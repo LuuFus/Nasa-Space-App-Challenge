@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import * as echarts from 'echarts';
+import * as echarts from 'echarts/core';
+import { BarChart, LineChart } from 'echarts/charts';
+import { DataZoomComponent, GridComponent, LegendComponent, MarkAreaComponent, MarkLineComponent, MarkPointComponent, TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 import { useT } from '../i18n/index.js';
+
+// only the parts of ECharts we use (keeps the download small)
+echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkPointComponent, MarkLineComponent, MarkAreaComponent, CanvasRenderer]);
 
 /** ECharts wrapper with a full-screen toggle (drag the slider to stretch the years). */
 export default function Chart({ option, height = 320 }) {

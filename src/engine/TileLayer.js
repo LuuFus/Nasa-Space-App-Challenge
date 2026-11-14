@@ -303,7 +303,12 @@ export class TileLayer {
     const { e, center, rho, flatBox } = g.userData;
     const cam = view.camera.position;
     const texelRad = (e.S * DEG) / TILE_PX;
-    if (view.morph < 0.5) {
+    if (view.morph > 0 && view.morph < 1) {
+      // while the globe unrolls nothing can be culled reliably: keep coarse tiles everywhere
+      const d = Math.max(0.8, view.camera.position.length() - 1);
+      return { px: (texelRad / d) * view.focalPx * 0.5, d };
+    }
+    if (view.morph === 0) {
       const dist = cam.length();
       const theta = center.angleTo(cam);
       const horizon = Math.acos(Math.min(1, 1 / dist));

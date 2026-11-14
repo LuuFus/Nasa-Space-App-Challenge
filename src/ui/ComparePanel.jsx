@@ -140,6 +140,7 @@ export default function ComparePanel() {
           <div className="explain">
             <b>{t('whatItMeans')}</b>
             {text.map((p, i) => <p key={i}>{p}</p>)}
+            {v0.note && <p className="small">⚠ {pick(v0.note)}</p>}
           </div>
           <div className="row">
             {v.gibs && (

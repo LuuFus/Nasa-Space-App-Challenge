@@ -117,6 +117,10 @@ Object.assign(VARIABLES, {
   LST_DAY: {
     title: { uk: 'Температура поверхні суші вдень (MODIS)', en: 'Daytime land surface temperature (MODIS)' },
     unit: '°C', digits: 1, term: 'lst', gibs: 'lst_day', src: 'gibs', key: 'lst_day',
+    note: {
+      uk: 'Увага: супутник Terra старіє, і з ~2022 року його орбіта «зсувається» — він пролітає раніше вранці, коли земля ще не прогріта. Тому останні роки можуть виглядати холоднішими, ніж були насправді. Це гарний приклад, чому дані треба перевіряти!',
+      en: 'Careful: the ageing Terra satellite’s orbit has been drifting since ~2022 — it passes earlier in the morning, before the ground warms up. So recent years may look colder than they really were. A good example of why data must be checked!',
+    },
     has: { uk: 'Гарячішу поверхню має', en: 'Hotter ground:' },
     life: {
       uk: (d) => `Середня денна температура самої землі змінилася на ${d >= 0 ? '+' : ''}${d.toFixed(1)} °C. Гаряча поверхня швидше висушує ґрунт і нагріває повітря над містами.`,

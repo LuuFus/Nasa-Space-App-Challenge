@@ -59,7 +59,10 @@ export default function TrendMaps() {
           {active.kind === 'trend' ? (
             <p className="desc">{lang === 'uk'
               ? `Колір показує, наскільки змінювалося значення кожні 10 років (${active.years[0]}–${active.years[1]}). Яскраві пікселі — зміни статистично значущі (тест Манна–Кендалла, p < 0,05), бліді — можуть бути випадковими. Значущий тренд має ${Math.round(active.significantShare * 100)} % площі.`
-              : `Colour shows how much the value changed per decade (${active.years[0]}–${active.years[1]}). Bright pixels are statistically significant (Mann–Kendall test, p < 0.05), pale ones could be random. ${Math.round(active.significantShare * 100)}% of the mapped area has a significant trend.`}</p>
+              : `Colour shows how much the value changed per decade (${active.years[0]}–${active.years[1]}). Bright pixels are statistically significant (Mann–Kendall test, p < 0.05), pale ones could be random. ${Math.round(active.significantShare * 100)}% of the mapped area has a significant trend.`}
+              {active.id === 'lst_day_trend' && (lang === 'uk'
+                ? ' Увага: орбіта супутника Terra з ~2022 року зсувається на ранок, тож останні роки трохи «холодніші», ніж насправді.'
+                : ' Careful: Terra’s orbit has drifted towards the morning since ~2022, so recent years look slightly too cold.')}</p>
           ) : (
             <>
               <p className="desc">{lang === 'uk'

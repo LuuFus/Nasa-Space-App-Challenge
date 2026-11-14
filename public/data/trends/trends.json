@@ -1,0 +1,205 @@
+[
+ {
+  "id": "t2m_trend",
+  "kind": "trend",
+  "layer": "t2m",
+  "title": {
+   "uk": "Тренд температури повітря",
+   "en": "Air temperature trend"
+  },
+  "unit": "°C",
+  "years": [
+   1980,
+   2025
+  ],
+  "vmax": 0.8,
+  "palette": [
+   [
+    33,
+    102,
+    172
+   ],
+   [
+    247,
+    247,
+    247
+   ],
+   [
+    178,
+    24,
+    43
+   ]
+  ],
+  "url": "trends/t2m_trend.png",
+  "significantShare": 0.73
+ },
+ {
+  "id": "t2m_anom",
+  "kind": "anomaly",
+  "layer": "t2m",
+  "title": {
+   "uk": "Аномалія температури за рік (від норми 1991–2020)",
+   "en": "Yearly temperature anomaly (vs 1991–2020)"
+  },
+  "unit": "°C",
+  "years": [
+   1980,
+   2025
+  ],
+  "vmax": 3.0,
+  "palette": [
+   [
+    33,
+    102,
+    172
+   ],
+   [
+    247,
+    247,
+    247
+   ],
+   [
+    178,
+    24,
+    43
+   ]
+  ],
+  "url": "trends/t2m_anom_{year}.png"
+ },
+ {
+  "id": "precip_trend",
+  "kind": "trend",
+  "layer": "precip",
+  "title": {
+   "uk": "Тренд опадів",
+   "en": "Precipitation trend"
+  },
+  "unit": "mm",
+  "years": [
+   1980,
+   2025
+  ],
+  "vmax": 150.0,
+  "palette": [
+   [
+    140,
+    81,
+    10
+   ],
+   [
+    245,
+    245,
+    245
+   ],
+   [
+    1,
+    102,
+    94
+   ]
+  ],
+  "url": "trends/precip_trend.png",
+  "significantShare": 0.367
+ },
+ {
+  "id": "soil_trend",
+  "kind": "trend",
+  "layer": "soil",
+  "title": {
+   "uk": "Тренд вологості ґрунту",
+   "en": "Soil moisture trend"
+  },
+  "unit": "%",
+  "years": [
+   1980,
+   2025
+  ],
+  "vmax": 2,
+  "palette": [
+   [
+    140,
+    81,
+    10
+   ],
+   [
+    245,
+    245,
+    245
+   ],
+   [
+    1,
+    102,
+    94
+   ]
+  ],
+  "url": "trends/soil_trend.png",
+  "significantShare": 0.418
+ },
+ {
+  "id": "ndvi_trend",
+  "kind": "trend",
+  "layer": "ndvi",
+  "title": {
+   "uk": "Тренд зеленості рослин (NDVI)",
+   "en": "Vegetation greenness trend (NDVI)"
+  },
+  "unit": "NDVI",
+  "years": [
+   2001,
+   2025
+  ],
+  "vmax": 0.04,
+  "palette": [
+   [
+    140,
+    81,
+    10
+   ],
+   [
+    245,
+    245,
+    245
+   ],
+   [
+    27,
+    120,
+    55
+   ]
+  ],
+  "url": "trends/ndvi_trend.png",
+  "significantShare": 0.441
+ },
+ {
+  "id": "lst_day_trend",
+  "kind": "trend",
+  "layer": "lst_day",
+  "title": {
+   "uk": "Тренд температури поверхні суші (вдень)",
+   "en": "Daytime land-surface temperature trend"
+  },
+  "unit": "°C",
+  "years": [
+   2001,
+   2025
+  ],
+  "vmax": 1.5,
+  "palette": [
+   [
+    33,
+    102,
+    172
+   ],
+   [
+    247,
+    247,
+    247
+   ],
+   [
+    178,
+    24,
+    43
+   ]
+  ],
+  "url": "trends/lst_day_trend.png",
+  "significantShare": 0.187
+ }
+]
