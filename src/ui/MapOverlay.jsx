@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Layers, LineChart, Satellite, X } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { EVENTS, EVENT_CATS } from '../content/events.js';
@@ -36,18 +37,18 @@ export default function MapOverlay() {
     <>
       <div className="map-chips">
         {base && base.period && !s.swipe.enabled && (
-          <div className="chip-map">🛰 {pick(base.title)} · <b>{fmtDate(base, s.dates[base.id] ?? base.date, lang)}</b>
-            {base.id !== 'bluemarble' && <button title={t('none')} onClick={() => s.setBase('bluemarble')}>✕</button>}
+          <div className="chip-map"><Satellite size={14} strokeWidth={1.75} /> {pick(base.title)} · <b>{fmtDate(base, s.dates[base.id] ?? base.date, lang)}</b>
+            {base.id !== 'bluemarble' && <button title={t('none')} aria-label={t('none')} onClick={() => s.setBase('bluemarble')}><X size={14} strokeWidth={1.75} /></button>}
           </div>
         )}
         {ov && (
-          <div className="chip-map">🗺 {pick(ov.title)}{ov.period && <> · <b>{fmtDate(ov, s.dates[ov.id] ?? ov.date, lang)}</b></>}
-            <button title={t('none')} onClick={() => s.setOverlay(null)}>✕</button>
+          <div className="chip-map"><Layers size={14} strokeWidth={1.75} /> {pick(ov.title)}{ov.period && <> · <b>{fmtDate(ov, s.dates[ov.id] ?? ov.date, lang)}</b></>}
+            <button title={t('none')} aria-label={t('none')} onClick={() => s.setOverlay(null)}><X size={14} strokeWidth={1.75} /></button>
           </div>
         )}
         {s.trendMap && (
-          <div className="chip-map">📊 {lang === 'uk' ? 'Карта трендів' : 'Trend map'}{s.trendMap.year && s.trendMap.id.includes('anom') ? <> · <b>{s.trendMap.year}</b></> : null}
-            <button onClick={() => s.setTrendMap(null)}>✕</button>
+          <div className="chip-map"><LineChart size={14} strokeWidth={1.75} /> {lang === 'uk' ? 'Карта трендів' : 'Trend map'}{s.trendMap.year && s.trendMap.id.includes('anom') ? <> · <b>{s.trendMap.year}</b></> : null}
+            <button aria-label="Close" onClick={() => s.setTrendMap(null)}><X size={14} strokeWidth={1.75} /></button>
           </div>
         )}
         {s.front.on && snaps && (
@@ -55,7 +56,7 @@ export default function MapOverlay() {
             <button onClick={() => s.setFront({ idx: Math.max(0, fIdx - 1) })}>◀</button>
             <b>{longDate(snaps[fIdx].date, lang, fIdx !== snaps.length - 1)}</b>
             <button onClick={() => s.setFront({ idx: Math.min(snaps.length - 1, fIdx + 1) })}>▶</button>
-            <button onClick={() => s.setFront({ on: false, compare: null })}>✕</button>
+            <button aria-label="Close" onClick={() => s.setFront({ on: false, compare: null })}><X size={14} strokeWidth={1.75} /></button>
           </div>
         )}
       </div>

@@ -9,16 +9,25 @@ export async function flyTo(lon, lat, alt = 0.3) {
   return eng.flyTo(lon, lat, alt, 2200);
 }
 
-/** apply an event / preset: fly there, set layers and dates, maybe open a swipe or the front line */
-export async function applyEvent(ev) {
+/**
+ * apply an event / preset: fly there, set layers and dates, maybe open a swipe or the front line.
+ * { swipe: false } = only show it on the map (the "after" picture instead of the split screen).
+ */
+export async function applyEvent(ev, { swipe = true } = {}) {
   const st = useStore.getState();
   if (st.eventApplied) closeEvent(false);
   const undo = { baseId: st.baseId, overlayId: st.overlayId, front: st.front, swipe: st.swipe.enabled };
   useStore.setState({ eventId: ev.id, eventApplied: undo });
-  if (ev.swipe) {
+  if (ev.swipe && swipe) {
     st.setSwipe({ enabled: true, split: 0.5, left: ev.swipe.left, right: ev.swipe.right, preset: ev.id });
-  } else if (st.swipe.enabled) {
-    st.setSwipe({ enabled: false });
+  } else {
+    if (st.swipe.enabled) st.setSwipe({ enabled: false, preset: null });
+    if (ev.swipe && !ev.base && !ev.layer) {
+      const r = ev.swipe.right;
+      const layer = st.catalog?.layers.find((l) => l.id === r.layer);
+      if (layer?.base) { st.setBase(layer.id); st.setOverlay(null); } else if (layer) st.setOverlay(layer.id);
+      if (layer && r.date) st.setDate(layer.id, r.date);
+    }
   }
   if (ev.base) {
     st.setBase(ev.base.id);

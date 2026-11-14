@@ -28,6 +28,7 @@ export default function AboutPanel() {
         <li>{uk ? 'Карти трендів і NDVI країн отримано, перетворивши кольори знімків GIBS назад у числа за офіційною палітрою: точність обмежена кроком палітри (наприклад, ~0,5 °C).' : 'Trend maps and country NDVI were obtained by turning GIBS image colours back into numbers using the official colour map: precision is limited by the palette step (e.g. ~0.5 °C).'}</li>
         <li>{uk ? 'Прогноз — це продовження лінійного тренду, а не кліматична модель.' : 'The forecast extends a linear trend; it is not a climate model.'}</li>
       </ul>
+      <p className="muted small">{uk ? 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала. Логотип NASA показано лише як посилання на хакатон.' : 'This is a student hackathon project, not an official NASA product, and it is not endorsed by NASA. The NASA logo is shown only as a reference to the hackathon.'}</p>
       <p className="muted small">{t('team')}</p>
     </div>
   );

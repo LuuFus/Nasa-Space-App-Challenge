@@ -9,7 +9,15 @@ import { countryAt, loadCountries } from '../lib/data.js';
 import { valueAt } from '../lib/legend.js';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
-import { EVENTS, EVENT_CATS } from '../content/events.js';
+import { EVENTS } from '../content/events.js';
+import { createElement as lucideSvg, Cloud, Droplets, Flame, Shield, Snowflake, Thermometer, Tornado, Trees, Waves } from 'lucide';
+
+// map markers of events: the same vector icons as in the panels (lucide, vanilla build)
+const MARKER_ICONS = { war: Shield, water: Droplets, fire: Flame, ice: Snowflake, air: Cloud, land: Trees, heat: Thermometer, storm: Tornado, quake: Waves };
+function markerIcon(cat) {
+  const svg = lucideSvg(MARKER_ICONS[cat] || Shield, { width: 14, height: 14, 'stroke-width': 1.9 });
+  return svg.outerHTML;
+}
 
 export function layerById(catalog, id) {
   return catalog?.layers.find((l) => l.id === id) || null;
@@ -107,7 +115,7 @@ export default function GlobeView() {
     const eng = engRef.current;
     if (!eng) return;
     eng.labels.setGroup('events', EVENTS.map((ev) => ({
-      key: 'ev' + ev.id, lon: ev.lon, lat: ev.lat, text: EVENT_CATS[ev.cat]?.icon || ' ', title: ev.title,
+      key: 'ev' + ev.id, lon: ev.lon, lat: ev.lat, html: markerIcon(ev.cat), title: ev.title,
       cls: 'lbl-event cat-' + ev.cat, marker: true, priority: 1, minZoom: 0,
       onClick: () => { useStore.getState().setEvent(ev.id); useStore.getState().setPanel('events'); },
     })), useStore.getState().toggles.events);

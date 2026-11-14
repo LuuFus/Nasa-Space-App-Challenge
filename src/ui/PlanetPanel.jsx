@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Layers, Map as MapIcon } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
@@ -79,7 +80,6 @@ export default function PlanetPanel() {
   const u = typeof C.unit === 'string' ? C.unit : C.unit[lang];
   return (
     <div>
-      <h3>{t('planet')}</h3>
       <div className="list">
         {Object.entries(CHARTS).map(([id, c]) => (
           <button key={id} className={chartId === id ? 'item on' : 'item'} onClick={() => setChart(id)}>{pick(c.title)}</button>
@@ -95,8 +95,8 @@ export default function PlanetPanel() {
           </div>
           <Formula tex={`\\beta = \\operatorname{median}\\frac{y_j-y_i}{x_j-x_i} = ${num(an.sen, 4, 'en')}\\ \\text{per year},\\quad Z = ${num(an.mkMod?.Z, 2, 'en')}`} />
           <div className="row">
-            {C.map && <button onClick={() => suggestContourMap(C.map.reason, () => showTrendMap(C.map.id))}>🗺 {lang === 'uk' ? 'Показати на карті світу' : 'Show on the world map'}</button>}
-            {C.layer && <button onClick={() => useStore.getState().setOverlay(C.layer)}>🗺 {lang === 'uk' ? 'Шар NASA на глобусі' : 'NASA layer on the globe'}</button>}
+            {C.map && <button className="btn-ghost" onClick={() => suggestContourMap(C.map.reason, () => showTrendMap(C.map.id))}><MapIcon size={14} strokeWidth={1.75} /> {lang === 'uk' ? 'Показати на карті світу' : 'Show on the world map'}</button>}
+            {C.layer && <button className="btn-ghost" onClick={() => useStore.getState().setOverlay(C.layer)}><Layers size={14} strokeWidth={1.75} /> {lang === 'uk' ? 'Шар NASA на глобусі' : 'NASA layer on the globe'}</button>}
           </div>
           <p className="muted small">{t('source')}: {ser.source}</p>
         </>
@@ -185,7 +185,7 @@ function FrontText({ front }) {
         : `Before 2022 Russia occupied Crimea and parts of the Donetsk and Luhansk regions (≈ ${k(last.area.crimea + last.area.ordlo)} thousand km²). The largest occupied area on this chart is ${k(tot(max))} thousand km² (${max.date}). In autumn 2022 Ukraine liberated the Kharkiv region and the right bank of Kherson — the curve drops sharply. Since then the front moves slowly: on ${last.date} about ${k(tot(last))} thousand km² are occupied, ${(100 * tot(last) / UKRAINE_KM2).toFixed(1)}% of Ukraine — more than the whole of Bulgaria.`}</p>
       <p className="small">{uk ? 'Чому це важливо для екології: на окупованих і прифронтових землях ніхто не гасить пожежі, не чистить воду й не вимірює забруднення — саме тому супутники NASA там особливо цінні.' : 'Why it matters for the environment: on occupied and front-line land nobody fights fires, treats water or measures pollution — which is exactly why NASA satellites are so valuable there.'}</p>
       <p className="muted small"><a href={src.url} target="_blank" rel="noreferrer">{pick(src)}</a> · {uk ? 'площі пораховано нашим скриптом у папці pipeline/' : 'areas computed by our script in pipeline/'}</p>
-      <button onClick={() => useStore.getState().setFront({ on: true, idx: null })}>🗺 {uk ? 'Показати лінію фронту на карті' : 'Show the front line on the map'}</button>
+      <button className="btn-ghost" onClick={() => useStore.getState().setFront({ on: true, idx: null })}><MapIcon size={14} strokeWidth={1.75} /> {uk ? 'Показати лінію фронту на карті' : 'Show the front line on the map'}</button>
     </div>
   );
 }

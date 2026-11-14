@@ -40,7 +40,7 @@ export const useStore = create((set, get) => ({
   setPickTarget: (pickTarget) => set({ pickTarget }),
 
   panel: 'layers',          // layers | compare | planet | swipe | events | glossary | about
-  setPanel: (panel) => set({ panel }),
+  setPanel: (panel) => set({ panel: panel === 'report' ? 'compare' : panel }),   // 'report' was merged into 'compare'
   chartFullscreen: false,
   setChartFullscreen: (chartFullscreen) => set({ chartFullscreen }),
 

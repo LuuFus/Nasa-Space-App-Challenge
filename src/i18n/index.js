@@ -9,7 +9,7 @@ export const STRINGS = {
   contourMap: { uk: 'Контурна карта', en: 'Contour map' },
   mapImagery: { uk: 'Карта зі знімками', en: 'Map with imagery' },
   layers: { uk: 'Шари', en: 'Layers' },
-  compare: { uk: 'Порівняти країни', en: 'Compare countries' },
+  compare: { uk: 'Порівняння країн', en: 'Country comparison' },
   planet: { uk: 'Уся планета', en: 'Whole planet' },
   report: { uk: 'Країна проти країни', en: 'Country vs country' },
   swipe: { uk: 'Було / стало', en: 'Before / after' },

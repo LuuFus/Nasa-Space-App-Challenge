@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Lightbulb } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { GLOSSARY } from '../content/glossary.js';
@@ -21,7 +22,6 @@ export default function GlossaryPanel() {
   const list = GLOSSARY.filter((g) => !ql || [g.term.uk, g.term.en, g.def.uk, g.def.en].some((x) => x.toLowerCase().includes(ql)));
   return (
     <div>
-      <h3>{t('glossary')}</h3>
       <input placeholder={t('search')} value={q} onChange={(e) => setQ(e.target.value)} style={{ width: '100%' }} />
       {Object.entries(GROUPS).map(([gid, gt]) => {
         const items = list.filter((g) => g.group === gid);
@@ -34,7 +34,7 @@ export default function GlossaryPanel() {
                 <b>{pick(g.term)}</b>
                 <div className="desc">{pick(g.def)}</div>
                 {g.tex && <Formula tex={g.tex} />}
-                {g.ex && <div className="small muted">💡 {t('example')}: {pick(g.ex)}</div>}
+                {g.ex && <div className="small muted gloss-ex"><Lightbulb size={13} strokeWidth={1.75} /> {t('example')}: {pick(g.ex)}</div>}
               </div>
             ))}
           </div>

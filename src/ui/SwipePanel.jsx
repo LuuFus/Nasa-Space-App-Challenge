@@ -1,15 +1,24 @@
+import { ChevronLeft, ChevronRight, Power, SplitSquareHorizontal } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { EVENTS } from '../content/events.js';
-import { applyEvent, clearSwipe } from '../lib/actions.js';
+import { clearSwipe } from '../lib/actions.js';
 import { fmtDate, firstDate, lastDate, periodOf, snapDate, stepDate } from '../lib/dates.js';
 import { layerById } from './GlobeView.jsx';
+import { STROKE } from './Icons.jsx';
+import { EventCard } from './EventsPanel.jsx';
+
+/** 1985 → 2025, or 02.2026 → 04.2026 when both pictures are from the same year */
+const span = (a, b) => (a.slice(0, 4) === b.slice(0, 4)
+  ? `${a.slice(5, 7)}.${a.slice(0, 4)} → ${b.slice(5, 7)}.${b.slice(0, 4)}`
+  : `${a.slice(0, 4)} → ${b.slice(0, 4)}`);
 
 export default function SwipePanel() {
   const { t, pick, lang } = useT();
   const s = useStore();
   const cat = s.catalog;
   if (!cat) return <p className="muted">{t('loading')}</p>;
+  const uk = lang === 'uk';
   const sw = s.swipe;
   const presets = EVENTS.filter((e) => e.swipe);
   const layers = cat.layers.filter((l) => !l.overlayOnly);
@@ -19,51 +28,58 @@ export default function SwipePanel() {
   };
   const update = (side, patch) => s.setSwipe({ enabled: true, ...defaults, [side]: { ...defaults[side], ...patch } });
   return (
-    <div>
-      <h3>{t('swipeTitle')}</h3>
-      <p className="desc">{lang === 'uk'
-        ? 'Екран ділиться навпіл: ліворуч — як було, праворуч — як стало. Тягни білий повзунок і дивись, як змінилося місце.'
-        : 'The screen is split in two: the past on the left, the present on the right. Drag the white slider to see how the place changed.'}</p>
-      <div className="row">
-        {sw.enabled
-          ? <button onClick={clearSwipe}>✕ {t('turnOff')}</button>
-          : <button className="primary" onClick={() => s.setSwipe({ enabled: true, ...defaults })}>{t('turnOn')}</button>}
+    <div className="swipe-panel">
+      <p className="desc">{uk
+        ? 'Екран ділиться навпіл: ліворуч — як було, праворуч — як стало. Тягни повзунок на карті й дивись, як змінилося місце.'
+        : 'The screen is split in two: the past on the left, the present on the right. Drag the slider on the map to see how the place changed.'}</p>
+
+      <div className={sw.enabled ? 'swipe-status on' : 'swipe-status'}>
+        {sw.enabled ? (
+          <>
+            <span className="status-pill"><span className="live-dot" />{uk ? 'Активно' : 'Active'}</span>
+            <button type="button" className="btn-ghost" onClick={clearSwipe}><Power size={15} strokeWidth={STROKE} /> {uk ? 'Вимкнути' : 'Turn off'}</button>
+          </>
+        ) : (
+          <button type="button" className="btn-accent" onClick={() => s.setSwipe({ enabled: true, ...defaults })}>
+            <SplitSquareHorizontal size={16} strokeWidth={STROKE} /> {uk ? 'Увімкнути порівняння' : 'Turn the comparison on'}
+          </button>
+        )}
       </div>
-      {['left', 'right'].map((side) => {
-        const cur = defaults[side];
-        const layer = layerById(cat, cur.layer);
-        const p = periodOf(layer);
-        return (
-          <div key={side} className="active-layer">
-            <b>{t(side)}</b>
-            <select value={cur.layer} onChange={(e) => {
-              const l = layerById(cat, e.target.value);
-              update(side, { layer: l.id, date: snapDate(l, cur.date) || l.date });
-            }} style={{ width: '100%', margin: '4px 0' }}>
-              {layers.map((l) => <option key={l.id} value={l.id}>{pick(l.title)}</option>)}
-            </select>
-            {p && (
-              <div className="row">
-                <button onClick={() => update(side, { date: stepDate(layer, cur.date, -1) })}>◀</button>
-                <input type="date" value={cur.date || ''} min={firstDate(layer)} max={lastDate(layer)}
-                  onChange={(e) => e.target.value && update(side, { date: snapDate(layer, e.target.value) })} />
-                <button onClick={() => update(side, { date: stepDate(layer, cur.date, 1) })}>▶</button>
-                <span className="muted small">{fmtDate(layer, cur.date, lang)}</span>
-              </div>
-            )}
-          </div>
-        );
-      })}
-      <h3>{t('presets')}</h3>
+
+      <div className="duo">
+        {['left', 'right'].map((side) => {
+          const cur = defaults[side];
+          const layer = layerById(cat, cur.layer);
+          const p = periodOf(layer);
+          return (
+            <div key={side} className={`side-card side-${side}`}>
+              <div className="side-label">{t(side)}</div>
+              <select value={cur.layer} aria-label={`${t(side)} — ${t('layer')}`} onChange={(e) => {
+                const l = layerById(cat, e.target.value);
+                update(side, { layer: l.id, date: snapDate(l, cur.date) || l.date });
+              }}>
+                {layers.map((l) => <option key={l.id} value={l.id}>{pick(l.title)}</option>)}
+              </select>
+              {p ? (
+                <>
+                  <div className="side-date mono">{fmtDate(layer, cur.date, lang)}</div>
+                  <div className="date-row">
+                    <button type="button" className="icon-btn" onClick={() => update(side, { date: stepDate(layer, cur.date, -1) })} title={uk ? 'Раніше' : 'Earlier'}><ChevronLeft size={15} strokeWidth={STROKE} /></button>
+                    <input className="mono" type="date" value={cur.date || ''} min={firstDate(layer)} max={lastDate(layer)} aria-label={`${t(side)} — ${t('date')}`}
+                      onChange={(e) => e.target.value && update(side, { date: snapDate(layer, e.target.value) })} />
+                    <button type="button" className="icon-btn" onClick={() => update(side, { date: stepDate(layer, cur.date, 1) })} title={uk ? 'Пізніше' : 'Later'}><ChevronRight size={15} strokeWidth={STROKE} /></button>
+                  </div>
+                </>
+              ) : <div className="side-date muted small">{uk ? 'знімок без дати' : 'undated mosaic'}</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      <h3 className="section-title">{t('presets')}</h3>
       {presets.map((ev) => (
-        <div key={ev.id} className={sw.preset === ev.id ? 'event-card on' : 'event-card'}>
-          <b>{pick(ev.title)}</b>
-          <div className="muted small">{ev.swipe.left.date.slice(0, 4)} → {ev.swipe.right.date.slice(0, 4)}</div>
-          <div className="row small">
-            <button className="primary" onClick={() => applyEvent(ev)}>⇆ {t('showBeforeAfter')}</button>
-            <a href={ev.source.url} target="_blank" rel="noreferrer">{t('source')} ↗</a>
-          </div>
-        </div>
+        <EventCard key={ev.id} ev={ev} active={sw.preset === ev.id}
+          dateText={span(ev.swipe.left.date, ev.swipe.right.date)} />
       ))}
     </div>
   );

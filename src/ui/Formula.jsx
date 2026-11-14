@@ -9,5 +9,5 @@ export default function Formula({ tex, block = true }) {
 /** a word that opens its glossary entry */
 export function Term({ id, children }) {
   const open = useStore((s) => s.openGlossary);
-  return <span className="term-link" onClick={() => open(id)} title="📖">{children}</span>;
+  return <span className="term-link" onClick={() => open(id)} title="Глосарій / Glossary">{children}</span>;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Flame, Pause, Play } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
@@ -40,7 +41,7 @@ export default function FireTimeline() {
   return (
     <div className="fire-timeline">
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
-        <b>🔥 {fmt(addDays(d.start, day), lang)}</b>
+        <b className="mono"><Flame size={14} strokeWidth={1.75} className="fire-ico" /> {fmt(addDays(d.start, day), lang)}</b>
         <span className="small">{uk ? 'сьогодні' : 'today'}: <b>{d.daily[day]}</b> · {uk ? 'усього' : 'total'}: <b>{total}</b></span>
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="fire-chart" preserveAspectRatio="none"
@@ -55,7 +56,7 @@ export default function FireTimeline() {
         <line x1={(day / d.days) * W} x2={(day / d.days) * W} y1="0" y2={H} stroke="#fff" strokeWidth="1" />
       </svg>
       <div className="row">
-        <button onClick={() => setFire({ ...fire, playing: !fire.playing, day: fire.day >= d.days - 1 ? 0 : fire.day })}>{fire.playing ? '⏸' : '▶'}</button>
+        <button onClick={() => setFire({ ...fire, playing: !fire.playing, day: fire.day >= d.days - 1 ? 0 : fire.day })}>{fire.playing ? <Pause size={14} strokeWidth={1.75} /> : <Play size={14} strokeWidth={1.75} />}</button>
         <input type="range" min="0" max={d.days - 1} value={day} style={{ flex: 1 }} onChange={(e) => setFire({ ...fire, day: +e.target.value, playing: false })} />
       </div>
       {sm.total > 0 && (

@@ -16,6 +16,6 @@ export const SOURCES = [
   ['Наказ Мінрозвитку № 376 (перелік ТОТ)', 'https://zakon.rada.gov.ua/laws/show/z0380-25', { uk: 'офіційний перелік окупованих територій і територій бойових дій — офіційний документ (не об’єкт авторського права)', en: 'official list of occupied and combat territories — an official document (not subject to copyright)' }],
   ['IAEA, Міндовкілля (ЕкоЗагроза)', 'https://www.iaea.org/newscenter/focus/ukraine', { uk: 'факти до подій війни (посилання)', en: 'facts for the war events (links)' }],
   ['Wikipedia', 'https://en.wikipedia.org', { uk: 'дати й цифри деяких подій 2026 року (тексти власні, лише посилання)', en: 'dates and figures for some 2026 events (own texts, links only)' }],
-  ['Шрифти Cormorant Garamond, Inter, Unbounded, Manrope', 'https://fontsource.org', { uk: 'SIL Open Font License 1.1', en: 'SIL Open Font License 1.1' }],
-  ['React, Three.js, ECharts, KaTeX, Zustand, Vite', 'https://github.com', { uk: 'бібліотеки з відкритим кодом (MIT / Apache-2.0)', en: 'open-source libraries (MIT / Apache-2.0)' }],
+  ['Шрифти Cormorant Garamond, Inter, JetBrains Mono', 'https://fontsource.org', { uk: 'SIL Open Font License 1.1', en: 'SIL Open Font License 1.1' }],
+  ['React, Three.js, ECharts, KaTeX, Zustand, Vite, Lucide', 'https://github.com', { uk: 'бібліотеки з відкритим кодом (MIT / Apache-2.0 / ISC); іконки — Lucide (ISC)', en: 'open-source libraries (MIT / Apache-2.0 / ISC); icons — Lucide (ISC)' }],
 ];

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Map as MapIcon, Palette, X } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadCountries, loadCountrySeries, loadJSON } from '../lib/data.js';
@@ -10,14 +11,19 @@ import { SEL_COLORS } from '../engine/Vectors.js';
 import Chart, { yearTooltip } from './Chart.jsx';
 import Formula, { Term } from './Formula.jsx';
 import { suggestContourMap } from './ConsentPrompt.jsx';
+import { STROKE } from './Icons.jsx';
 
-export default function ComparePanel() {
+/**
+ * Detailed study of ONE indicator for the two selected countries: chart,
+ * plain-language explanation, statistics, seasons and formulas. Opened from a
+ * row of the indicator table in the "Country comparison" tab; which countries
+ * are compared comes from the store (selA / selB).
+ */
+export default function CompareDetail({ varId }) {
   const { t, pick, lang } = useT();
   const s = useStore();
   const [countries, setCountries] = useState(null);
   const [docs, setDocs] = useState({});
-  const varId = useStore((st) => st.compareVar);
-  const setVarId = useStore((st) => st.setCompareVar);
   const [seasonId, setSeasonId] = useState('year');
   const [mode, setMode] = useState('values');
   const [horizon, setHorizon] = useState(2050);
@@ -57,7 +63,6 @@ export default function ComparePanel() {
   const text = useMemo(() => (rep ? explain(rep, lang, names) : []), [rep, lang, names.a, names.b]);
   const option = useMemo(() => (rep ? buildOption(rep, mode, lang, names, t) : null), [rep, mode, lang, names.a, names.b]);
 
-  const sorted = useMemo(() => countries?.list.filter((c) => c.area > 300).slice().sort((a, b) => pick(a.name).localeCompare(pick(b.name), lang)) || [], [countries, lang]);
   const v = VARIABLES[varId];
   const u = unitText(v, lang, season.months?.length === 1);
 
@@ -97,24 +102,7 @@ export default function ComparePanel() {
 
   return (
     <div className="compare-panel">
-      <h3>{t('compare')}</h3>
-      <p className="muted small">{t('clickToPick')}</p>
-      {['a', 'b'].map((k) => (
-        <div className="row" key={k} style={{ marginBottom: 4 }}>
-          <span className={k === 'a' ? 'sel-a' : 'sel-b'} style={{ width: 70 }}>{t(k === 'a' ? 'countryA' : 'countryB')}</span>
-          <select value={(k === 'a' ? s.selA : s.selB) || ''} onChange={(e) => s.setSel(k, e.target.value || null)} style={{ flex: 1 }}>
-            {k === 'b' && <option value="">—</option>}
-            {sorted.map((c) => <option key={c.id} value={c.id}>{pick(c.name)}</option>)}
-          </select>
-          <button className={s.pickTarget === k ? 'on' : ''} onClick={() => s.setPickTarget(k)} title={t('pickOnMap')}>🎯</button>
-        </div>
-      ))}
       <div className="row">
-        <label className="small">{t('variable')}
-          <select value={varId} onChange={(e) => setVarId(e.target.value)}>
-            {Object.entries(VARIABLES).map(([id, x]) => <option key={id} value={id}>{pick(x.title)}</option>)}
-          </select>
-        </label>
         <label className="small">{t('season')}
           <select value={season.id} disabled={v0.src === 'gibs'} onChange={(e) => setSeasonId(e.target.value)}>
             {SEASONS.map((x) => <option key={x.id} value={x.id}>{pick(x.title)}</option>)}
@@ -141,14 +129,14 @@ export default function ComparePanel() {
           <div className="explain">
             <b>{t('whatItMeans')}</b>
             {text.map((p, i) => <p key={i}>{p}</p>)}
-            {v0.note && <p className="small">⚠ {pick(v0.note)}</p>}
+            {v0.note && <p className="small note">{pick(v0.note)}</p>}
           </div>
           <div className="row">
             {v.gibs && (
-              <button onClick={() => s.setOverlay(v.gibs)}>🗺 {pick(v.title)} — {t('showOnMap')}</button>
+              <button className="btn-ghost" onClick={() => s.setOverlay(v.gibs)}><MapIcon size={14} strokeWidth={STROKE} /> {pick(v.title)} — {t('showOnMap')}</button>
             )}
-            <button onClick={colourMap}>🎨 {t('mapColor')}</button>
-            {choro && <button onClick={() => { getEngine()?.vectors?.setChoropleth(null); setChoro(null); }}>{t('trendMapOff')}</button>}
+            <button className="btn-ghost" onClick={colourMap}><Palette size={14} strokeWidth={STROKE} /> {t('mapColor')}</button>
+            {choro && <button className="btn-ghost" onClick={() => { getEngine()?.vectors?.setChoropleth(null); setChoro(null); }}><X size={14} strokeWidth={STROKE} /> {t('trendMapOff')}</button>}
           </div>
           {choro && (
             <div className="legend">

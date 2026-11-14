@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { HelpCircle } from 'lucide-react';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
 import { num } from '../lib/explain.js';
@@ -159,7 +160,7 @@ export default function CausesPanel({ eventId }) {
   if (!c) return null;
   return (
     <div className="causes">
-      <h4>{uk ? '❓ Чому це сталося — що пішло не так' : '❓ Why it happened — what went wrong'}</h4>
+      <h4 className="with-icon"><HelpCircle size={16} strokeWidth={1.75} /> {uk ? 'Чому це сталося — що пішло не так' : 'Why it happened — what went wrong'}</h4>
       <div className="explain">{text.map((p, i) => <p key={i}>{p}</p>)}</div>
       <div className="row small">
         {KIND_PARAMS[c.kind].map((p) => <button key={p} className={param === p ? 'on' : ''} onClick={() => setParam(p)}>{P[p][lang]}</button>)}

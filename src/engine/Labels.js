@@ -38,7 +38,8 @@ export class Labels {
 
   setLang(lang) {
     this.lang = lang;
-    for (const g of this.groups.values()) for (const it of g.items) if (it.el) it.el.firstChild.textContent = this._text(it);
+    for (const g of this.groups.values()) for (const it of g.items) if (it.el && !it.html) it.el.firstChild.textContent = this._text(it);
+    for (const g of this.groups.values()) for (const it of g.items) if (it.el && it.title) it.el.title = typeof it.title === 'string' ? it.title : it.title[lang];
     this.dirty = true;
     this.engine.requestRender();
   }
@@ -53,7 +54,8 @@ export class Labels {
     const el = document.createElement('div');
     el.className = 'lbl ' + (it.cls || '');
     const span = document.createElement('span');
-    span.textContent = this._text(it);
+    // `html` = a small trusted SVG icon made by our own code (event markers)
+    if (it.html) span.innerHTML = it.html; else span.textContent = this._text(it);
     el.appendChild(span);
     if (it.title) el.title = typeof it.title === 'string' ? it.title : it.title[this.lang];
     if (it.onClick) {
@@ -62,7 +64,7 @@ export class Labels {
     }
     this.root.appendChild(el);
     it.el = el;
-    it.w = Math.max(14, span.textContent.length * (it.charW || 6.4) + 10);
+    it.w = it.html ? 26 : Math.max(14, span.textContent.length * (it.charW || 6.4) + 10);
     it.h = it.lineH || 16;
     return el;
   }

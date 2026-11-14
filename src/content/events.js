@@ -3,16 +3,17 @@
 // Imagery dates were checked by hand so the NASA pictures really show the change
 // (cloud-free days). Sources are NASA pages unless stated otherwise.
 
+// icons for these categories are vector icons in src/ui/Icons.jsx (EVENT_ICONS)
 export const EVENT_CATS = {
-  war: { icon: '', title: { uk: 'Війна в Україні', en: 'War in Ukraine' } },
-  water: { icon: '💧', title: { uk: 'Вода', en: 'Water' } },
-  fire: { icon: '🔥', title: { uk: 'Пожежі й дим', en: 'Fire & smoke' } },
-  ice: { icon: '❄', title: { uk: 'Лід', en: 'Ice' } },
-  air: { icon: '☁', title: { uk: 'Атмосфера', en: 'Atmosphere' } },
-  land: { icon: '🌳', title: { uk: 'Ліси й земля', en: 'Forests & land' } },
-  heat: { icon: '🌡', title: { uk: 'Спека', en: 'Heat' } },
-  storm: { icon: '🌀', title: { uk: 'Урагани', en: 'Hurricanes' } },
-  quake: { icon: '🌊', title: { uk: 'Землетруси й цунамі', en: 'Earthquakes & tsunamis' } },
+  war: { title: { uk: 'Війна в Україні', en: 'War in Ukraine' } },
+  water: { title: { uk: 'Вода', en: 'Water' } },
+  fire: { title: { uk: 'Пожежі й дим', en: 'Fire & smoke' } },
+  ice: { title: { uk: 'Лід', en: 'Ice' } },
+  air: { title: { uk: 'Атмосфера', en: 'Atmosphere' } },
+  land: { title: { uk: 'Ліси й земля', en: 'Forests & land' } },
+  heat: { title: { uk: 'Спека', en: 'Heat' } },
+  storm: { title: { uk: 'Урагани', en: 'Hurricanes' } },
+  quake: { title: { uk: 'Землетруси й цунамі', en: 'Earthquakes & tsunamis' } },
 };
 
 const S = (left, ld, right, rd) => ({ left: { layer: left, date: ld }, right: { layer: right, date: rd } });

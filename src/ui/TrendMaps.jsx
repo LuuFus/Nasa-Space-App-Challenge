@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { LineChart } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { dataUrl, loadJSON } from '../lib/data.js';
@@ -50,7 +51,7 @@ export default function TrendMaps() {
       <div className="muted small" style={{ marginTop: 6 }}>{lang === 'uk' ? 'Розраховано нашими скриптами з даних NASA:' : 'Computed by our scripts from NASA data:'}</div>
       {meta.map((m) => (
         <button key={m.id} className={trend?.id === m.id ? 'item on' : 'item'} onClick={() => (trend?.id === m.id ? setTrendMap(null) : pick2(m))}>
-          📊 {pick(m.title)} ({m.years[0]}–{m.years[1]})
+          <LineChart size={14} strokeWidth={1.75} /> {pick(m.title)} ({m.years[0]}–{m.years[1]})
         </button>
       ))}
       {active && (

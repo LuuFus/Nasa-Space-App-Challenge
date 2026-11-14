@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { Pause, Play, ShieldAlert } from 'lucide-react';
+import { STROKE, Switch } from './Icons.jsx';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
@@ -33,14 +35,18 @@ export default function FrontControls() {
   const src = frontSource(data);
   const loc = uk ? 'uk-UA' : 'en-GB';
   return (
-    <div className="active-layer">
-      <label className="row">
-        <input type="checkbox" checked={front.on} onChange={(e) => {
-          setFront({ on: e.target.checked });
-          if (e.target.checked) flyTo(33.5, 48.3, 0.5);
+    <div className={front.on ? 'monitor-card on' : 'monitor-card'}>
+      <div className="monitor-head">
+        <span className="monitor-icon"><ShieldAlert size={18} strokeWidth={STROKE} /></span>
+        <div className="monitor-title">
+          <b>{uk ? 'Війна в Україні: лінія фронту' : 'War in Ukraine: front line'}</b>
+          <span className="muted small">{uk ? 'Окуповані території щомісяця' : 'Occupied territory month by month'}</span>
+        </div>
+        <Switch checked={front.on} label={uk ? 'Показати лінію фронту' : 'Show the front line'} onChange={(on) => {
+          setFront({ on });
+          if (on) flyTo(33.5, 48.3, 0.5);
         }} />
-        <b>{uk ? 'Лінія фронту та окуповані території' : 'Front line and occupied territories'}</b>
-      </label>
+      </div>
       <p className="desc">{uk
         ? `Як змінювалася окупована територія України щомісяця${snaps ? ' з ' + month(snaps[0].date, lang) : ''}. Червона штриховка — окуповано, темно-червона — окуповано ще з 2014 року, сіра — бойові дії, зелена — звільнено.`
         : `How Ukraine’s occupied territory changed month by month${snaps ? ' since ' + month(snaps[0].date, lang) : ''}. Red hatching — occupied, dark red — occupied since 2014, grey — hostilities, green — liberated.`}</p>
@@ -49,9 +55,11 @@ export default function FrontControls() {
           <div className="row">
             <input type="range" min="0" max={snaps.length - 1} value={idx} style={{ flex: 1 }}
               onChange={(e) => setFront({ idx: +e.target.value })} />
-            <button onClick={() => setPlaying(!playing)}>{playing ? '■' : '▶'}</button>
+            <button type="button" className={playing ? 'icon-btn on' : 'icon-btn'} onClick={() => setPlaying(!playing)} title={playing ? (uk ? 'Зупинити' : 'Stop') : (uk ? 'Анімація по місяцях' : 'Animate by month')}>
+              {playing ? <Pause size={15} strokeWidth={STROKE} /> : <Play size={15} strokeWidth={STROKE} />}
+            </button>
           </div>
-          <div className="small"><b>{month(s.date, lang)}</b> · {uk ? 'окуповано' : 'occupied'} ≈ {total.toLocaleString(loc)} {uk ? 'км²' : 'km²'} ({(100 * total / UKRAINE_KM2).toFixed(1)} % {uk ? 'території України' : 'of Ukraine'})
+          <div className="small"><b>{month(s.date, lang)}</b> · {uk ? 'окуповано' : 'occupied'} ≈ <span className="mono">{total.toLocaleString(loc)}</span> {uk ? 'км²' : 'km²'} (<span className="mono">{(100 * total / UKRAINE_KM2).toFixed(1)}</span> % {uk ? 'території України' : 'of Ukraine'})
             {s.area.partial > 0 && <> {uk ? `+ ${s.area.partial.toLocaleString(loc)} км² громад, окупованих частково` : `+ ${s.area.partial.toLocaleString(loc)} km² of partly occupied communities`}</>}</div>
           <label className="row small">{uk ? 'Порівняти з' : 'Compare with'}
             <select value={front.compare ?? ''} onChange={(e) => setFront({ compare: e.target.value === '' ? null : +e.target.value })}>
