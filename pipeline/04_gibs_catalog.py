@@ -230,6 +230,12 @@ CURATED = [
 
 def parse_interval(v: str):
     v = v.strip()
+    if v and v[0] not in "[(":   # a single number, e.g. sourceValue="3"
+        try:
+            x = float(v)
+            return x, x
+        except ValueError:
+            return None, None
     m = re.match(r"^[\[\(]\s*([^,\]\)]*)\s*(?:,\s*([^\]\)]*))?\s*[\]\)]$", v)
     if not m:
         return None, None
@@ -255,8 +261,13 @@ def parse_colormap(xml_bytes):
     for cm in root.findall("ColorMap"):
         title = cm.get("title") or ""
         units = cm.get("units") or ""
-        entries = []
-        labels = {}
+        legend = cm.find("Legend")
+        ltype = legend.get("type") if legend is not None else "continuous"
+        tips = {}
+        if legend is not None:
+            for le in legend.findall("LegendEntry"):
+                tips[le.get("id")] = le.get("tooltip")
+        entries, labels = [], {}
         for e in cm.findall("Entries/ColorMapEntry"):
             if e.get("nodata") == "true":
                 continue
@@ -264,16 +275,30 @@ def parse_colormap(xml_bytes):
             lo, hi = parse_interval(e.get("value") or e.get("sourceValue") or "")
             transparent = e.get("transparent") == "true"
             entries.append(rgb + [lo, hi, 1 if transparent else 0])
-            if e.get("label"):
-                labels[len(entries) - 1] = e.get("label")
-        legend = cm.find("Legend")
-        ltype = legend.get("type") if legend is not None else "continuous"
-        tips = [le.get("tooltip") for le in legend.findall("LegendEntry")] if legend is not None else []
+            label = e.get("label") or (tips.get(e.get("ref")) if ltype == "classification" else None)
+            if label:
+                labels[len(entries) - 1] = label
         if not entries:
             continue
+        tl = list(tips.values())
         maps.append({"title": title, "units": units, "type": ltype, "entries": entries,
-                     "labels": labels or None, "first": tips[0] if tips else None, "last": tips[-1] if tips else None})
+                     "labels": labels or None, "first": tl[0] if tl else None, "last": tl[-1] if tl else None})
+    maps.sort(key=lambda m: -len(m["entries"]))   # the real data colour map is the biggest one
     return maps
+
+
+# Numbers in GIBS colour maps are in SI units; show them in units students know.
+DISPLAY = {
+    "K": {"offset": -273.15, "units": "°C"},
+    "kg/m²/s": {"scale": 86400, "units": "мм/добу|mm/day"},
+    "kg/m³": {"scale": 1e9, "units": "мкг/м³|µg/m³"},
+    "m³/m³": {"scale": 100, "units": "%"},
+    "kg/kg": {"scale": 1e6, "units": "мг/кг|mg/kg"},
+}
+DISPLAY_BY_LAYER = {
+    "so2": {"scale": 1e6, "units": "мг/м²|mg/m²"},
+    "water_vapor": {"scale": 1, "units": "мм|mm"},
+}
 
 
 def main():
@@ -319,8 +344,8 @@ def main():
         if ranges and not date:
             date = default
         transform = None
-        if legend and legend.get("units") == "K":
-            transform = {"offset": -273.15, "units": "°C"}
+        if legend:
+            transform = DISPLAY_BY_LAYER.get(lid) or DISPLAY.get(legend.get("units"))
         out.append({
             "id": lid, "gibs": gibs, "cat": cat,
             "title": {"uk": titles[0], "en": titles[1]},

@@ -102,7 +102,7 @@ export default function GlobeView() {
       vecRef.current?.setHover(c?.id || null);
       const st = useStore.getState();
       const ov = layerById(st.catalog, st.overlayId);
-      const val = ov ? valueAt(ov, eng.sampleOverlay(p.lon, p.lat)) : null;
+      const val = ov ? valueAt(ov, eng.sampleOverlay(p.lon, p.lat), st.lang) : null;
       setHover({ ...p, country: c, val, layer: ov });
     });
     const offClick = eng.on('click', (p) => {

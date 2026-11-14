@@ -99,26 +99,33 @@ export default function PlanetPanel() {
 
 function FiresText({ firms }) {
   const { lang } = useT();
-  const share = (i) => firms.front[i] / Math.max(1, firms.total[i]);
   const iy = (y) => firms.years.indexOf(y);
-  const s21 = share(iy(2021)), s23 = share(iy(2023)), s24 = share(iy(2024));
   const pct = (x) => `${Math.round(x * 100)} %`;
-  // summer (Jun–Sep) detections in the front-line oblasts
-  const summer = (i) => firms.monthlyFront[i].slice(5, 9).reduce((a, b) => a + b, 0);
-  const pre = [2015, 2016, 2017, 2018, 2019, 2020, 2021].map((y) => summer(iy(y)));
-  const preAvg = pre.reduce((a, b) => a + b, 0) / pre.length;
-  const war = [2022, 2023, 2024, 2025].map((y) => summer(iy(y)));
+  // June–September: harvest and stubble-burning season, and the season of heavy fighting
+  const summer = (arr, y) => arr[iy(y)].slice(5, 9).reduce((a, b) => a + b, 0);
+  const preYears = [2015, 2016, 2017, 2018, 2019, 2020, 2021];
+  const warYears = [2022, 2023, 2024, 2025].filter((y) => iy(y) >= 0);
+  const sum = (ys, arr) => ys.reduce((a, y) => a + summer(arr, y), 0);
+  const preShare = sum(preYears, firms.monthlyFront) / (sum(preYears, firms.monthlyFront) + sum(preYears, firms.monthlyRest));
+  const warShares = warYears.map((y) => summer(firms.monthlyFront, y) / (summer(firms.monthlyFront, y) + summer(firms.monthlyRest, y)));
+  const restPre = sum(preYears, firms.monthlyRest) / preYears.length;
+  const restWar = sum(warYears, firms.monthlyRest) / warYears.length;
+  const frontPre = sum(preYears, firms.monthlyFront) / preYears.length;
+  const frontWar = sum(warYears, firms.monthlyFront) / warYears.length;
+  const share = (y) => firms.front[iy(y)] / Math.max(1, firms.total[iy(y)]);
   const uk = lang === 'uk';
   return (
     <div className="explain">
       <b>{uk ? 'Що це означає простими словами' : 'What it means in plain words'}</b>
       <p>{uk
-        ? `Найбільше пожеж в Україні завжди давало спалювання стерні й сухої трави навесні та восени (це заборонено, штраф за ст. 77-1 КУпАП). З роками його стало менше, тож загальна кількість пожеж падає. Але з початком повномасштабної війни змінилося, ДЕ горить: частка п’яти прифронтових областей (Донецька, Луганська, Харківська, Запорізька, Херсонська) зросла з ${pct(s21)} у 2021 році до ${pct(s23)} у 2023 та ${pct(s24)} у 2024.`
-        : `Most fires in Ukraine have always come from burning stubble and dry grass in spring and autumn (illegal, fined under the Code of Administrative Offences, art. 77-1). That burning has declined, so the total number of fires is falling. But since the full-scale war began, WHERE things burn has changed: the share of the five front-line oblasts (Donetsk, Luhansk, Kharkiv, Zaporizhzhia, Kherson) rose from ${pct(s21)} in 2021 to ${pct(s23)} in 2023 and ${pct(s24)} in 2024.`}</p>
+        ? `Найбільше пожеж в Україні дає спалювання стерні й сухої трави (це заборонено, штраф за ст. 77-1 КУпАП). Його стає менше, тому загальна кількість пожеж з роками падає. Але з 2022 року змінилося, ДЕ горить: частка п’яти прифронтових областей (Донецька, Луганська, Харківська, Запорізька, Херсонська) за рік зросла з ${pct(share(2021))} у 2021 до ${pct(share(2023))} у 2023 та ${pct(share(2024))} у 2024.`
+        : `Most fires in Ukraine come from burning stubble and dry grass (illegal, fined under art. 77-1 of the Code of Administrative Offences). That burning is declining, so the total number of fires falls over the years. But since 2022 WHERE things burn has changed: the yearly share of the five front-line oblasts (Donetsk, Luhansk, Kharkiv, Zaporizhzhia, Kherson) rose from ${pct(share(2021))} in 2021 to ${pct(share(2023))} in 2023 and ${pct(share(2024))} in 2024.`}</p>
       <p>{uk
-        ? `Влітку (червень–вересень), коли поля зазвичай не палять, у прифронтових областях у 2015–2021 роках було в середньому ${Math.round(preAvg)} пожеж, а у 2022–2025: ${war.join(', ')}. Літні пожежі вздовж фронту — це здебільшого наслідки обстрілів: горять поля пшениці, ліси, степ.`
-        : `In summer (June–September), when fields are not usually burned, the front-line oblasts averaged ${Math.round(preAvg)} fires in 2015–2021, and in 2022–2025: ${war.join(', ')}. Summer fires along the front are mostly caused by shelling: wheat fields, forests and steppe burn.`}</p>
-      <p className="small muted">{uk ? 'Обережно з висновками: супутник бачить вогонь, але не знає його причини; частина цих областей окупована, і дані там ніхто не перевіряє на землі.' : 'Careful with conclusions: the satellite sees fire but not its cause; parts of these oblasts are occupied and nobody can verify on the ground.'}</p>
+        ? `Влітку (червень–вересень) у 2015–2021 роках на прифронтові області припадало в середньому ${pct(preShare)} літніх пожеж країни, а у ${warYears.join(', ')} — ${warShares.map(pct).join(', ')}. У решті України літніх пожеж стало менше (в середньому ${Math.round(restPre)} на рік до війни і ${Math.round(restWar)} під час війни), а в прифронтових областях — ні (${Math.round(frontPre)} і ${Math.round(frontWar)}). Отже, вогонь «перемістився» до фронту: поля, ліси й степ горять від обстрілів, і гасити їх там неможливо.`
+        : `In summer (June–September) the front-line oblasts had on average ${pct(preShare)} of Ukraine’s summer fires in 2015–2021, and ${warShares.map(pct).join(', ')} in ${warYears.join(', ')}. In the rest of Ukraine summer fires became fewer (on average ${Math.round(restPre)} a year before the war and ${Math.round(restWar)} during it), but not in the front-line oblasts (${Math.round(frontPre)} and ${Math.round(frontWar)}). Fire has “moved” to the front: fields, forests and steppe burn from shelling and cannot be put out there.`}</p>
+      <p className="small muted">{uk
+        ? 'Обережно з висновками: супутник бачить вогонь, але не знає його причини; 2024 рік був дуже спекотним і сухим; частина цих областей окупована, і перевірити дані на землі неможливо.'
+        : 'Careful with conclusions: the satellite sees fire but not its cause; 2024 was very hot and dry; parts of these oblasts are occupied and nothing can be checked on the ground.'}</p>
       <p className="muted small">{firms.source}</p>
     </div>
   );

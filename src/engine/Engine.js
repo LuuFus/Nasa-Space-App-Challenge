@@ -429,7 +429,7 @@ export class Engine {
     v.frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse));
 
     const sw = this.swipe.enabled && !contour;
-    this.base.update(v);
+    if (!sw) this.base.update(v);
     this.overlay.update(v);
     this.clouds.update(v);
     if (sw) { this.swipeL.update(v); this.swipeR.update(v); }

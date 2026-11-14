@@ -103,6 +103,28 @@ export const VARIABLES = {
   },
 };
 
+// Series computed by pipeline/06_gibs_trends.py from MODIS maps (yearly only)
+Object.assign(VARIABLES, {
+  NDVI: {
+    title: { uk: 'Рослинність (NDVI, MODIS)', en: 'Vegetation (NDVI, MODIS)' },
+    unit: 'NDVI', digits: 3, term: 'ndvi', gibs: 'ndvi', src: 'gibs', key: 'ndvi',
+    has: { uk: 'Зеленішу рослинність має', en: 'Greener vegetation:' },
+    life: {
+      uk: (d) => `NDVI змінився на ${d >= 0 ? '+' : ''}${d.toFixed(3)}. Для порівняння: густий ліс ≈ 0,8, поле влітку ≈ 0,6, сухий степ ≈ 0,2. ${d < -0.02 ? 'Рослинність бідніє — посухи, пожежі, вирубки або забудова.' : d > 0.02 ? 'Земля «зеленіє» — більше посівів, лісів або довший вегетаційний сезон.' : 'Помітних змін зеленості немає.'}`,
+      en: (d) => `NDVI changed by ${d >= 0 ? '+' : ''}${d.toFixed(3)}. For reference: dense forest ≈ 0.8, summer crops ≈ 0.6, dry steppe ≈ 0.2. ${d < -0.02 ? 'Vegetation is getting poorer — droughts, fires, logging or building.' : d > 0.02 ? 'The land is greening — more crops, forest or a longer growing season.' : 'No noticeable change in greenness.'}`,
+    },
+  },
+  LST_DAY: {
+    title: { uk: 'Температура поверхні суші вдень (MODIS)', en: 'Daytime land surface temperature (MODIS)' },
+    unit: '°C', digits: 1, term: 'lst', gibs: 'lst_day', src: 'gibs', key: 'lst_day',
+    has: { uk: 'Гарячішу поверхню має', en: 'Hotter ground:' },
+    life: {
+      uk: (d) => `Середня денна температура самої землі змінилася на ${d >= 0 ? '+' : ''}${d.toFixed(1)} °C. Гаряча поверхня швидше висушує ґрунт і нагріває повітря над містами.`,
+      en: (d) => `The average daytime temperature of the ground itself changed by ${d >= 0 ? '+' : ''}${d.toFixed(1)} °C. A hot surface dries soil faster and heats the air above cities.`,
+    },
+  },
+});
+
 export const SEASONS = [
   { id: 'year', months: null, title: { uk: 'Увесь рік', en: 'Whole year' } },
   { id: 'winter', months: [12, 1, 2], title: { uk: 'Зима (гру–лют)', en: 'Winter (Dec–Feb)' } },

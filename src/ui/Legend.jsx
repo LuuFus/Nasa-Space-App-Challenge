@@ -2,8 +2,8 @@ import { legendBar } from '../lib/legend.js';
 import { useT } from '../i18n/index.js';
 
 export default function Legend({ layer }) {
-  const { t } = useT();
-  const bar = legendBar(layer);
+  const { t, lang } = useT();
+  const bar = legendBar(layer, lang);
   if (!bar) {
     return layer?.legendImage ? <img className="legend-img" src={layer.legendImage} alt={t('legend')} /> : null;
   }

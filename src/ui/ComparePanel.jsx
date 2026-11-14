@@ -29,16 +29,30 @@ export default function ComparePanel() {
       if (id && !docs[id]) loadCountrySeries(id).then((d) => setDocs((o) => ({ ...o, [id]: d }))).catch(() => setDocs((o) => ({ ...o, [id]: null })));
     }
   }, [s.selA, s.selB]);
+  const [gibsData, setGibsData] = useState(null);
+  useEffect(() => { loadJSON('gibs_country_annual.json').then(setGibsData).catch(() => {}); }, []);
   // leaving the panel clears the trend colouring
   useEffect(() => () => getEngine()?.vectors?.setChoropleth(null), []);
 
-  const season = SEASONS.find((x) => x.id === seasonId);
-  const docA = docs[s.selA], docB = s.selB ? docs[s.selB] : null;
+  const v0 = VARIABLES[varId];
+  const season = v0.src === 'gibs' ? SEASONS[0] : SEASONS.find((x) => x.id === seasonId);
+  // MODIS-derived variables come from gibs_country_annual.json (yearly values only)
+  const gibsDoc = (id) => {
+    const g = gibsData?.[v0.key];
+    const arr = id && g?.countries[id];
+    if (!arr) return null;
+    const y0 = g.years[0], y1 = g.years[g.years.length - 1];
+    const annual = [];
+    for (let y = y0; y <= y1; y++) { const i = g.years.indexOf(y); annual.push(i >= 0 ? arr[i] : null); }
+    return { id, years: [y0, y1], points: [], source: g.source, series: { [varId]: { annual, monthly: [] } } };
+  };
+  const docA = v0.src === 'gibs' ? gibsDoc(s.selA) : docs[s.selA];
+  const docB = v0.src === 'gibs' ? gibsDoc(s.selB) : (s.selB ? docs[s.selB] : null);
   const names = {
     a: countries?.byId.get(s.selA) ? pick(countries.byId.get(s.selA).name) : s.selA,
     b: countries?.byId.get(s.selB) ? pick(countries.byId.get(s.selB).name) : s.selB,
   };
-  const rep = useMemo(() => (docA ? compareReport(docA, docB, varId, season, horizon) : null), [docA, docB, varId, seasonId, horizon]);
+  const rep = useMemo(() => (docA ? compareReport(docA, docB, varId, season, horizon) : null), [docA, docB, varId, seasonId, horizon, gibsData]);
   const text = useMemo(() => (rep ? explain(rep, lang, names) : []), [rep, lang, names.a, names.b]);
   const option = useMemo(() => (rep ? buildOption(rep, mode, lang, names, t) : null), [rep, mode, lang, names.a, names.b]);
 
@@ -47,17 +61,25 @@ export default function ComparePanel() {
   const u = unitText(v, lang, season.months?.length === 1);
 
   const colourMap = async () => {
-    const data = await loadJSON('power_annual.json');
-    const years = [];
-    for (let y = data.years[0]; y <= data.years[1]; y++) years.push(y);
     const slopes = {};
-    for (const [id, ser] of Object.entries(data.countries)) {
-      const lr = linreg(years, ser[varId]);
-      if (lr) slopes[id] = { v: lr.slope * 10, p: lr.p };
+    if (v0.src === 'gibs') {
+      const g = gibsData?.[v0.key];
+      for (const [id, arr] of Object.entries(g?.countries || {})) {
+        const lr = linreg(g.years, arr);
+        if (lr) slopes[id] = { v: lr.slope * 10, p: lr.p };
+      }
+    } else {
+      const data = await loadJSON('power_annual.json');
+      const years = [];
+      for (let y = data.years[0]; y <= data.years[1]; y++) years.push(y);
+      for (const [id, ser] of Object.entries(data.countries)) {
+        const lr = linreg(years, ser[varId]);
+        if (lr) slopes[id] = { v: lr.slope * 10, p: lr.p };
+      }
     }
     const vals = Object.values(slopes).map((x) => Math.abs(x.v)).sort((a, b) => a - b);
     const max = vals[Math.floor(vals.length * 0.95)] || 1;
-    const warmCold = varId.startsWith('T2M');
+    const warmCold = varId.startsWith('T2M') || varId === 'LST_DAY';
     const fn = (c) => {
       const x = slopes[c.id];
       if (!x) return null;
@@ -93,7 +115,7 @@ export default function ComparePanel() {
           </select>
         </label>
         <label className="small">{t('season')}
-          <select value={seasonId} onChange={(e) => setSeasonId(e.target.value)}>
+          <select value={season.id} disabled={v0.src === 'gibs'} onChange={(e) => setSeasonId(e.target.value)}>
             {SEASONS.map((x) => <option key={x.id} value={x.id}>{pick(x.title)}</option>)}
           </select>
         </label>
@@ -143,7 +165,7 @@ export default function ComparePanel() {
             </div>
             <Formulas X={showFor === 'b' && rep.B ? rep.B : rep.A} u={u} horizon={horizon} lang={lang} />
           </details>
-          <p className="muted small">{t('source')}: NASA POWER (MERRA-2), {rep.A.doc.points.length} {lang === 'uk' ? 'точок усередині країни A, усереднено' : 'points inside country A, averaged'}.</p>
+          <p className="muted small">{t('source')}: {v0.src === 'gibs' ? rep.A.doc.source : `NASA POWER (MERRA-2), ${rep.A.doc.points.length} ${lang === 'uk' ? 'точок усередині країни A, усереднено' : 'points inside country A, averaged'}`}.</p>
         </>
       )}
     </div>

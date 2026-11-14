@@ -25,20 +25,20 @@ from PIL import Image, ImageDraw
 from common import OUT, download, log, parallel, read_json, write_json
 
 W, H = 640, 320           # 0.5625° grid = GIBS level-0 resolution
-TILE = "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/{gibs}/default/{date}/{tms}/0/0/{x}.png"
+TILE = "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/{gibs}/default/{date}/{tms}/{z}/{y}/{x}.png"
 
 LAYERS = [
     # id, catalog id, first year, last year, how to convert the decoded number, unit, palette, title
     dict(id="t2m", cat="t2m", y0=1980, y1=2025, conv=lambda v: v - 273.15, unit="°C", pal="temp",
          title={"uk": "Тренд температури повітря", "en": "Air temperature trend"}, anomalies=True),
-    dict(id="precip", cat="precip", y0=1980, y1=2025, conv=lambda v: v * 365.25, unit="mm", pal="water",
+    dict(id="precip", cat="precip", y0=1980, y1=2025, conv=lambda v: v * 86400 * 365.25, unit="mm", pal="water",
          title={"uk": "Тренд опадів", "en": "Precipitation trend"}),
     dict(id="soil", cat="soil", y0=1980, y1=2025, conv=lambda v: v * 100, unit="%", pal="water",
          title={"uk": "Тренд вологості ґрунту", "en": "Soil moisture trend"}),
     dict(id="ndvi", cat="ndvi", y0=2001, y1=2025, conv=lambda v: v, unit="NDVI", pal="green",
-         title={"uk": "Тренд зеленості рослин (NDVI)", "en": "Vegetation greenness trend (NDVI)"}, country=True),
+         title={"uk": "Тренд зеленості рослин (NDVI)", "en": "Vegetation greenness trend (NDVI)"}, country=True, level=2),
     dict(id="lst_day", cat="lst_day", y0=2001, y1=2025, conv=lambda v: v - 273.15, unit="°C", pal="temp",
-         title={"uk": "Тренд температури поверхні суші (вдень)", "en": "Daytime land-surface temperature trend"}, country=True),
+         title={"uk": "Тренд температури поверхні суші (вдень)", "en": "Daytime land-surface temperature trend"}, country=True, level=2),
 ]
 
 PALETTES = {  # negative end, middle, positive end
@@ -64,23 +64,34 @@ def colormap_lookup(legend):
     return keys, vals
 
 
-def decode_month(layer, date, keys, vals):
-    tiles = []
-    for x in (0, 1):
-        raw = download(TILE.format(gibs=layer["gibs"], date=date, tms=layer["tms"], x=x), timeout=90, quiet=True)
-        if raw is None:
-            return None
-        tiles.append(np.array(Image.open(io.BytesIO(raw)).convert("RGBA")))
-    img = np.concatenate([tiles[0], tiles[1]], axis=1)[:H, :W]   # 1024×512 -> world part 640×320
+def decode_month(layer, date, keys, vals, z=0):
+    """Whole world at 0.5625°. Fine-resolution products (1 km MODIS) are read at a
+    deeper zoom level and averaged, otherwise every big pixel would be one random
+    1 km sample and the maps would be noisy."""
+    S = 288 / 2 ** z
+    nx, ny = math.ceil(360 / S), math.ceil(180 / S)
+    rows = []
+    for y in range(ny):
+        row = []
+        for x in range(nx):
+            raw = download(TILE.format(gibs=layer["gibs"], date=date, tms=layer["tms"], z=z, y=y, x=x), timeout=90, quiet=True)
+            if raw is None:
+                return None
+            row.append(np.array(Image.open(io.BytesIO(raw)).convert("RGBA")))
+        rows.append(np.concatenate(row, axis=1))
+    f = 2 ** z
+    img = np.concatenate(rows, axis=0)[:H * f, :W * f]
     rgb = (img[..., 0].astype(np.int64) << 16) | (img[..., 1].astype(np.int64) << 8) | img[..., 2]
-    out = np.full((H, W), np.nan, dtype=np.float32)
+    out = np.full(rgb.shape, np.nan, dtype=np.float32)
     ok = img[..., 3] > 0
-    idx = np.searchsorted(keys, rgb[ok])
-    idx = np.clip(idx, 0, len(keys) - 1)
+    idx = np.clip(np.searchsorted(keys, rgb[ok]), 0, len(keys) - 1)
     hit = keys[idx] == rgb[ok]
     vv = np.full(idx.shape, np.nan, dtype=np.float32)
     vv[hit] = vals[idx[hit]]
     out[ok] = vv
+    if f > 1:
+        with np.errstate(all="ignore"):
+            out = np.nanmean(out.reshape(H, f, W, f), axis=(1, 3))
     return out
 
 
@@ -114,11 +125,13 @@ def colorize(field, vmax, pal, sig=None):
     k = np.clip(field / vmax, -1, 1)
     k0 = np.nan_to_num(k)[..., None]
     rgb = np.where(k0 < 0, mid + (neg - mid) * -k0, mid + (pos - mid) * k0)
-    a = np.where(np.isfinite(field), 225, 0).astype(np.float32)
-    if sig is not None:
-        a = np.where(np.isfinite(field) & (sig >= 0.05), 80, a)
+    a = np.where(np.isfinite(field), 235, 0).astype(np.float32)
+    if sig is not None:   # not significant: keep the colour but wash it out
+        weak = np.isfinite(field) & (sig >= 0.05)
+        rgb = np.where(weak[..., None], mid + (rgb - mid) * 0.35, rgb)
+        a = np.where(weak, 150, a)
     img = np.dstack([rgb, a]).clip(0, 255).astype(np.uint8)
-    return Image.fromarray(img, "RGBA")
+    return Image.fromarray(img, "RGBA").quantize(colors=96, method=Image.Quantize.FASTOCTREE)
 
 
 def nice(v):
@@ -164,7 +177,7 @@ def main():
         keys, vals = colormap_lookup(layer["legend"])
         months = [(y, m) for y in range(L["y0"], L["y1"] + 1) for m in range(1, 13)]
         log(f"{L['id']}: {len(months)} months of {layer['gibs']}")
-        grids = parallel(lambda ym: decode_month(layer, f"{ym[0]}-{ym[1]:02d}-01", keys, vals), months, workers=8, desc=L["id"])
+        grids = parallel(lambda ym: decode_month(layer, f"{ym[0]}-{ym[1]:02d}-01", keys, vals, L.get("level", 0)), months, workers=8, desc=L["id"])
         years, cube = [], []
         for yi, y in enumerate(range(L["y0"], L["y1"] + 1)):
             block = [g for g in grids[yi * 12:(yi + 1) * 12] if g is not None]

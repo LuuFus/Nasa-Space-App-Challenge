@@ -101,18 +101,20 @@ class Scheduler {
   constructor() {
     this.queue = new Map(); // url -> job
     this.active = 0;
-    this.max = 10;
+    this.max = 16;
     this.frame = 0;
   }
+  /** ask for a URL; calling again each frame keeps the request alive */
   request(url, priority, onDone) {
     let j = this.queue.get(url);
     if (!j) {
-      j = { url, priority, frame: this.frame, cbs: [onDone], started: false };
+      j = { url, priority, frame: this.frame, cbs: [], started: false };
       this.queue.set(url, j);
     } else {
       j.priority = Math.min(j.priority, priority);
       j.frame = this.frame;
     }
+    if (onDone) j.cbs.push(onDone);
   }
   tick() {
     this.frame++;
@@ -120,7 +122,11 @@ class Scheduler {
     const waiting = [];
     for (const j of this.queue.values()) {
       if (j.started) continue;
-      if (this.frame - j.frame > 3) { this.queue.delete(j.url); continue; } // nobody wants it any more
+      if (this.frame - j.frame > 3) { // nobody wants it any more
+        this.queue.delete(j.url);
+        j.cbs.forEach((cb) => cb(null, 'dropped'));
+        continue;
+      }
       waiting.push(j);
     }
     waiting.sort((a, b) => a.priority - b.priority);
@@ -256,8 +262,10 @@ export class TileLayer {
     if (!url) { t.state = 'empty'; return; }
     t.state = 'loading';
     const src = this.sourceKey;
-    scheduler.request(url, priority, (img) => {
+    t.url = url;
+    scheduler.request(url, priority, (img, err) => {
       if (src !== this.sourceKey) return; // the date/layer changed meanwhile
+      if (err === 'dropped') { t.state = 'idle'; return; }
       if (!img) {
         // missing tile (404) or a network hiccup: try again a couple of times, later
         t.tries = (t.tries || 0) + 1;
@@ -277,8 +285,6 @@ export class TileLayer {
       t.state = 'ready';
       this.engine.requestRender();
     });
-    // if the scheduler dropped the job the tile goes back to idle next time it is wanted
-    setTimeout(() => { if (t.state === 'loading' && !scheduler.queue.has(url)) t.state = 'idle'; }, 4000);
   }
 
   /** Choose tiles for this frame. view: { camera, frustum, focalPx, morph, frame } */
@@ -326,6 +332,7 @@ export class TileLayer {
     const t = this._tile(z, x, y);
     t.used = view.frame;
     if (t.state === 'idle') this._request(t, z * 1000 + m.d);
+    else if (t.state === 'loading') scheduler.request(t.url, z * 1000 + m.d); // still wanted
     if (t.state === 'ready') return this._draw(g, t, z, x, y);
     // not ready: stand-in from the closest loaded ancestor
     let pz = z, px = x, py = y;
@@ -337,6 +344,7 @@ export class TileLayer {
         return this._draw(g, p, z, x, y);
       }
       if (p && p.state === 'idle' && pz <= 2) this._request(p, pz * 1000);
+      else if (p && p.state === 'loading') scheduler.request(p.url, pz * 1000);
     }
   }
 
