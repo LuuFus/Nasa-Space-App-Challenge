@@ -14,6 +14,7 @@ STEPS = [
     "04_gibs_catalog.py",    # NASA GIBS layer catalogue + colour maps
     "05_firms_ukraine.py",   # NASA FIRMS fires in Ukraine 2001-2025
     "06_gibs_trends.py",     # trend maps + MODIS country series
+    "07_frontline.py",       # DeepStateMap front line in Ukraine, monthly
 ]
 
 if __name__ == "__main__":

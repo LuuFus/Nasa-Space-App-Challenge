@@ -9,6 +9,7 @@ const SOURCES = [
   ['NASA Earth Observatory', 'https://science.nasa.gov/earth/earth-observatory/', { uk: 'статті до подій', en: 'articles behind the events' }],
   ['NSIDC Sea Ice Index v4', 'https://nsidc.org/data/g02135', { uk: 'площа морського льоду (партнер NASA)', en: 'sea-ice extent (NASA partner)' }],
   ['NOAA GML Mauna Loa', 'https://gml.noaa.gov/ccgg/trends/', { uk: 'CO₂ в атмосфері', en: 'atmospheric CO₂' }],
+  ['DeepStateMap', 'https://deepstatemap.live', { uk: 'лінія фронту та окуповані території України щомісяця з квітня 2022 (© DeepStateMap)', en: 'front line and occupied territories of Ukraine monthly since April 2022 (© DeepStateMap)' }],
   ['Natural Earth 1:10m (Ukraine POV)', 'https://www.naturalearthdata.com', { uk: 'кордони, столиці, річки, озера, назви морів', en: 'borders, capitals, rivers, lakes, sea names' }],
 ];
 

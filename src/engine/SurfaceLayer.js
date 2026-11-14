@@ -9,15 +9,21 @@ import { DEG, GLSL_PROJECTION } from './projection.js';
 let sharedGeom = null;
 function worldGeometry() {
   if (sharedGeom) return sharedGeom;
-  const nx = 360, ny = 180;
+  sharedGeom = gridGeometry([-180, -90, 180, 90], 180, 90);
+  return sharedGeom;
+}
+
+/** a lon/lat grid mesh over bbox [west, south, east, north] */
+export function gridGeometry(bbox, nx, ny) {
+  const [w, sLat, e, n] = bbox;
   const ll = new Float32Array((nx + 1) * (ny + 1) * 2);
   const uv = new Float32Array((nx + 1) * (ny + 1) * 2);
   const pos = new Float32Array((nx + 1) * (ny + 1) * 3);
   let k = 0;
   for (let j = 0; j <= ny; j++) {
-    const lat = 90 - (180 * j) / ny;
+    const lat = n - ((n - sLat) * j) / ny;
     for (let i = 0; i <= nx; i++) {
-      const lon = -180 + (360 * i) / nx;
+      const lon = w + ((e - w) * i) / nx;
       ll[k * 2] = lon * DEG;
       ll[k * 2 + 1] = lat * DEG;
       uv[k * 2] = i / nx;
@@ -43,7 +49,6 @@ function worldGeometry() {
   g.setAttribute('lonlat', new THREE.BufferAttribute(ll, 2));
   g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
   g.setIndex(new THREE.BufferAttribute(idx, 1));
-  sharedGeom = g;
   return g;
 }
 
@@ -70,7 +75,7 @@ void main() {
 }`;
 
 export class SurfaceLayer {
-  constructor(engine, { color = 0x0b1a33, lift = 0, opacity = 1, transparent = false, renderOrder = 0, depth = false } = {}) {
+  constructor(engine, { color = 0x0b1a33, lift = 0, opacity = 1, transparent = false, renderOrder = 0, depth = false, bbox = null } = {}) {
     this.engine = engine;
     this.material = new THREE.ShaderMaterial({
       vertexShader: VERT,
@@ -86,7 +91,8 @@ export class SurfaceLayer {
       depthWrite: depth,
     });
     if (!depth) this.material.userData.surface = true;
-    this.mesh = new THREE.Mesh(worldGeometry(), this.material);
+    const geom = bbox ? gridGeometry(bbox, Math.ceil((bbox[2] - bbox[0]) * 2), Math.ceil((bbox[3] - bbox[1]) * 2)) : worldGeometry();
+    this.mesh = new THREE.Mesh(geom, this.material);
     this.mesh.frustumCulled = false;
     this.mesh.renderOrder = renderOrder;
   }
@@ -105,10 +111,11 @@ export class SurfaceLayer {
 
 /** Equirectangular canvas helper: draw lon/lat polygons into a texture. */
 export class LonLatCanvas {
-  constructor(width = 4096) {
+  constructor(width = 4096, bbox = [-180, -90, 180, 90]) {
+    this.bbox = bbox;
     this.canvas = document.createElement('canvas');
     this.canvas.width = width;
-    this.canvas.height = width / 2;
+    this.canvas.height = Math.round((width * (bbox[3] - bbox[1])) / (bbox[2] - bbox[0]));
     this.ctx = this.canvas.getContext('2d');
     this.texture = new THREE.CanvasTexture(this.canvas);
     this.texture.generateMipmaps = true;
@@ -123,21 +130,36 @@ export class LonLatCanvas {
     if (color) { ctx.fillStyle = color; ctx.fillRect(0, 0, this.w, this.h); }
   }
   /** rings: arrays of [lon, lat, lon, lat, ...] (Float32Array); one path, even-odd holes */
-  fillPolygon(polys, style) {
+  fillPolygon(polys, style, rule = 'evenodd') {
     const { ctx, w, h } = this;
+    const [W, S, E, N] = this.bbox;
     ctx.beginPath();
     for (const poly of polys) {
       for (const ring of poly) {
         for (let i = 0; i < ring.length; i += 2) {
-          const x = ((ring[i] + 180) / 360) * w;
-          const y = ((90 - ring[i + 1]) / 180) * h;
+          const x = ((ring[i] - W) / (E - W)) * w;
+          const y = ((N - ring[i + 1]) / (N - S)) * h;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.closePath();
       }
     }
     ctx.fillStyle = style;
-    ctx.fill('evenodd');
+    ctx.fill(rule);
+  }
+  /** diagonal stripes, e.g. for occupied territory */
+  hatch(color, gap = 9, width = 2.5) {
+    const c = document.createElement('canvas');
+    c.width = c.height = gap;
+    const x = c.getContext('2d');
+    x.strokeStyle = color;
+    x.lineWidth = width;
+    x.beginPath();
+    x.moveTo(-1, gap + 1); x.lineTo(gap + 1, -1);
+    x.moveTo(-1, 1); x.lineTo(1, -1);
+    x.moveTo(gap - 1, gap + 1); x.lineTo(gap + 1, gap - 1);
+    x.stroke();
+    return this.ctx.createPattern(c, 'repeat');
   }
   commit() { this.texture.needsUpdate = true; }
 }

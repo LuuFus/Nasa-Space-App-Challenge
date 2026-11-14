@@ -83,9 +83,9 @@ summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
 /* swipe */
 .swipe-bar { position: absolute; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: #fff; cursor: ew-resize; z-index: 3; box-shadow: 0 0 6px #000; }
 .swipe-knob { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #111; border-radius: 50%; width: 34px; height: 34px; line-height: 34px; text-align: center; font-weight: 700; }
-.swipe-label { position: absolute; top: 10px; background: rgba(10, 14, 22, 0.85); padding: 4px 8px; border-radius: 6px; font-size: 12px; z-index: 3; pointer-events: none; }
-.swipe-label.left { left: 10px; }
-.swipe-label.right { right: 10px; }
+
+
+
 
 /* consent */
 .consent { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #142038; border: 1px solid #3a64c4; border-radius: 10px; padding: 12px 16px; z-index: 50; max-width: 520px; box-shadow: 0 8px 30px #000a; }
@@ -108,3 +108,21 @@ summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
 .gloss-entry { border-bottom: 1px solid #1d2638; padding: 8px 0; }
 .gloss-entry.on { background: #142038; }
 .term-link { color: #8fb4ff; cursor: help; border-bottom: 1px dotted #8fb4ff; }
+
+/* over-the-map controls */
+.map-chips { position: absolute; bottom: 26px; left: 8px; display: flex; flex-direction: column; gap: 4px; z-index: 6; max-width: 46%; }
+.chip-map { display: flex; align-items: center; gap: 6px; background: rgba(12, 18, 30, 0.88); border: 1px solid #33415c; border-radius: 16px; padding: 3px 4px 3px 10px; font-size: 12px; }
+.chip-map button { padding: 1px 7px; border-radius: 12px; font-size: 12px; }
+.chip-map.front { border-color: #c0392b; }
+.event-banner { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: min(560px, 60%); background: rgba(12, 18, 30, 0.92); border: 1px solid #3a64c4; border-radius: 10px; padding: 8px 12px; z-index: 6; font-size: 13px; }
+.event-banner p { margin: 6px 0; }
+.event-banner.small-banner { top: auto; bottom: 28px; width: auto; padding: 4px 10px; }
+.front-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; align-items: center; }
+.front-legend i { display: inline-block; width: 14px; height: 10px; margin-right: 4px; vertical-align: middle; border-radius: 2px; }
+.front-legend i.hatched { background-image: repeating-linear-gradient(135deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 5px) !important; }
+.front-legend i.dashed { border-top: 2px dashed #fff; height: 0; border-radius: 0; }
+.swipe-date { position: absolute; top: 56px; z-index: 5; pointer-events: none; background: rgba(0, 0, 0, 0.72); border-radius: 8px; padding: 4px 10px; text-shadow: 0 0 4px #000; }
+.swipe-date.left { text-align: right; }
+.swipe-date .big { font-size: 22px; font-weight: 700; color: #fff; }
+.swipe-date .small { font-size: 11px; color: #c9d5ea; }
+.swipe-exit { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 6; background: #b3261e; border-color: #b3261e; color: #fff; padding: 6px 14px; border-radius: 18px; }

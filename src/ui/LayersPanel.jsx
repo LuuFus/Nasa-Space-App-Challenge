@@ -4,6 +4,7 @@ import { useT } from '../i18n/index.js';
 import { fmtDate, firstDate, lastDate, periodOf, snapDate, stepDate, worldviewUrl } from '../lib/dates.js';
 import Legend from './Legend.jsx';
 import TrendMaps from './TrendMaps.jsx';
+import FrontControls from './FrontControls.jsx';
 import { layerById } from './GlobeView.jsx';
 
 const CATS = ['temperature', 'vegetation', 'water', 'fire', 'lights', 'air', 'ozone', 'climate'];
@@ -35,6 +36,10 @@ export default function LayersPanel() {
       {base && <p className="desc">{pick(base.desc)}</p>}
 
       <h3>{t('dataLayer')}</h3>
+      <details open={s.front.on}>
+        <summary>⚠ {t('cat_war')}</summary>
+        <FrontControls />
+      </details>
       {CATS.map((c) => {
         const items = cat.layers.filter((l) => l.cat === c);
         return (

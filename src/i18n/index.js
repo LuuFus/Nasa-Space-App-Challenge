@@ -47,6 +47,7 @@ export const STRINGS = {
   cat_air: { uk: 'Повітря і викиди', en: 'Air & emissions' },
   cat_ozone: { uk: 'Озоновий шар', en: 'Ozone layer' },
   cat_climate: { uk: 'Клімат і тренди', en: 'Climate & trends' },
+  cat_war: { uk: 'Війна в Україні: лінія фронту', en: 'War in Ukraine: front line' },
   valueHere: { uk: 'Тут', en: 'Here' },
   clickToPick: { uk: 'Клацни на країну, щоб обрати її', en: 'Click a country to select it' },
   countryA: { uk: 'Країна A', en: 'Country A' },

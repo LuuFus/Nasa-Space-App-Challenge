@@ -69,6 +69,8 @@ void main() {
   gl_FragColor = vec4(vColor.rgb, vColor.a * uOpacity);
 }`;
 
+const CELL = 30; // degrees: segments are grouped into 30°×30° chunks that can be skipped when off screen
+
 export class LineLayer {
   constructor(engine, { lift = 0.00025, renderOrder = 10, opacity = 1 } = {}) {
     this.engine = engine;
@@ -92,32 +94,58 @@ export class LineLayer {
       side: THREE.DoubleSide,
     });
     this.material.userData.surface = true;
-    this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), this.material);
-    this.mesh.frustumCulled = false;
-    this.mesh.renderOrder = renderOrder;
+    this.renderOrder = renderOrder;
+    this.mesh = new THREE.Group();   // one child mesh per chunk
+    this.chunks = [];
+    engine.lineLayers.push(this);
   }
 
-  set visible(v) { this.mesh.visible = v; this.engine.requestRender(); }
+  set visible(v) {
+    if (this.mesh.visible === v) return;
+    this.mesh.visible = v;
+    this.engine.requestRender();
+  }
   get visible() { return this.mesh.visible; }
   setMaxRank(r) { this.material.uniforms.uMaxRank.value = r; }
   setWidthScale(s) { this.material.uniforms.uWidthScale.value = s; }
   setOpacity(o) { this.material.uniforms.uOpacity.value = o; }
 
+  /** hide chunks behind the globe or outside the screen */
+  update(view) {
+    if (!this.mesh.visible) return;
+    const cam = view.camera.position;
+    const globe = view.morph === 0;
+    const dist = cam.length();
+    const horizon = Math.acos(Math.min(1, 1 / dist));
+    for (const c of this.chunks) {
+      if (!globe) { c.mesh.visible = true; continue; }
+      const theta = c.center.angleTo(cam);
+      c.mesh.visible = theta - c.radius < horizon + 0.03 && view.frustum.intersectsSphere(c.sphere);
+    }
+  }
+
   /**
    * lines: [{ coords: [lon,lat,lon,lat,...] (degrees), closed, color: [r,g,b,a],
    *           width, inset (default -width/2 = centred), dash, gap, rank }]
-   * One instance per segment (4 shared corner vertices), so even ~500k border
-   * segments take only ~25 MB of GPU memory.
+   * One instance per segment (4 shared corner vertices).
    */
   setLines(lines) {
-    let nSeg = 0;
-    for (const l of lines) nSeg += l.coords.length / 2 - (l.closed ? 0 : 1);
-    const AB = new Float32Array(nSeg * 4);
-    const COL = new Uint8Array(nSeg * 4);
-    const ST = new Float32Array(nSeg * 4);
-    const DI = new Float32Array(nSeg * 2);
-    const RK = new Float32Array(nSeg);
-    let s = 0;
+    // pass 1: count segments per chunk
+    const counts = new Map();
+    const cellOf = (lon, lat) => Math.floor((lon + 180) / CELL) * 100 + Math.floor((lat + 90) / CELL);
+    for (const l of lines) {
+      const co = l.coords, n = co.length / 2, segs = l.closed ? n : n - 1;
+      for (let i = 0; i < segs; i++) {
+        const j = (i + 1) % n;
+        const k = cellOf((co[i * 2] + co[j * 2]) / 2, (co[i * 2 + 1] + co[j * 2 + 1]) / 2);
+        counts.set(k, (counts.get(k) || 0) + 1);
+      }
+    }
+    const buf = new Map();
+    for (const [k, n] of counts) {
+      buf.set(k, { n: 0, AB: new Float32Array(n * 4), COL: new Uint8Array(n * 4), ST: new Float32Array(n * 4), DI: new Float32Array(n * 2), RK: new Float32Array(n), pts: [] });
+    }
+    // pass 2: fill
     for (const l of lines) {
       const co = l.coords;
       const n = co.length / 2;
@@ -135,28 +163,54 @@ export class LineLayer {
         const fake = (Math.abs(lon1) > 179.999 && Math.abs(lon2) > 179.999) ||
           (lat1 < -89.99 && lat2 < -89.99) || (lat1 > 89.99 && lat2 > 89.99) || Math.abs(lon1 - lon2) > 180;
         if (!fake) {
-          AB[s * 4] = lon1 * DEG; AB[s * 4 + 1] = lat1 * DEG; AB[s * 4 + 2] = lon2 * DEG; AB[s * 4 + 3] = lat2 * DEG;
-          COL[s * 4] = c0; COL[s * 4 + 1] = c1; COL[s * 4 + 2] = c2; COL[s * 4 + 3] = c3;
-          ST[s * 4] = inset; ST[s * 4 + 1] = width; ST[s * 4 + 2] = l.dash ?? 0; ST[s * 4 + 3] = l.gap ?? 0;
-          DI[s * 2] = dist; DI[s * 2 + 1] = dist + segKm;
-          RK[s] = l.rank ?? 0;
-          s++;
+          const b = buf.get(cellOf((lon1 + lon2) / 2, (lat1 + lat2) / 2));
+          const s = b.n++;
+          b.AB[s * 4] = lon1 * DEG; b.AB[s * 4 + 1] = lat1 * DEG; b.AB[s * 4 + 2] = lon2 * DEG; b.AB[s * 4 + 3] = lat2 * DEG;
+          b.COL[s * 4] = c0; b.COL[s * 4 + 1] = c1; b.COL[s * 4 + 2] = c2; b.COL[s * 4 + 3] = c3;
+          b.ST[s * 4] = inset; b.ST[s * 4 + 1] = width; b.ST[s * 4 + 2] = l.dash ?? 0; b.ST[s * 4 + 3] = l.gap ?? 0;
+          b.DI[s * 2] = dist; b.DI[s * 2 + 1] = dist + segKm;
+          b.RK[s] = l.rank ?? 0;
+          if (s % 8 === 0) b.pts.push(lon1, lat1);
         }
         dist += segKm;
       }
     }
-    const g = new THREE.InstancedBufferGeometry();
-    // corner (x: 0 at A / 1 at B, y: 0 inner / 1 outer edge)
-    g.setAttribute('aCorner', new THREE.BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), 2));
-    g.setIndex([0, 2, 1, 1, 2, 3]);
-    g.setAttribute('aAB', new THREE.InstancedBufferAttribute(AB.subarray(0, s * 4), 4));
-    g.setAttribute('aColor', new THREE.InstancedBufferAttribute(COL.subarray(0, s * 4), 4, true));
-    g.setAttribute('aStyle', new THREE.InstancedBufferAttribute(ST.subarray(0, s * 4), 4));
-    g.setAttribute('aDist2', new THREE.InstancedBufferAttribute(DI.subarray(0, s * 2), 2));
-    g.setAttribute('aRank', new THREE.InstancedBufferAttribute(RK.subarray(0, s), 1));
-    g.instanceCount = s;
-    this.mesh.geometry.dispose();
-    this.mesh.geometry = g;
+    // rebuild chunk meshes
+    for (const c of this.chunks) { c.mesh.geometry.dispose(); this.mesh.remove(c.mesh); }
+    this.chunks = [];
+    const corner = new THREE.BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), 2);
+    for (const b of buf.values()) {
+      if (!b.n) continue;
+      const g = new THREE.InstancedBufferGeometry();
+      g.setAttribute('aCorner', corner);
+      g.setIndex([0, 2, 1, 1, 2, 3]);
+      g.setAttribute('aAB', new THREE.InstancedBufferAttribute(b.AB.subarray(0, b.n * 4), 4));
+      g.setAttribute('aColor', new THREE.InstancedBufferAttribute(b.COL.subarray(0, b.n * 4), 4, true));
+      g.setAttribute('aStyle', new THREE.InstancedBufferAttribute(b.ST.subarray(0, b.n * 4), 4));
+      g.setAttribute('aDist2', new THREE.InstancedBufferAttribute(b.DI.subarray(0, b.n * 2), 2));
+      g.setAttribute('aRank', new THREE.InstancedBufferAttribute(b.RK.subarray(0, b.n), 1));
+      g.instanceCount = b.n;
+      const mesh = new THREE.Mesh(g, this.material);
+      mesh.frustumCulled = false;
+      mesh.renderOrder = this.renderOrder;
+      // bounding cap of the chunk on the unit sphere
+      const center = new THREE.Vector3();
+      const vs = [];
+      for (let i = 0; i < b.pts.length; i += 2) {
+        const la = b.pts[i + 1] * DEG, lo = b.pts[i] * DEG;
+        const v = new THREE.Vector3(Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo));
+        vs.push(v);
+        center.add(v);
+      }
+      if (center.lengthSq() < 1e-9) center.set(0, 1, 0);
+      center.normalize();
+      let radius = 0;
+      for (const v of vs) radius = Math.max(radius, center.angleTo(v));
+      radius += 0.05;
+      const sphere = new THREE.Sphere(center.clone().multiplyScalar(Math.cos(Math.min(radius, Math.PI / 2) / 2)), 2 * Math.sin(Math.min(radius, Math.PI / 2) / 2) + 0.05);
+      this.chunks.push({ mesh, center, radius, sphere });
+      this.mesh.add(mesh);
+    }
     this.engine.requestRender();
   }
 }

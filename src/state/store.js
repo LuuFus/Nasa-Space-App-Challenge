@@ -60,6 +60,12 @@ export const useStore = create((set, get) => ({
 
   eventId: null,
   setEvent: (eventId) => set({ eventId }),
+  // what an event switched on, so "close event" can undo it
+  eventApplied: null,
+
+  // front line in Ukraine (DeepStateMap monthly snapshots)
+  front: { on: false, idx: null, compare: null },
+  setFront: (f) => set({ front: { ...get().front, ...f } }),
 }));
 
 if (import.meta.env.DEV) window.__store = useStore; // debugging helper

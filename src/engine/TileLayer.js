@@ -171,10 +171,11 @@ void main() {
 const FRAG = /* glsl */ `
 uniform sampler2D uTex;
 uniform float uOpacity;
-uniform int uMode;      // 0 = as is, 1 = keep only clouds (white, unsaturated pixels)
+uniform int uMode;      // 0 = as is, 1 = keep only clouds, 2 = black "no data" becomes a hole
 varying vec2 vUv;
 void main() {
   vec4 c = texture2D(uTex, vUv);
+  if (uMode == 2 && max(c.r, max(c.g, c.b)) < 0.035) discard;
   if (uMode == 1) {
     float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
     float sat = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
@@ -212,7 +213,8 @@ export class TileLayer {
     this.loading = 0;
   }
 
-  setSource(url, maxLevel, sourceKey) {
+  setSource(url, maxLevel, sourceKey, mode) {
+    if (mode != null) this.mode = mode;
     if (sourceKey === this.sourceKey) return;
     this.urlFn = url;
     this.maxLevel = maxLevel;
@@ -273,16 +275,21 @@ export class TileLayer {
         if (t.tries < 3) setTimeout(() => { if (t.state === 'empty') { t.state = 'idle'; this.engine.requestRender(); } }, 4000 * t.tries);
         return;
       }
-      const tex = new THREE.Texture(img);
-      tex.generateMipmaps = true;
-      tex.minFilter = THREE.LinearMipmapLinearFilter;
-      tex.magFilter = THREE.LinearFilter;
-      tex.anisotropy = this.engine.maxAniso;
-      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-      tex.needsUpdate = true;
-      t.tex = tex;
-      t.img = img;
-      t.state = 'ready';
+      // turning an image into a GPU texture is expensive: the engine does a few per frame
+      t.state = 'pending';
+      this.engine.enqueueUpload(() => {
+        if (src !== this.sourceKey) return;
+        const tex = new THREE.Texture(img);
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.anisotropy = Math.min(8, this.engine.maxAniso);
+        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.needsUpdate = true;
+        t.tex = tex;
+        t.img = img;
+        t.state = 'ready';
+      });
       this.engine.requestRender();
     });
   }
@@ -370,7 +377,7 @@ export class TileLayer {
 
   _evict() {
     if (this.tiles.size <= this.maxTextures) return;
-    const list = [...this.tiles.entries()].filter(([, t]) => t.used !== this.frame && t.state !== 'loading');
+    const list = [...this.tiles.entries()].filter(([, t]) => t.used !== this.frame && t.state !== 'loading' && t.state !== 'pending');
     list.sort((a, b) => a[1].used - b[1].used);
     let extra = this.tiles.size - this.maxTextures;
     for (const [k, t] of list) {

@@ -11,6 +11,7 @@ export class Labels {
     container.appendChild(this.root);
     this.groups = new Map(); // kind -> { items, visible }
     this.lang = 'uk';
+    this.dirty = true;
   }
 
   /**
@@ -21,20 +22,24 @@ export class Labels {
     const old = this.groups.get(kind);
     if (old) old.items.forEach((it) => it.el?.remove());
     this.groups.set(kind, { items, visible });
+    this.dirty = true;
     this.engine.requestRender();
   }
 
   setVisible(kind, visible) {
     const g = this.groups.get(kind);
     if (!g) return;
+    if (g.visible === visible) return;
     g.visible = visible;
     if (!visible) g.items.forEach((it) => { if (it.el) it.el.style.display = 'none'; });
+    this.dirty = true;
     this.engine.requestRender();
   }
 
   setLang(lang) {
     this.lang = lang;
     for (const g of this.groups.values()) for (const it of g.items) if (it.el) it.el.firstChild.textContent = this._text(it);
+    this.dirty = true;
     this.engine.requestRender();
   }
 
@@ -62,6 +67,10 @@ export class Labels {
     return el;
   }
 
+  _hide(it) {
+    if (it.el && it._shown !== false) { it.el.style.display = 'none'; it._shown = false; }
+  }
+
   update() {
     const eng = this.engine;
     const zoom = eng.zoom;
@@ -71,9 +80,9 @@ export class Labels {
       if (!g.visible) continue;
       for (const it of g.items) {
         const show = (it.minZoom == null || zoom >= it.minZoom) && (it.maxZoom == null || zoom <= it.maxZoom);
-        if (!show) { if (it.el) it.el.style.display = 'none'; continue; }
+        if (!show) { this._hide(it); continue; }
         const p = eng.project(it.lon, it.lat);
-        if (!p || p.x < -50 || p.y < -20 || p.x > W + 50 || p.y > H + 20) { if (it.el) it.el.style.display = 'none'; continue; }
+        if (!p || p.x < -50 || p.y < -20 || p.x > W + 50 || p.y > H + 20) { this._hide(it); continue; }
         it._x = p.x; it._y = p.y;
         cand.push(it);
       }
@@ -93,11 +102,13 @@ export class Labels {
           if (x0 < r[2] && x0 + w > r[0] && y0 < r[3] && y0 + h > r[1]) ok = false;
         }
       }
-      if (!ok) { el.style.display = 'none'; continue; }
+      if (!ok) { this._hide(it); continue; }
       placed.push([x0 - 2, y0 - 1, x0 + w + 2, y0 + h + 1]);
       count++;
-      el.style.display = '';
-      el.style.transform = `translate(${it._x.toFixed(1)}px, ${it._y.toFixed(1)}px)`;
+      // touch the DOM only when something changed
+      if (it._shown !== true) { el.style.display = ''; it._shown = true; }
+      const tx = `translate(${it._x.toFixed(1)}px, ${it._y.toFixed(1)}px)`;
+      if (tx !== it._tx) { el.style.transform = tx; it._tx = tx; }
     }
   }
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Engine } from '../engine/Engine.js';
 import { Vectors } from '../engine/Vectors.js';
+import { Front } from '../engine/Front.js';
+import MapOverlay from './MapOverlay.jsx';
 import { setEngine } from '../engine/instance.js';
 import { countryAt, loadCountries } from '../lib/data.js';
 import { valueAt } from '../lib/legend.js';
@@ -27,6 +29,7 @@ export default function GlobeView() {
     const eng = new Engine(ref.current);
     const vec = new Vectors(eng);
     eng.vectors = vec;
+    eng.front = new Front(eng);
     engRef.current = eng;
     vecRef.current = vec;
     setEngine(eng);
@@ -36,7 +39,13 @@ export default function GlobeView() {
   }, []);
 
   // ---- store -> engine
-  const { catalog, baseId, overlayId, dates, overlayOpacity, toggles, mode, flatStyle, selA, selB, swipe, trendMap, cloudDate } = s;
+  const { catalog, baseId, overlayId, dates, overlayOpacity, toggles, mode, flatStyle, selA, selB, swipe, trendMap, cloudDate, front } = s;
+  useEffect(() => {
+    const f = engRef.current?.front;
+    if (!f) return;
+    if (!front.on) { f.hide(); return; }
+    f.load().then((d) => f.show(front.idx ?? d.snapshots.length - 1, front.compare));
+  }, [front.on, front.idx, front.compare]);
   useEffect(() => {
     const eng = engRef.current;
     if (!eng || !catalog) return;
@@ -61,8 +70,11 @@ export default function GlobeView() {
   }, [toggles]);
   useEffect(() => { engRef.current?.setMode(mode); }, [mode]);
   useEffect(() => { engRef.current?.setFlatStyle(flatStyle); }, [flatStyle]);
-  useEffect(() => { vecRef.current?.setSelection(selA, selB); }, [selA, selB]);
-  useEffect(() => { vecRef.current?.ready.then((v) => v.setSelection(useStore.getState().selA, useStore.getState().selB)); }, []);
+  // the two compared countries are highlighted only while comparing (they would hide other layers)
+  const comparing = s.panel === 'compare';
+  useEffect(() => {
+    vecRef.current?.ready.then((v) => (comparing ? v.setSelection(selA, selB) : v.setSelection(null, null)));
+  }, [selA, selB, comparing]);
   useEffect(() => { engRef.current?.labels.setLang(lang); }, [lang]);
   useEffect(() => {
     const eng = engRef.current;
@@ -129,34 +141,8 @@ export default function GlobeView() {
           {hover.val && <div>{pick(hover.layer.title)}: <b>{hover.val.text}</b></div>}
         </div>
       )}
-      {s.swipe.enabled && <SwipeHandle />}
+      <MapOverlay />
       <div className="hint">{t('zoomHint')}</div>
     </div>
-  );
-}
-
-function SwipeHandle() {
-  const swipe = useStore((s) => s.swipe);
-  const setSwipe = useStore((s) => s.setSwipe);
-  const catalog = useStore((s) => s.catalog);
-  const { pick, t } = useT();
-  const drag = (e) => {
-    const box = e.currentTarget.parentElement.getBoundingClientRect();
-    const move = (ev) => setSwipe({ split: Math.min(0.98, Math.max(0.02, (ev.clientX - box.left) / box.width)) });
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    e.preventDefault();
-  };
-  const L = layerById(catalog, swipe.left?.layer), R = layerById(catalog, swipe.right?.layer);
-  const label = (side, layer) => `${pick(layer?.title)} · ${side?.date ?? ''}`;
-  return (
-    <>
-      <div className="swipe-bar" style={{ left: `${swipe.split * 100}%` }} onPointerDown={drag}>
-        <div className="swipe-knob" title={t('dragHint')}>⇆</div>
-      </div>
-      <div className="swipe-label left">{label(swipe.left, L)}</div>
-      <div className="swipe-label right">{label(swipe.right, R)}</div>
-    </>
   );
 }

@@ -6,6 +6,21 @@ import { decodeRing, loadCountries, loadJSON } from '../lib/data.js';
 export const PALETTE = ['#ffd166', '#2ec4b6', '#ff6b6b', '#4cc9f0', '#f4a261', '#c77dff', '#90e050', '#ff8fd8', '#e9c46a'];
 export const SEL_COLORS = { a: '#ff9f1c', b: '#8f5cff' };
 
+/** keep a vertex only every `step` degrees (for the far-away view) */
+function decimate(co, closed, step) {
+  const n = co.length / 2;
+  const out = [co[0], co[1]];
+  let lx = co[0], ly = co[1];
+  for (let i = 1; i < n; i++) {
+    const x = co[i * 2], y = co[i * 2 + 1];
+    if (Math.abs(x - lx) + Math.abs(y - ly) >= step || (!closed && i === n - 1)) {
+      out.push(x, y);
+      lx = x; ly = y;
+    }
+  }
+  return out;
+}
+
 const hex = (h, a = 1) => {
   const n = parseInt(h.slice(1), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, a];
@@ -18,9 +33,11 @@ export class Vectors {
     this.graticule = new LineLayer(engine, { lift: 0.00003, renderOrder: 7 });
     this.rivers = new LineLayer(engine, { lift: 0.00003, renderOrder: 8 });
     this.borders = new LineLayer(engine, { lift: 0.00004, renderOrder: 9 });
+    // a lighter copy of the borders for the whole-planet view (far fewer segments)
+    this.bordersCoarse = new LineLayer(engine, { lift: 0.00004, renderOrder: 9 });
     this.selection = new LineLayer(engine, { lift: 0.00005, renderOrder: 10 });
     this.hover = new LineLayer(engine, { lift: 0.00006, renderOrder: 11 });
-    for (const l of [this.graticule, this.rivers, this.borders, this.selection, this.hover]) engine.scene.add(l.mesh);
+    for (const l of [this.graticule, this.rivers, this.borders, this.bordersCoarse, this.selection, this.hover]) engine.scene.add(l.mesh);
     this.tintCanvas = new LonLatCanvas(4096);
     this.landCanvas = new LonLatCanvas(4096);
     this.state = { borders: true, rivers: true, graticule: false, capitals: true, labels: true, oceans: true, tint: false };
@@ -117,7 +134,9 @@ export class Vectors {
       }
     }
     this.borders.setLines(lines);
-    this.borders.visible = this.state.borders;
+    this.bordersCoarse.setLines(lines.map((l) => ({ ...l, coords: decimate(l.coords, l.closed, 0.25) })).filter((l) => l.coords.length >= (l.closed ? 8 : 4)));
+    this._lod = null;
+    this._zoomStyle();
     // ---- rivers
     const rcol = contour ? hex('#2f86d6', 0.95) : hex('#6cc0ff', 0.85);
     this.rivers.setLines(this.riverData.map((r) => ({
@@ -148,8 +167,16 @@ export class Vectors {
 
   _zoomStyle() {
     const z = this.engine.zoom ?? 3;
+    const fine = z >= 4.3;
+    if (this._lod !== fine || this._bordersOn !== this.state.borders) {
+      this._lod = fine;
+      this._bordersOn = this.state.borders;
+      this.borders.visible = this.state.borders && fine;
+      this.bordersCoarse.visible = this.state.borders && !fine;
+    }
     const s = Math.max(0.55, Math.min(1.25, 0.45 + z * 0.14));
     this.borders.setWidthScale(s);
+    this.bordersCoarse.setWidthScale(s);
     this.rivers.setWidthScale(s);
     this.rivers.setMaxRank(Math.max(2, Math.min(9, Math.round(z * 1.5 - 1.5))));
   }
@@ -194,7 +221,7 @@ export class Vectors {
   set(key, value) {
     this.state[key] = value;
     if (!this.countries) return;
-    if (key === 'borders') this.borders.visible = value;
+    if (key === 'borders') this._zoomStyle();
     if (key === 'rivers') { this.rivers.visible = value; this.engine.labels.setVisible('rivers', value); }
     if (key === 'graticule') this.graticule.visible = value || this.engine.contour;
     if (key === 'capitals') this.engine.labels.setVisible('capitals', value);
