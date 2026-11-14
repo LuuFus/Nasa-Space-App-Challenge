@@ -56,6 +56,8 @@ export const useStore = create((set, get) => ({
   glossaryTerm: null,
   openGlossary: (glossaryTerm) => set({ glossaryTerm, panel: 'glossary' }),
 
+  planetChart: 'gistemp',
+
   eventId: null,
   setEvent: (eventId) => set({ eventId }),
 }));
