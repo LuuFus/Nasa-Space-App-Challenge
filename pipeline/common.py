@@ -62,6 +62,13 @@ def download(url: str, *, retries: int = 4, timeout: int = 120, binary: bool = T
                 if cache:
                     missing.write_text("404")
                 return None
+            if r.status_code == 429:  # rate limited: wait (server hint or growing pause)
+                wait = float(r.headers.get("Retry-After") or 0) or 15 * (attempt + 1)
+                if not quiet:
+                    log(f"  rate limited, waiting {wait:.0f}s")
+                time.sleep(wait)
+                last = RuntimeError("429 Too Many Requests")
+                continue
             r.raise_for_status()
             data = r.content
             if cache:
