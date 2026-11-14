@@ -26,7 +26,7 @@ statistical trend tests and plain-language explanations (Ukrainian / English).
 | 🇺🇦 **Війна в Україні** | Лінія фронту й окуповані території щомісяця з лютого 2022 за **офіційним переліком ТОТ** (наказ Мінрозвитку № 376) на межах громад OCHA, з анімацією та порівнянням дат; графік окупованої площі; події: Каховська ГЕС, блекаути (нічні вогні), пожежі вздовж фронту, Чорнобильська зона, ліси біля Кремінної, Демидів — з поясненням «що ти бачиш»; графік пожеж FIRMS 2001–2025 за областями |
 | 🔥 **Поширення пожеж** | Точки NASA FIRMS день за днем (колір = вік вогню), програвання, денна гістограма, рух центру пожежі й напрям (Чорнобильська зона 2020, Австралія 2019–20, Канада 2023, фронт 2022–23) |
 | 🌀 **Події 2026** | Пожежі в США, спека в Європі, ураган, озеро Пауелл, повені в Таїланді, землетрус і цунамі — «було / стало» і графіки причин: чим погода перед подією відрізнялася від норми 1991–2020 (NASA POWER) |
-| 🏠 **Стартова сторінка** | «Be An Earth Detective»: відео NASA з МКС (суспільне надбання), опис проєкту, джерела |
+| 🏠 **Стартова сторінка** | «Be An Earth Detective»: фонове відео NASA SVS із супутниками на орбітах (суспільне надбання), опис проєкту, джерела, логотипи NASA, Space Apps і Noosphere з посиланнями |
 | 📖 **Глосарій** | ~50 термінів і формул (NDVI, p-значення, Манн–Кендалл, Добсон…) |
 | 🇺🇦/🇬🇧 | Перемикання мови |
 
@@ -83,8 +83,9 @@ pipeline/      01…10 Python scripts that turn NASA (and other open) data into 
 | [DeepStateMap](https://deepstatemap.live) | *тимчасово*: попередня версія лінії фронту (крок 07); буде прибрано після переходу на офіційний перелік (крок 10) |
 | [IAEA](https://www.iaea.org/newscenter/focus/ukraine), [EcoZagroza](https://ecozagroza.gov.ua/) | факти до подій війни (Чорнобиль, ліси) |
 | [NOAA NESDIS](https://www.nesdis.noaa.gov/imagery/hurricanes/2026-hurricane-season-media-gallery), Wikipedia | дати й цифри подій 2026 року (тексти наші, лише посилання) |
-| [NASA Image and Video Library](https://images.nasa.gov/details/NHQ_2020_1221_Earth%20Views) | відео «Earth Views from the ISS — No Music» на стартовій сторінці — суспільне надбання; логотипи NASA не використовуємо |
-| [Fontsource](https://fontsource.org): Unbounded, Manrope | шрифти — SIL Open Font License 1.1 |
+| [NASA Scientific Visualization Studio](https://svs.gsfc.nasa.gov/5061/) | відео «Earth Observing Fleet (January 2023)» на стартовій сторінці (`public/video/earth-orbit.mp4`: 36 с, 1280×720, без звуку) — суспільне надбання |
+| Логотипи NASA, NASA Space Apps Challenge, Noosphere | лише як посилання на організаторів хакатону; належать власникам, проєкт не схвалений NASA |
+| [Fontsource](https://fontsource.org): Cormorant Garamond, Inter, Unbounded, Manrope | шрифти — SIL Open Font License 1.1 |
 
 Обмеження чесно описані у вкладці «Про проєкт»: значення країни — середнє з кількох точок POWER;
 карти трендів і NDVI країн отримані з кольорів GIBS (точність = крок палітри); прогноз — продовження лінійного тренду.
