@@ -59,3 +59,5 @@ export const useStore = create((set, get) => ({
   eventId: null,
   setEvent: (eventId) => set({ eventId }),
 }));
+
+if (import.meta.env.DEV) window.__store = useStore; // debugging helper

@@ -258,7 +258,13 @@ export class TileLayer {
     const src = this.sourceKey;
     scheduler.request(url, priority, (img) => {
       if (src !== this.sourceKey) return; // the date/layer changed meanwhile
-      if (!img) { t.state = 'empty'; return; }
+      if (!img) {
+        // missing tile (404) or a network hiccup: try again a couple of times, later
+        t.tries = (t.tries || 0) + 1;
+        t.state = 'empty';
+        if (t.tries < 3) setTimeout(() => { if (t.state === 'empty') { t.state = 'idle'; this.engine.requestRender(); } }, 4000 * t.tries);
+        return;
+      }
       const tex = new THREE.Texture(img);
       tex.generateMipmaps = true;
       tex.minFilter = THREE.LinearMipmapLinearFilter;
