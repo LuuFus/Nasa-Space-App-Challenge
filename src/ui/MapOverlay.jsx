@@ -5,6 +5,7 @@ import { EVENTS, EVENT_CATS } from '../content/events.js';
 import { closeEvent, clearSwipe } from '../lib/actions.js';
 import { fmtDate } from '../lib/dates.js';
 import { loadJSON } from '../lib/data.js';
+import { frontSource, isOfficial } from '../lib/front.js';
 import { layerById } from './GlobeView.jsx';
 import { CatIcon } from './Icons.jsx';
 import FireTimeline from './FireTimeline.jsx';
@@ -69,10 +70,10 @@ export default function MapOverlay() {
             </span>
           </div>
           {!folded && ev.see && <p><b>{lang === 'uk' ? 'Що ти бачиш: ' : 'What you see: '}</b>{pick(ev.see)}</p>}
-          {!folded && s.front.on && <FrontLegend lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} />}
+          {!folded && s.front.on && <FrontLegend data={front} lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} />}
         </div>
       )}
-      {!ev && s.front.on && <div className="event-banner small-banner"><FrontLegend lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} /></div>}
+      {!ev && s.front.on && <div className="event-banner small-banner"><FrontLegend data={front} lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} /></div>}
 
       {s.swipe.enabled && <Swipe />}
       {s.fire && <FireTimeline />}
@@ -80,18 +81,22 @@ export default function MapOverlay() {
   );
 }
 
-function FrontLegend({ lang, compare }) {
+function FrontLegend({ data, lang, compare }) {
+  const uk = lang === 'uk';
+  const official = isOfficial(data);
+  const src = frontSource(data);
   const items = [
-    ['rgba(230,40,40,0.6)', lang === 'uk' ? 'окуповано з 2022' : 'occupied since 2022', true],
-    ['rgba(120,10,30,0.7)', lang === 'uk' ? 'окуповано з 2014' : 'occupied since 2014', true],
-    ['rgba(160,150,140,0.8)', lang === 'uk' ? 'сіра зона' : 'grey zone'],
-    ['rgba(30,160,90,0.6)', lang === 'uk' ? 'звільнено' : 'liberated'],
-  ];
+    ['rgba(230,40,40,0.6)', uk ? 'окуповано з 2022' : 'occupied since 2022', true],
+    official && ['rgba(230,40,40,0.28)', uk ? 'громада окупована частково' : 'community partly occupied', true],
+    ['rgba(120,10,30,0.7)', uk ? 'окуповано з 2014' : 'occupied since 2014', true],
+    ['rgba(160,150,140,0.8)', official ? (uk ? 'активні бойові дії' : 'active hostilities') : (uk ? 'сіра зона' : 'grey zone')],
+    ['rgba(30,160,90,0.6)', uk ? 'звільнено' : 'liberated'],
+  ].filter(Boolean);
   return (
     <div className="front-legend">
       {items.map(([c, l, h]) => <span key={l}><i style={{ background: c }} className={h ? 'hatched' : ''} />{l}</span>)}
       {compare && <span><i className="dashed" />{lang === 'uk' ? `фронт ${longDate(compare, lang)}` : `front on ${longDate(compare, lang)}`}</span>}
-      <span className="muted">© DeepStateMap</span>
+      <a className="muted" href={src.url} target="_blank" rel="noreferrer">{src.short?.[lang] ?? src[lang]}</a>
     </div>
   );
 }

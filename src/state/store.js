@@ -65,7 +65,7 @@ export const useStore = create((set, get) => ({
   // what an event switched on, so "close event" can undo it
   eventApplied: null,
 
-  // front line in Ukraine (DeepStateMap monthly snapshots)
+  // front line in Ukraine (monthly snapshots, see src/engine/Front.js)
   front: { on: false, idx: null, compare: null },
   // day-by-day fire playback { id, day, playing }
   fire: null,

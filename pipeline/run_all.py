@@ -14,8 +14,11 @@ STEPS = [
     "04_gibs_catalog.py",    # NASA GIBS layer catalogue + colour maps
     "05_firms_ukraine.py",   # NASA FIRMS fires in Ukraine 2001-2025
     "06_gibs_trends.py",     # trend maps + MODIS country series
-    "07_frontline.py",       # DeepStateMap front line in Ukraine, monthly
+    "08_event_fires.py",     # NASA FIRMS fire points for the fire-spread events
+    "09_event_causes.py",    # NASA POWER daily weather vs 1991-2020 normals for 2026 events
+    "10_tot_official.py",    # front line: official list of occupied territories + OCHA borders
 ]
+# 07_frontline.py (DeepStateMap) is the old front-line source, kept only until step 10 has its input files
 
 if __name__ == "__main__":
     sys.path.insert(0, str(HERE))
@@ -24,4 +27,8 @@ if __name__ == "__main__":
         if only and not any(step.startswith(o) for o in only):
             continue
         print(f"\n=== {step} ===", flush=True)
-        runpy.run_path(str(HERE / step), run_name="__main__")
+        try:
+            runpy.run_path(str(HERE / step), run_name="__main__")
+        except SystemExit as e:  # a step that cannot run (e.g. missing input files) must not stop the rest
+            if e.code not in (None, 0):
+                print(f"  skipped: {e.code}", flush=True)

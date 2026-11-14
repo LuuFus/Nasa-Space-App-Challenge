@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
+import { frontSource, frontTotal, UKRAINE_KM2 } from '../lib/front.js';
 import { analyse, forecastSen, movingAverage } from '../lib/stats.js';
 import { num } from '../lib/explain.js';
 import Chart, { yearTooltip } from './Chart.jsx';
@@ -168,9 +169,10 @@ function seriesOption(ser, an, C, lang, t) {
 }
 
 function FrontText({ front }) {
-  const { lang } = useT();
+  const { lang, pick } = useT();
   const uk = lang === 'uk';
-  const tot = (x) => x.area.occupied + x.area.ordlo + x.area.crimea;
+  const tot = (x) => frontTotal(x.area);
+  const src = frontSource(front);
   const sn = front.snapshots;
   const max = sn.reduce((a, x) => (tot(x) > tot(a) ? x : a), sn[0]);
   const last = sn[sn.length - 1];
@@ -179,11 +181,11 @@ function FrontText({ front }) {
     <div className="explain">
       <b>{uk ? 'Що це означає простими словами' : 'What it means in plain words'}</b>
       <p>{uk
-        ? `До 2022 року Росія окуповувала Крим і частини Донеччини та Луганщини (≈ ${k(last.area.crimea + last.area.ordlo)} тис. км²). Найбільше окупованої землі на цьому графіку — ${k(tot(max))} тис. км² (${max.date}). Восени 2022 року Сили оборони звільнили Харківщину й правобережжя Херсонщини — крива різко падає. Відтоді фронт повільно рухається: станом на ${last.date} окуповано ≈ ${k(tot(last))} тис. км², це ${(tot(last) / 6036.28).toFixed(1)} % території України — більше, ніж уся Болгарія.`
-        : `Before 2022 Russia occupied Crimea and parts of the Donetsk and Luhansk regions (≈ ${k(last.area.crimea + last.area.ordlo)} thousand km²). The largest occupied area on this chart is ${k(tot(max))} thousand km² (${max.date}). In autumn 2022 Ukraine liberated the Kharkiv region and the right bank of Kherson — the curve drops sharply. Since then the front moves slowly: on ${last.date} about ${k(tot(last))} thousand km² are occupied, ${(tot(last) / 6036.28).toFixed(1)}% of Ukraine — more than the whole of Bulgaria.`}</p>
+        ? `До 2022 року Росія окуповувала Крим і частини Донеччини та Луганщини (≈ ${k(last.area.crimea + last.area.ordlo)} тис. км²). Найбільше окупованої землі на цьому графіку — ${k(tot(max))} тис. км² (${max.date}). Восени 2022 року Сили оборони звільнили Харківщину й правобережжя Херсонщини — крива різко падає. Відтоді фронт повільно рухається: станом на ${last.date} окуповано ≈ ${k(tot(last))} тис. км², це ${(100 * tot(last) / UKRAINE_KM2).toFixed(1)} % території України — більше, ніж уся Болгарія.`
+        : `Before 2022 Russia occupied Crimea and parts of the Donetsk and Luhansk regions (≈ ${k(last.area.crimea + last.area.ordlo)} thousand km²). The largest occupied area on this chart is ${k(tot(max))} thousand km² (${max.date}). In autumn 2022 Ukraine liberated the Kharkiv region and the right bank of Kherson — the curve drops sharply. Since then the front moves slowly: on ${last.date} about ${k(tot(last))} thousand km² are occupied, ${(100 * tot(last) / UKRAINE_KM2).toFixed(1)}% of Ukraine — more than the whole of Bulgaria.`}</p>
       <p className="small">{uk ? 'Чому це важливо для екології: на окупованих і прифронтових землях ніхто не гасить пожежі, не чистить воду й не вимірює забруднення — саме тому супутники NASA там особливо цінні.' : 'Why it matters for the environment: on occupied and front-line land nobody fights fires, treats water or measures pollution — which is exactly why NASA satellites are so valuable there.'}</p>
-      <p className="muted small">© DeepStateMap · {uk ? 'площі пораховано нашим скриптом pipeline/07_frontline.py' : 'areas computed by our script pipeline/07_frontline.py'}</p>
-      <button onClick={() => useStore.getState().setFront({ on: true, idx: null })}>⚠ {uk ? 'Показати лінію фронту на карті' : 'Show the front line on the map'}</button>
+      <p className="muted small"><a href={src.url} target="_blank" rel="noreferrer">{pick(src)}</a> · {uk ? 'площі пораховано нашим скриптом у папці pipeline/' : 'areas computed by our script in pipeline/'}</p>
+      <button onClick={() => useStore.getState().setFront({ on: true, idx: null })}>🗺 {uk ? 'Показати лінію фронту на карті' : 'Show the front line on the map'}</button>
     </div>
   );
 }
@@ -202,6 +204,8 @@ function frontOption(f, lang) {
     series: [
       { name: uk ? 'Окуповано з 2014' : 'Occupied since 2014', type: 'line', stack: 'a', areaStyle: { opacity: 0.6 }, symbol: 'none', color: '#7a0a1e', data: sn.map((x) => (x.area.ordlo + x.area.crimea) / 1000) },
       { name: uk ? 'Окуповано з 2022' : 'Occupied since 2022', type: 'line', stack: 'a', areaStyle: { opacity: 0.5 }, symbol: 'none', color: '#e62828', data: sn.map((x) => x.area.occupied / 1000) },
+      // official list: communities where only some villages are occupied — the true area lies inside this band
+      ...(sn.some((x) => x.area.partial) ? [{ name: uk ? 'Громади, окуповані частково' : 'Partly occupied communities', type: 'line', stack: 'a', areaStyle: { opacity: 0.18 }, lineStyle: { type: 'dashed', width: 1 }, symbol: 'none', color: '#f08080', data: sn.map((x) => (x.area.partial || 0) / 1000) }] : []),
     ],
   };
 }
