@@ -1,0 +1,259 @@
+<mxfile host="Electron">
+  <diagram name="Страница-1" id="w7nVxBboOmld_Fs6dHXu">
+    <mxGraphModel dx="2827" dy="1921" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-14" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Сайт IT Detectives" vertex="1">
+          <mxGeometry height="60" width="230" x="290" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-8" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="250" width="120" x="-150" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-5" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-8" source="kvpuE-YdDtKkX8Tf4EIt-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-2" parent="kvpuE-YdDtKkX8Tf4EIt-8" style="rounded=0;whiteSpace=wrap;html=1;" value="Інформацію (коротко) + слайдшоу" vertex="1">
+          <mxGeometry height="60" width="120" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-6" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-8" source="kvpuE-YdDtKkX8Tf4EIt-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-3" parent="kvpuE-YdDtKkX8Tf4EIt-8" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Розпочати" vertex="1">
+          <mxGeometry height="60" width="120" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-4" parent="kvpuE-YdDtKkX8Tf4EIt-8" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Англ, укр&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="120" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Англ, укр" vertex="1">
+          <mxGeometry height="60" width="120" x="650" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-30" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="500" width="120" x="30" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-26" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-30" source="kvpuE-YdDtKkX8Tf4EIt-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-20" parent="kvpuE-YdDtKkX8Tf4EIt-30" style="whiteSpace=wrap;html=1;shapeInside=1;rounded=1;roundedPerimeter=1;" value="Графіки" vertex="1">
+          <mxGeometry height="80" width="120" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-27" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-30" source="kvpuE-YdDtKkX8Tf4EIt-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-21" parent="kvpuE-YdDtKkX8Tf4EIt-30" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Радіація" vertex="1">
+          <mxGeometry height="80" width="120" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-28" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-30" source="kvpuE-YdDtKkX8Tf4EIt-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-22" parent="kvpuE-YdDtKkX8Tf4EIt-30" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Температура" vertex="1">
+          <mxGeometry height="80" width="120" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-29" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-30" source="kvpuE-YdDtKkX8Tf4EIt-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-23" parent="kvpuE-YdDtKkX8Tf4EIt-30" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="танення снігу" vertex="1">
+          <mxGeometry height="80" width="120" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-25" parent="kvpuE-YdDtKkX8Tf4EIt-30" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Тощо" vertex="1">
+          <mxGeometry height="80" width="120" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-80" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="1200" width="210" x="250" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-17" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-15" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Розшарування" vertex="1">
+          <mxGeometry height="60" width="120" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-19" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-16" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Температура Землі" vertex="1">
+          <mxGeometry height="60" width="120" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-60" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-18" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Рослинність" vertex="1">
+          <mxGeometry height="60" width="120" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-61" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-31" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Вологість грунту" vertex="1">
+          <mxGeometry height="60" width="120" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-63" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-35" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-32" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Пожари" vertex="1">
+          <mxGeometry height="60" width="120" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-65" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-36">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-35" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Нічні вогні" vertex="1">
+          <mxGeometry height="60" width="120" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-66" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.47;entryY=0.037;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-37">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-36" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Опади&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="120" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-67" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-37" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Вологість повітря" vertex="1">
+          <mxGeometry height="60" width="120" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-69" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-41">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-38" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Температура поверхні, суші" vertex="1">
+          <mxGeometry height="60" width="120" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-70" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-41" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Викиди в повітря (діоксид азоту)" vertex="1">
+          <mxGeometry height="60" width="120" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-71" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-49">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-42" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Озоновий шар" vertex="1">
+          <mxGeometry height="60" width="120" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-72" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-49" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Клімат" vertex="1">
+          <mxGeometry height="60" width="120" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-73" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-80" source="kvpuE-YdDtKkX8Tf4EIt-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-51">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-50" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;fillColor=#FFF2CC;" value="Aqua MODIS" vertex="1">
+          <mxGeometry height="60" width="120" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-51" parent="kvpuE-YdDtKkX8Tf4EIt-80" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Вода" vertex="1">
+          <mxGeometry height="60" width="120" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-81" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="380" width="120" x="-200" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-56" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-81" source="kvpuE-YdDtKkX8Tf4EIt-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-52" parent="kvpuE-YdDtKkX8Tf4EIt-81" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Дослідження" vertex="1">
+          <mxGeometry height="60" width="120" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-58" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-81" source="kvpuE-YdDtKkX8Tf4EIt-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-53" parent="kvpuE-YdDtKkX8Tf4EIt-81" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Про хлорофіл" vertex="1">
+          <mxGeometry height="60" width="120" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-59" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-81" source="kvpuE-YdDtKkX8Tf4EIt-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-55">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-54" parent="kvpuE-YdDtKkX8Tf4EIt-81" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Як досліджувати те чи інше (формули і інша інф)" vertex="1">
+          <mxGeometry height="60" width="120" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-55" parent="kvpuE-YdDtKkX8Tf4EIt-81" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;h1 id=&quot;wb-cont&quot; style=&quot;box-sizing: border-box; margin: 1em 0px 0.2em; line-height: 1.17; color: rgb(51, 51, 51); font-variant-ligatures: no-common-ligatures; padding-bottom: 4px; word-break: break-word; border-width: 0px 0px 6px; border-bottom-style: solid; border-bottom-color: rgb(166, 42, 30); border-image: linear-gradient(to right, rgb(166, 42, 30) 72px, transparent 72px) 1 / 1 / 0 stretch; text-align: start; background-color: rgb(255, 255, 255);&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Times New Roman&quot;&gt;Monitoring and protecting our ecosystems from space&lt;/font&gt;&lt;/h1&gt;" vertex="1">
+          <mxGeometry height="110" width="120" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-88" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-83">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-82" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Кнопки внизу панелі" vertex="1">
+          <mxGeometry height="60" width="120" x="-440" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-89" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-84">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-83" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Перегляд" vertex="1">
+          <mxGeometry height="50" width="120" x="-440" y="1100" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-90" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-84" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-74">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-84" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Змінення вигляду" vertex="1">
+          <mxGeometry height="50" width="120" x="-440" y="1169" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-45" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="3д Земля" vertex="1">
+          <mxGeometry height="110" width="120" x="-250" y="1150" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Контурна карта Землі" vertex="1">
+          <mxGeometry height="60" width="120" x="-240" y="1550" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-44" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-47" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-43" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="З хмарами" vertex="1">
+          <mxGeometry height="110" width="120" x="-250" y="1285" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-48" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-46" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Кордони країн" vertex="1">
+          <mxGeometry height="110" width="120" x="-250" y="1425" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-91" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-74" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-76">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-74" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Періоди, час" vertex="1">
+          <mxGeometry height="45" width="120" x="-440" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-76" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Порівняння" vertex="1">
+          <mxGeometry height="45" width="120" x="-440" y="1306" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-86" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-84" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.021;entryY=0.397;entryDx=0;entryDy=0;entryPerimeter=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-102" edge="1" parent="1" source="kvpuE-YdDtKkX8Tf4EIt-100" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-96">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-100" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Кнопки збоку" vertex="1">
+          <mxGeometry height="60" width="120" x="-740" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-101" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="215" width="120" x="-740" y="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-104" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-101" source="kvpuE-YdDtKkX8Tf4EIt-93" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-97">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-93" parent="kvpuE-YdDtKkX8Tf4EIt-101" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Дослідження" vertex="1">
+          <mxGeometry height="50" width="120" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-103" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-101" source="kvpuE-YdDtKkX8Tf4EIt-96" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-93">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-96" parent="kvpuE-YdDtKkX8Tf4EIt-101" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Зміна мови" vertex="1">
+          <mxGeometry height="35" width="120" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-105" edge="1" parent="kvpuE-YdDtKkX8Tf4EIt-101" source="kvpuE-YdDtKkX8Tf4EIt-97" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="kvpuE-YdDtKkX8Tf4EIt-99">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-97" parent="kvpuE-YdDtKkX8Tf4EIt-101" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Розшарування" vertex="1">
+          <mxGeometry height="35" width="120" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="kvpuE-YdDtKkX8Tf4EIt-99" parent="kvpuE-YdDtKkX8Tf4EIt-101" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="Графіки, формули" vertex="1">
+          <mxGeometry height="50" width="120" y="165" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
