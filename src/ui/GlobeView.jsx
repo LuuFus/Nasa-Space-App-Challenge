@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Engine } from '../engine/Engine.js';
 import { Vectors } from '../engine/Vectors.js';
 import { Front } from '../engine/Front.js';
+import { Fires } from '../engine/Fires.js';
 import MapOverlay from './MapOverlay.jsx';
 import { setEngine } from '../engine/instance.js';
 import { countryAt, loadCountries } from '../lib/data.js';
@@ -30,6 +31,7 @@ export default function GlobeView() {
     const vec = new Vectors(eng);
     eng.vectors = vec;
     eng.front = new Front(eng);
+    eng.fires = new Fires(eng);
     engRef.current = eng;
     vecRef.current = vec;
     setEngine(eng);
@@ -39,7 +41,13 @@ export default function GlobeView() {
   }, []);
 
   // ---- store -> engine
-  const { catalog, baseId, overlayId, dates, overlayOpacity, toggles, mode, flatStyle, selA, selB, swipe, trendMap, cloudDate, front } = s;
+  const { catalog, baseId, overlayId, dates, overlayOpacity, toggles, mode, flatStyle, selA, selB, swipe, trendMap, cloudDate, front, fire } = s;
+  useEffect(() => {
+    const f = engRef.current?.fires;
+    if (!f) return;
+    if (!fire?.id) { f.hide(); return; }
+    f.load(fire.id).then(() => f.setDay(fire.day));
+  }, [fire?.id, fire?.day]);
   useEffect(() => {
     const f = engRef.current?.front;
     if (!f) return;
@@ -79,12 +87,13 @@ export default function GlobeView() {
   useEffect(() => {
     const eng = engRef.current;
     if (!eng || !catalog) return;
-    const L = swipe.left && layerById(catalog, swipe.left.layer);
-    const R = swipe.right && layerById(catalog, swipe.right.layer);
+    const side = (x) => (x?.image ? { image: x.image } : x && layerById(catalog, x.layer) ? { layer: layerById(catalog, x.layer), date: x.date } : null);
+    const L = side(swipe.left);
+    const R = side(swipe.right);
     eng.setSwipe({
       enabled: swipe.enabled && !!L && !!R, split: swipe.split,
-      left: L ? { layer: L, date: swipe.left.date } : undefined,
-      right: R ? { layer: R, date: swipe.right.date } : undefined,
+      left: L || undefined,
+      right: R || undefined,
     });
   }, [catalog, swipe]);
   useEffect(() => {
@@ -98,7 +107,7 @@ export default function GlobeView() {
     const eng = engRef.current;
     if (!eng) return;
     eng.labels.setGroup('events', EVENTS.map((ev) => ({
-      key: 'ev' + ev.id, lon: ev.lon, lat: ev.lat, text: EVENT_CATS[ev.cat]?.icon || '●', title: ev.title,
+      key: 'ev' + ev.id, lon: ev.lon, lat: ev.lat, text: EVENT_CATS[ev.cat]?.icon || ' ', title: ev.title,
       cls: 'lbl-event cat-' + ev.cat, marker: true, priority: 1, minZoom: 0,
       onClick: () => { useStore.getState().setEvent(ev.id); useStore.getState().setPanel('events'); },
     })), useStore.getState().toggles.events);

@@ -37,7 +37,7 @@ export default function LayersPanel() {
 
       <h3>{t('dataLayer')}</h3>
       <details open={s.front.on}>
-        <summary>⚠ {t('cat_war')}</summary>
+        <summary><span className="ua-badge" /> {t('cat_war')}</summary>
         <FrontControls />
       </details>
       {CATS.map((c) => {

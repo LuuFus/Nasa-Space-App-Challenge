@@ -8,6 +8,17 @@ import { useT } from '../i18n/index.js';
 // only the parts of ECharts we use (keeps the download small)
 echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkPointComponent, MarkLineComponent, MarkAreaComponent, CanvasRenderer]);
 
+/** tooltip whose header is the year written as 1990 (not 1,990) */
+export const yearTooltip = (fmtVal) => (params) => {
+  const list = Array.isArray(params) ? params : [params];
+  const x = list[0]?.value?.[0] ?? list[0]?.axisValue;
+  const head = `<b>${Math.round(Number(x))}</b>`;
+  const seen = new Set();
+  const rows = list.filter((p) => p.value?.[1] != null && !seen.has(p.seriesName) && seen.add(p.seriesName))
+    .map((p) => `${p.marker} ${p.seriesName}: <b>${fmtVal(p.value[1])}</b>`);
+  return [head, ...rows].join('<br/>');
+};
+
 /** ECharts wrapper with a full-screen toggle (drag the slider to stretch the years). */
 export default function Chart({ option, height = 320 }) {
   const el = useRef(null);

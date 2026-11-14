@@ -57,6 +57,8 @@ export const useStore = create((set, get) => ({
   openGlossary: (glossaryTerm) => set({ glossaryTerm, panel: 'glossary' }),
 
   planetChart: 'gistemp',
+  compareVar: 'T2M',
+  setCompareVar: (compareVar) => set({ compareVar }),
 
   eventId: null,
   setEvent: (eventId) => set({ eventId }),
@@ -65,6 +67,9 @@ export const useStore = create((set, get) => ({
 
   // front line in Ukraine (DeepStateMap monthly snapshots)
   front: { on: false, idx: null, compare: null },
+  // day-by-day fire playback { id, day, playing }
+  fire: null,
+  setFire: (fire) => set({ fire }),
   setFront: (f) => set({ front: { ...get().front, ...f } }),
 }));
 

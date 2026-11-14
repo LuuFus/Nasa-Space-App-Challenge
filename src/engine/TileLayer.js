@@ -201,7 +201,7 @@ export class TileLayer {
     this.opacity = opts.opacity ?? 1;
     this.mode = opts.mode ?? 0;
     this.transparent = opts.transparent ?? true;
-    this.lodBias = opts.lodBias ?? 1;
+    this.lodBias = opts.lodBias ?? 1.3;
     this.group = new THREE.Group();
     this.group.renderOrder = opts.renderOrder ?? 0;
     this.tiles = new Map(); // key -> { state, tex, img, used }
@@ -219,9 +219,23 @@ export class TileLayer {
     this.urlFn = url;
     this.maxLevel = maxLevel;
     this.sourceKey = sourceKey;
-    // keep the old textures as a fallback until the new ones arrive? Simpler: drop.
-    for (const t of this.tiles.values()) t.tex?.dispose();
-    this.tiles.clear();
+    // the old picture stays on screen until the new tiles arrive (no blank globe)
+    this._dropPrev();
+    this.prev = this.tiles.size ? this.tiles : null;
+    this._prevIdle = 0;
+    this.tiles = new Map();
+    // whole-world coarse tiles first: something sensible appears almost at once
+    if (url) {
+      for (const [z, x, y] of [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [1, 2, 0], [1, 0, 1], [1, 1, 1], [1, 2, 1]]) {
+        this._request(this._tile(z, x, y), -10 + z);
+      }
+    }
+  }
+
+  _dropPrev() {
+    if (!this.prev) return;
+    for (const t of this.prev.values()) t.tex?.dispose();
+    this.prev = null;
   }
 
   setOpacity(o) { this.opacity = o; }
@@ -289,6 +303,7 @@ export class TileLayer {
         t.tex = tex;
         t.img = img;
         t.state = 'ready';
+        t.readyAt = performance.now();
       });
       this.engine.requestRender();
     });
@@ -297,12 +312,14 @@ export class TileLayer {
   /** Choose tiles for this frame. view: { camera, frustum, focalPx, morph, frame } */
   update(view) {
     this.inUse = 0;
+    this._usedPrev = 0;
     this.frame = view.frame;
     if (this.visible && this.urlFn) {
       this._visit(0, 0, 0, view);
       this._visit(0, 1, 0, view);
     }
     for (let i = 0; i < this.pool.length; i++) this.pool[i].visible = i < this.inUse;
+    if (this.prev && this._usedPrev === 0 && ++this._prevIdle > 20) this._dropPrev();
     this._evict();
   }
 
@@ -346,26 +363,39 @@ export class TileLayer {
     if (t.state === 'idle') this._request(t, z * 1000 + m.d);
     else if (t.state === 'loading') scheduler.request(t.url, z * 1000 + m.d); // still wanted
     if (t.state === 'ready') return this._draw(g, t, z, x, y);
-    // not ready: stand-in from the closest loaded ancestor
+    // not ready: stand-in from the closest loaded ancestor (parents load first, so this is
+    // usually just one level coarser), otherwise from the previous date/layer
     let pz = z, px = x, py = y;
     while (pz > 0) {
       pz--; px >>= 1; py >>= 1;
-      const p = this.tiles.get(`${pz}/${px}/${py}`);
-      if (p && p.state === 'ready') {
-        p.used = view.frame;
-        return this._draw(g, p, z, x, y);
+      const p = this._tile(pz, px, py);
+      p.used = view.frame;
+      if (p.state === 'ready') return this._draw(g, p, z, x, y);
+      if (pz >= z - 2) {
+        if (p.state === 'idle') this._request(p, pz * 1000 - 500);
+        else if (p.state === 'loading') scheduler.request(p.url, pz * 1000 - 500);
       }
-      if (p && p.state === 'idle' && pz <= 2) this._request(p, pz * 1000);
-      else if (p && p.state === 'loading') scheduler.request(p.url, pz * 1000);
+    }
+    if (this.prev) {
+      let qz = z, qx = x, qy = y;
+      for (;;) {
+        const q = this.prev.get(`${qz}/${qx}/${qy}`);
+        if (q && q.state === 'ready') { this._usedPrev++; return this._draw(g, q, z, x, y, true); }
+        if (qz === 0) break;
+        qz--; qx >>= 1; qy >>= 1;
+      }
     }
   }
 
-  _draw(g, t, z, x, y) {
+  _draw(g, t, z, x, y, old = false) {
     const m = this._mesh();
     m.geometry = g;
     const u = m.material.uniforms;
     u.uTex.value = t.tex;
-    u.uOpacity.value = this.opacity;
+    // new tiles fade in over ~0.3 s instead of popping in as squares
+    const age = old ? 1 : Math.min(1, (performance.now() - (t.readyAt || 0)) / 300);
+    if (age < 1) this.engine.requestRender();
+    u.uOpacity.value = this.opacity * (this.transparent ? age : 1);
     u.uLift.value = this.lift;
     u.uMode.value = this.mode;
     if (t.z === z) u.uUV.value.set(0, 0, 1);

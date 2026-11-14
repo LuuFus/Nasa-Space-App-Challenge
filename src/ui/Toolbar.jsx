@@ -1,5 +1,6 @@
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
+import { Flag } from './Icons.jsx';
 
 const VIEW_TOGGLES = ['clouds', 'borders', 'capitals', 'rivers', 'labels', 'oceans', 'graticule', 'tint', 'events'];
 const TOGGLE_TEXT = { labels: 'countryNames', events: 'eventMarkers' };
@@ -15,7 +16,7 @@ export default function Toolbar() {
   return (
     <header className="toolbar">
       <div className="brand">
-        <b>{t('appTitle')}</b>
+        <a href="#/" title={t('appTitle')}><b>{t('appTitle')}</b></a>
         <span className="muted small">{t('team')}</span>
       </div>
       <div className="seg" role="group" aria-label={t('view')}>
@@ -36,8 +37,8 @@ export default function Toolbar() {
         )}
       </div>
       <div className="seg lang">
-        <button className={lang === 'uk' ? 'on' : ''} onClick={() => s.setLang('uk')}>UA</button>
-        <button className={lang === 'en' ? 'on' : ''} onClick={() => s.setLang('en')}>EN</button>
+        <button className={lang === 'uk' ? 'on' : ''} onClick={() => s.setLang('uk')}><Flag code="uk" /> UA</button>
+        <button className={lang === 'en' ? 'on' : ''} onClick={() => s.setLang('en')}><Flag code="en" /> EN</button>
       </div>
     </header>
   );

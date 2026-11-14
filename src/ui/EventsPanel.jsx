@@ -3,6 +3,8 @@ import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { EVENTS, EVENT_CATS } from '../content/events.js';
 import { applyEvent } from '../lib/actions.js';
+import { CatIcon } from './Icons.jsx';
+import CausesPanel from './CausesPanel.jsx';
 
 export default function EventsPanel() {
   const { t, pick } = useT();
@@ -18,14 +20,16 @@ export default function EventsPanel() {
       <div className="row small" style={{ marginBottom: 6 }}>
         <button className={cat === 'all' ? 'on' : ''} onClick={() => setCat('all')}>{t('all')}</button>
         {Object.entries(EVENT_CATS).map(([id, c]) => (
-          <button key={id} className={cat === id ? 'on' : ''} onClick={() => setCat(id)}>{c.icon} {pick(c.title)}</button>
+          <button key={id} className={cat === id ? 'on' : ''} onClick={() => setCat(id)}><CatIcon cat={id} /> {pick(c.title)}</button>
         ))}
       </div>
       {list.map((ev) => (
         <div key={ev.id} ref={(el) => (refs.current[ev.id] = el)} className={eventId === ev.id ? 'event-card on' : 'event-card'}>
-          <h4>{EVENT_CATS[ev.cat].icon} {pick(ev.title)}</h4>
+          <h4><CatIcon cat={ev.cat} /> {pick(ev.title)}</h4>
           <div className="muted small">{ev.date}</div>
           {eventId === ev.id && <p className="desc">{pick(ev.text)}</p>}
+          {eventId === ev.id && ev.why && <div className="explain"><p>{pick(ev.why)}</p></div>}
+          {eventId === ev.id && ev.causes && <CausesPanel eventId={ev.id} />}
           <div className="row small">
             <button className="primary" onClick={() => applyEvent(ev)}>{ev.swipe ? `⇆ ${t('showBeforeAfter')}` : `📍 ${t('showOnMap')}`}</button>
             {ev.chart && <button onClick={() => { useStore.setState({ planetChart: ev.chart }); setPanel('planet'); }}>📈 {t('planet')}</button>}

@@ -1,17 +1,6 @@
 import { useT } from '../i18n/index.js';
+import { SOURCES } from '../content/sources.js';
 
-const SOURCES = [
-  ['NASA GIBS (WMTS)', 'https://gibs.earthdata.nasa.gov', { uk: 'усі знімки й шари на глобусі, офіційні палітри', en: 'all imagery and layers on the globe, official colour maps' }],
-  ['NASA POWER', 'https://power.larc.nasa.gov', { uk: 'температура, опади, вологість ґрунту й повітря, вітер, сонце для 246 країн (1981–2025)', en: 'temperature, rain, soil & air moisture, wind, sun for 246 countries (1981–2025)' }],
-  ['NASA GISS GISTEMP v4', 'https://data.giss.nasa.gov/gistemp/', { uk: 'температура планети з 1880 року', en: 'planet temperature since 1880' }],
-  ['NASA Ozone Watch', 'https://ozonewatch.gsfc.nasa.gov', { uk: 'площа озонової діри', en: 'ozone hole area' }],
-  ['NASA FIRMS', 'https://firms.modaps.eosdis.nasa.gov', { uk: 'пожежі в Україні та сусідніх країнах за 2001–2025 роки', en: 'fires in Ukraine and neighbours 2001–2025' }],
-  ['NASA Earth Observatory', 'https://science.nasa.gov/earth/earth-observatory/', { uk: 'статті до подій', en: 'articles behind the events' }],
-  ['NSIDC Sea Ice Index v4', 'https://nsidc.org/data/g02135', { uk: 'площа морського льоду (партнер NASA)', en: 'sea-ice extent (NASA partner)' }],
-  ['NOAA GML Mauna Loa', 'https://gml.noaa.gov/ccgg/trends/', { uk: 'CO₂ в атмосфері', en: 'atmospheric CO₂' }],
-  ['DeepStateMap', 'https://deepstatemap.live', { uk: 'лінія фронту та окуповані території України щомісяця з квітня 2022 (© DeepStateMap)', en: 'front line and occupied territories of Ukraine monthly since April 2022 (© DeepStateMap)' }],
-  ['Natural Earth 1:10m (Ukraine POV)', 'https://www.naturalearthdata.com', { uk: 'кордони, столиці, річки, озера, назви морів', en: 'borders, capitals, rivers, lakes, sea names' }],
-];
 
 export default function AboutPanel() {
   const { t, pick, lang } = useT();

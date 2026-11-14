@@ -162,18 +162,189 @@ export function anomalies(years, ys, from = 1991, to = 2020) {
 }
 
 /** the whole trend report used by charts and explanations */
-export function analyse(years, ys) {
+// ---------------------------------------------------------------- robust trend toolkit
+export const Z_CRIT = 1.959964; // two-sided 5 % level
+
+function ranks(a) {
+  const idx = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0]);
+  const r = new Array(a.length);
+  for (let i = 0; i < idx.length;) {
+    let j = i;
+    while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++;
+    const avg = (i + j) / 2 + 1; // average rank for ties
+    for (let k = i; k <= j; k++) r[idx[k][1]] = avg;
+    i = j + 1;
+  }
+  return r;
+}
+
+function tieTerm(y) {
+  const counts = new Map();
+  for (const v of y) counts.set(v, (counts.get(v) || 0) + 1);
+  let t = 0;
+  for (const c of counts.values()) if (c > 1) t += c * (c - 1) * (2 * c + 5);
+  return t;
+}
+
+/**
+ * Modified Mann–Kendall test (Hamed & Rao, 1998). When neighbouring years are
+ * correlated (a warm year tends to follow a warm year) the classic test is too
+ * optimistic, so Var(S) is inflated by n/n* computed from the autocorrelation of
+ * the ranks of the de-trended series.
+ */
+export function mannKendallModified(xs, ys) {
+  const [x, y] = clean(xs, ys);
+  const n = y.length;
+  if (n < 8) return null;
+  let S = 0;
+  for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) S += Math.sign(y[j] - y[i]);
+  const varS = (n * (n - 1) * (2 * n + 5) - tieTerm(y)) / 18;
+  const beta = senSlope(x, y) ?? 0;
+  const res = y.map((v, i) => v - beta * x[i]);
+  const R = ranks(res);
+  const rm = mean(R);
+  const den = R.reduce((a, v) => a + (v - rm) ** 2, 0);
+  let sum = 0;
+  const lagLimit = Z_CRIT / Math.sqrt(n); // only significant lags count
+  const used = [];
+  for (let k = 1; k < n - 2; k++) {
+    let num = 0;
+    for (let i = 0; i < n - k; i++) num += (R[i] - rm) * (R[i + k] - rm);
+    const rho = den > 0 ? num / den : 0;
+    if (Math.abs(rho) > lagLimit) {
+      sum += (n - k) * (n - k - 1) * (n - k - 2) * rho;
+      used.push([k, rho]);
+    }
+  }
+  let factor = 1 + (2 / (n * (n - 1) * (n - 2))) * sum; // n / n*
+  if (!(factor > 0)) factor = 1;
+  const varStar = varS * factor;
+  const Z = S > 0 ? (S - 1) / Math.sqrt(varStar) : S < 0 ? (S + 1) / Math.sqrt(varStar) : 0;
+  const p = 2 * (1 - normalCdf(Math.abs(Z)));
+  return { S, varS, factor, varStar, Z, p, n, lags: used, zCrit: Z_CRIT, reject: Math.abs(Z) > Z_CRIT };
+}
+
+/**
+ * Seasonal Mann–Kendall (Hirsch, Slack & Smith, 1982) for monthly data:
+ * January is compared only with Januaries, July with Julys…, so the yearly cycle
+ * can never look like a trend. S and Var(S) are summed over the 12 months.
+ * monthly: flat array, 12 values per year starting at year y0 (null = missing).
+ */
+export function seasonalMannKendall(monthly, y0) {
+  const nYears = Math.floor(monthly.length / 12);
+  let S = 0, varS = 0, used = 0;
+  const slopes = [];
+  const perMonth = [];
+  for (let m = 0; m < 12; m++) {
+    const xs = [], ys = [];
+    for (let k = 0; k < nYears; k++) {
+      const v = monthly[k * 12 + m];
+      if (v != null && Number.isFinite(v)) { xs.push(y0 + k); ys.push(v); }
+    }
+    const n = ys.length;
+    if (n < 4) { perMonth.push(null); continue; }
+    let s = 0;
+    for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) {
+      s += Math.sign(ys[j] - ys[i]);
+      slopes.push((ys[j] - ys[i]) / (xs[j] - xs[i]));
+    }
+    const v = (n * (n - 1) * (2 * n + 5) - tieTerm(ys)) / 18;
+    S += s; varS += v; used++;
+    const z = s > 0 ? (s - 1) / Math.sqrt(v) : s < 0 ? (s + 1) / Math.sqrt(v) : 0;
+    perMonth.push({ S: s, Z: z, p: 2 * (1 - normalCdf(Math.abs(z))), sen: senSlope(xs, ys), n });
+  }
+  if (!used) return null;
+  slopes.sort((a, b) => a - b);
+  const m = slopes.length >> 1;
+  const sen = slopes.length % 2 ? slopes[m] : (slopes[m - 1] + slopes[m]) / 2;
+  const Z = S > 0 ? (S - 1) / Math.sqrt(varS) : S < 0 ? (S + 1) / Math.sqrt(varS) : 0;
+  return { S, varS, Z, p: 2 * (1 - normalCdf(Math.abs(Z))), sen, months: used, perMonth, zCrit: Z_CRIT, reject: Math.abs(Z) > Z_CRIT };
+}
+
+/** 95 % confidence interval of Sen's slope (Gilbert, 1987) */
+export function senInterval(xs, ys, varS) {
+  const [x, y] = clean(xs, ys);
+  const sl = [];
+  for (let i = 0; i < x.length - 1; i++) for (let j = i + 1; j < x.length; j++) if (x[j] !== x[i]) sl.push((y[j] - y[i]) / (x[j] - x[i]));
+  if (sl.length < 3 || !(varS > 0)) return null;
+  sl.sort((a, b) => a - b);
+  const N = sl.length;
+  const C = Z_CRIT * Math.sqrt(varS);
+  const lo = Math.max(0, Math.round((N - C) / 2) - 1);
+  const hi = Math.min(N - 1, Math.round((N + C) / 2));
+  return [sl[lo], sl[hi]];
+}
+
+/** Sen line y = a + β·x (a = median of y − β·x) and the spread of the points around it */
+export function senLine(xs, ys) {
+  const [x, y] = clean(xs, ys);
+  const beta = senSlope(x, y);
+  if (beta == null) return null;
+  const a0 = y.map((v, i) => v - beta * x[i]).sort((p, q) => p - q);
+  const m = a0.length >> 1;
+  const a = a0.length % 2 ? a0[m] : (a0[m - 1] + a0[m]) / 2;
+  const res = y.map((v, i) => v - (a + beta * x[i]));
+  const s = Math.sqrt(res.reduce((acc, r) => acc + r * r, 0) / Math.max(1, x.length - 2));
+  const xb = mean(x);
+  const sxx = x.reduce((acc, v) => acc + (v - xb) ** 2, 0);
+  return { a, beta, s, n: x.length, xbar: xb, sxx };
+}
+
+/** forecast from the Sen line with a 95 % prediction band (same form as for least squares) */
+export function forecastSen(line, x0, conf = 0.95) {
+  if (!line) return null;
+  const y = line.a + line.beta * x0;
+  const t = tCritical(conf, Math.max(1, line.n - 2));
+  const half = t * line.s * Math.sqrt(1 + 1 / line.n + (x0 - line.xbar) ** 2 / line.sxx);
+  return { y, lo: y - half, hi: y + half, t };
+}
+
+/**
+ * Honest check of the forecast method: pretend we live in `split`, fit the Sen
+ * line on the earlier years, "predict" the later ones and compare with reality.
+ */
+export function hindcast(xs, ys, split) {
+  const [x, y] = clean(xs, ys);
+  const tx = [], ty = [], vx = [], vy = [];
+  x.forEach((v, i) => { if (v <= split) { tx.push(v); ty.push(y[i]); } else { vx.push(v); vy.push(y[i]); } });
+  if (tx.length < 10 || vx.length < 3) return null;
+  const line = senLine(tx, ty);
+  const clim = mean(ty);
+  let se = 0, seClim = 0, inside = 0;
+  vx.forEach((v, i) => {
+    const f = forecastSen(line, v);
+    se += (vy[i] - f.y) ** 2;
+    seClim += (vy[i] - clim) ** 2;
+    if (vy[i] >= f.lo && vy[i] <= f.hi) inside++;
+  });
+  const rmse = Math.sqrt(se / vx.length);
+  const rmseClim = Math.sqrt(seClim / vx.length);
+  return { split, train: tx.length, test: vx.length, rmse, rmseClim, skill: 1 - rmse / rmseClim, coverage: inside / vx.length };
+}
+
+/** the whole trend report used by charts and explanations */
+export function analyse(years, ys, monthly = null, y0 = null) {
   const lr = linreg(years, ys);
-  const mk = mannKendall(ys);
-  const sen = senSlope(years, ys);
   if (!lr) return null;
+  const mk = mannKendall(ys);
+  const mkMod = mannKendallModified(years, ys);
+  const sen = senSlope(years, ys);
+  const line = senLine(years, ys);
+  const smk = monthly ? seasonalMannKendall(monthly, y0) : null;
   const [x, y] = clean(years, ys);
   const firstAvg = mean(y.slice(0, Math.min(10, y.length)));
   const lastAvg = mean(y.slice(-Math.min(10, y.length)));
+  const expected = years.length ? years[years.length - 1] - years[0] + 1 : 0;
+  const test = mkMod || mk;
   return {
-    lr, mk, sen, n: x.length, first: x[0], last: x[x.length - 1],
-    perDecade: lr.slope * 10, change: lr.slope * (x[x.length - 1] - x[0]),
+    lr, mk, mkMod, smk, sen, line,
+    senCI: senInterval(x, y, mkMod?.varStar ?? mk?.varS),
+    hind: hindcast(x, y, x[0] + Math.floor((x[x.length - 1] - x[0]) * 0.55)),
+    n: x.length, missing: Math.max(0, expected - x.length), first: x[0], last: x[x.length - 1],
+    // size of the change = Sen's slope (non-parametric, the partner of the Mann–Kendall test)
+    perDecade: (sen ?? lr.slope) * 10, change: (sen ?? lr.slope) * (x[x.length - 1] - x[0]),
     firstAvg, lastAvg, mean: mean(y), sd: std(y),
-    significant: (mk ? mk.p : lr.p) < 0.05,
+    p: test?.p ?? lr.p,
+    significant: (test?.p ?? lr.p) < 0.05,
   };
 }

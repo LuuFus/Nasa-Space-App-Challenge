@@ -129,6 +129,37 @@ Object.assign(VARIABLES, {
   },
 });
 
+// Air quality, MERRA-2 maps decoded by pipeline/06_gibs_trends.py (yearly only)
+Object.assign(VARIABLES, {
+  PM25: {
+    title: { uk: 'Пил PM2.5 у повітрі (MERRA-2)', en: 'Dust PM2.5 in the air (MERRA-2)' },
+    unit: { uk: 'мкг/м³', en: 'µg/m³' }, digits: 1, term: 'pm25', gibs: 'pm25', src: 'gibs', key: 'pm25',
+    has: { uk: 'Більше пилу в повітрі має', en: 'More dust in the air:' },
+    life: {
+      uk: (d) => `Концентрація дрібного пилу змінилася на ${d >= 0 ? '+' : ''}${d.toFixed(1)} мкг/м³. ВООЗ радить, щоб у середньому за рік PM2.5 не перевищував 5 мкг/м³ — дрібний пил потрапляє глибоко в легені.`,
+      en: (d) => `Fine dust changed by ${d >= 0 ? '+' : ''}${d.toFixed(1)} µg/m³. The WHO advises a yearly average of PM2.5 below 5 µg/m³ — fine dust goes deep into the lungs.`,
+    },
+  },
+  AOD: {
+    title: { uk: 'Аерозолі — каламутність повітря (MERRA-2)', en: 'Aerosols — haze (MERRA-2)' },
+    unit: 'AOD', digits: 3, term: 'aod', gibs: 'aod', src: 'gibs', key: 'aod',
+    has: { uk: 'Каламутніше повітря має', en: 'Hazier air:' },
+    life: {
+      uk: (d) => `Оптична товщина аерозолів змінилася на ${d >= 0 ? '+' : ''}${d.toFixed(3)}. Менше — прозоріше небо й більше сонця для рослин і сонячних панелей; більше — дим, пил і смог.`,
+      en: (d) => `Aerosol optical depth changed by ${d >= 0 ? '+' : ''}${d.toFixed(3)}. Lower means a clearer sky and more sun for plants and solar panels; higher means smoke, dust and smog.`,
+    },
+  },
+  SO2: {
+    title: { uk: 'Діоксид сірки SO₂ — викиди (MERRA-2)', en: 'Sulphur dioxide SO₂ — emissions (MERRA-2)' },
+    unit: { uk: 'мг/м²', en: 'mg/m²' }, digits: 2, term: 'so2', gibs: 'so2', src: 'gibs', key: 'so2',
+    has: { uk: 'Більше SO₂ над собою має', en: 'More SO₂ overhead:' },
+    life: {
+      uk: (d) => `Кількість SO₂ змінилася на ${d >= 0 ? '+' : ''}${d.toFixed(2)} мг/м². SO₂ дають вугільні електростанції та металургія; з нього утворюються кислотні дощі. ${d < 0 ? 'Падіння — ознака фільтрів на ТЕС або закриття заводів.' : 'Зростання — більше спаленого вугілля.'}`,
+      en: (d) => `SO₂ changed by ${d >= 0 ? '+' : ''}${d.toFixed(2)} mg/m². SO₂ comes from coal power plants and smelters and causes acid rain. ${d < 0 ? 'A fall means filters at power plants or closed factories.' : 'A rise means more coal burned.'}`,
+    },
+  },
+});
+
 export const SEASONS = [
   { id: 'year', months: null, title: { uk: 'Увесь рік', en: 'Whole year' } },
   { id: 'winter', months: [12, 1, 2], title: { uk: 'Зима (гру–лют)', en: 'Winter (Dec–Feb)' } },

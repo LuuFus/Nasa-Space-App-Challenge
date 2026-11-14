@@ -1,24 +1,29 @@
-import { useEffect } from 'react';
-import GlobeView from './ui/GlobeView.jsx';
-import Toolbar from './ui/Toolbar.jsx';
-import Sidebar from './ui/Sidebar.jsx';
-import ConsentPrompt from './ui/ConsentPrompt.jsx';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import Landing from './landing/Landing.jsx';
 import { loadJSON } from './lib/data.js';
 import { useStore } from './state/store.js';
 
+// The 3D Earth is a separate, heavier chunk: it loads only after "Start".
+const EarthApp = lazy(() => import('./EarthApp.jsx'));
+
+function useRoute() {
+  const get = () => (window.location.hash.startsWith('#/earth') ? 'earth' : 'home');
+  const [route, setRoute] = useState(get);
+  useEffect(() => {
+    const on = () => setRoute(get());
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
+  return route;
+}
+
 export default function App() {
-  const setCatalog = useStore((s) => s.setCatalog);
+  const route = useRoute();
   const lang = useStore((s) => s.lang);
-  useEffect(() => { loadJSON('layers.json').then(setCatalog); }, []);
+  const setCatalog = useStore((s) => s.setCatalog);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
-  return (
-    <div className="app">
-      <Toolbar />
-      <div className="main">
-        <Sidebar />
-        <GlobeView />
-      </div>
-      <ConsentPrompt />
-    </div>
-  );
+  useEffect(() => { loadJSON('layers.json').then(setCatalog); }, []);
+  useEffect(() => { document.body.classList.toggle('earth-mode', route === 'earth'); window.scrollTo(0, 0); }, [route]);
+  if (route === 'home') return <Landing />;
+  return <Suspense fallback={<div className="boot">…</div>}><EarthApp /></Suspense>;
 }

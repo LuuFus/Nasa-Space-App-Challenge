@@ -2,7 +2,7 @@
 // for school students (Ukrainian and English). Sentences are built so that the
 // country name always stays in the nominative case.
 import { VARIABLES, unitText } from '../content/variables.js';
-import { analyse, forecast } from './stats.js';
+import { analyse, forecastSen } from './stats.js';
 
 export function num(v, digits = 1, lang = 'uk') {
   if (v == null || !Number.isFinite(v)) return '—';
@@ -46,12 +46,14 @@ export function seasonalSeries(doc, varId, season) {
 export function compareReport(docA, docB, varId, season, horizon = 2050) {
   const sa = seasonalSeries(docA, varId, season);
   const sb = docB ? seasonalSeries(docB, varId, season) : null;
-  const A = { doc: docA, ...sa, an: analyse(sa.years, sa.values) };
-  const B = sb ? { doc: docB, ...sb, an: analyse(sb.years, sb.values) } : null;
+  // for the whole year we also run the seasonal Mann–Kendall test on the monthly data
+  const monthlyOf = (doc) => (!season?.months && doc.series[varId]?.monthly?.length ? doc.series[varId].monthly : null);
+  const A = { doc: docA, ...sa, an: analyse(sa.years, sa.values, monthlyOf(docA), docA.years[0]) };
+  const B = sb ? { doc: docB, ...sb, an: analyse(sb.years, sb.values, monthlyOf(docB), docB.years[0]) } : null;
   for (const X of [A, B]) {
     if (!X?.an) continue;
-    X.f2035 = forecast(X.an.lr, 2035);
-    X.fH = forecast(X.an.lr, horizon);
+    X.f2035 = forecastSen(X.an.line, 2035);
+    X.fH = forecastSen(X.an.line, horizon);
   }
   return { A, B, varId, season, horizon };
 }
@@ -70,10 +72,10 @@ export function explain(rep, lang, names) {
     if (!an) return uk ? `${n}: недостатньо даних.` : `${n}: not enough data.`;
     const dir = an.perDecade > 0 ? (uk ? 'зростає' : 'is rising') : (uk ? 'зменшується' : 'is falling');
     const sig = an.significant
-      ? (uk ? `Це не випадковість: імовірність отримати такий тренд «просто так» — ${pText(an.mk?.p ?? an.lr.p, lang)}.`
-        : `This is not chance: the probability of such a trend appearing by accident is ${pText(an.mk?.p ?? an.lr.p, lang)}.`)
-      : (uk ? `Але коливання з року в рік великі, тож тренд може бути випадковим (імовірність ${pText(an.mk?.p ?? an.lr.p, lang)}).`
-        : `But year-to-year swings are large, so the trend could be random (probability ${pText(an.mk?.p ?? an.lr.p, lang)}).`);
+      ? (uk ? `Це не випадковість: імовірність отримати такий тренд «просто так» — ${pText(an.p, lang)} (тест Манна–Кендалла з поправкою на автокореляцію).`
+        : `This is not chance: the probability of such a trend appearing by accident is ${pText(an.p, lang)} (Mann–Kendall test corrected for autocorrelation).`)
+      : (uk ? `Але коливання з року в рік великі, тож тренд може бути випадковим (імовірність ${pText(an.p, lang)}).`
+        : `But year-to-year swings are large, so the trend could be random (probability ${pText(an.p, lang)}).`);
     return uk
       ? `${n}: показник ${dir} — у середньому ${signed(an.perDecade, d + 1, lang)} ${u} ${per}, тобто ${signed(an.change, d, lang)} ${u} за ${an.first}–${an.last} рр. ${sig}`
       : `${n}: the value ${dir} — on average ${signed(an.perDecade, d + 1, lang)} ${u} ${per}, i.e. ${signed(an.change, d, lang)} ${u} over ${an.first}–${an.last}. ${sig}`;

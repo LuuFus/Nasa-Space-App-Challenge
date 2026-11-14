@@ -11,6 +11,7 @@ export const STRINGS = {
   layers: { uk: 'Шари', en: 'Layers' },
   compare: { uk: 'Порівняти країни', en: 'Compare countries' },
   planet: { uk: 'Уся планета', en: 'Whole planet' },
+  report: { uk: 'Країна проти країни', en: 'Country vs country' },
   swipe: { uk: 'Було / стало', en: 'Before / after' },
   events: { uk: 'Події', en: 'Events' },
   glossary: { uk: 'Глосарій', en: 'Glossary' },

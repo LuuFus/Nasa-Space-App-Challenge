@@ -4,17 +4,100 @@
 // (cloud-free days). Sources are NASA pages unless stated otherwise.
 
 export const EVENT_CATS = {
-  war: { icon: '⚠', title: { uk: 'Війна в Україні', en: 'War in Ukraine' } },
+  war: { icon: '', title: { uk: 'Війна в Україні', en: 'War in Ukraine' } },
   water: { icon: '💧', title: { uk: 'Вода', en: 'Water' } },
   fire: { icon: '🔥', title: { uk: 'Пожежі й дим', en: 'Fire & smoke' } },
   ice: { icon: '❄', title: { uk: 'Лід', en: 'Ice' } },
   air: { icon: '☁', title: { uk: 'Атмосфера', en: 'Atmosphere' } },
   land: { icon: '🌳', title: { uk: 'Ліси й земля', en: 'Forests & land' } },
+  heat: { icon: '🌡', title: { uk: 'Спека', en: 'Heat' } },
+  storm: { icon: '🌀', title: { uk: 'Урагани', en: 'Hurricanes' } },
+  quake: { icon: '🌊', title: { uk: 'Землетруси й цунамі', en: 'Earthquakes & tsunamis' } },
 };
 
 const S = (left, ld, right, rd) => ({ left: { layer: left, date: ld }, right: { layer: right, date: rd } });
 
 export const EVENTS = [
+  // ------------------------------------------------------------------ 2026
+  {
+    id: 'morrill_fire_2026', cat: 'fire', causes: true, lon: -102.3, lat: 41.4, alt: 0.06, date: '2026-03-12',
+    title: { uk: 'Пожежа Морріл, Небраска (березень 2026)', en: 'Morrill Fire, Nebraska (March 2026)' },
+    text: {
+      uk: 'Пожежа почалася 12 березня 2026 року і за один день пройшла близько 110 км степом. До 25 березня вигоріло понад 2600 км² (643 тис. акрів) — найбільша пожежа в історії штату і одна з найбільших у США. Евакуювали села біля озера Мак-Коногі. Зима 2025–2026 була однією з найтепліших і найсухіших у Небрасці.',
+      en: 'The fire started on 12 March 2026 and ran about 110 km across the prairie in a single day. By 25 March more than 2,600 km² (643,000 acres) had burned — the largest fire in the state’s history and one of the largest in the US. Villages near Lake McConaughy were evacuated. Winter 2025–2026 was one of Nebraska’s warmest and driest.',
+    },
+    see: { uk: 'Хибні кольори 7-2-1: ліворуч 26 лютого, праворуч 2 квітня 2026. Руда пляма — згарище. Нижче, у панелі події, графіки показують, чому степ спалахнув.', en: 'False colour 7-2-1: left 26 February, right 2 April 2026. The rusty patch is the burn scar. Charts in the event panel show why the prairie caught fire.' },
+    source: { title: 'Wikipedia — 2026 Nebraska wildfires', url: 'https://en.wikipedia.org/wiki/2026_Nebraska_wildfires' },
+    swipe: S('falsecolor_721', '2026-02-26', 'falsecolor_721', '2026-04-02'),
+  },
+  {
+    id: 'cottonwood_fire_2026', cat: 'fire', causes: true, lon: -112.38, lat: 38.32, alt: 0.035, date: '2026-06-23',
+    title: { uk: 'Пожежа Коттонвуд, Юта (червень 2026)', en: 'Cottonwood Fire, Utah (June 2026)' },
+    text: {
+      uk: 'Пожежа біля міст Бівер і Джанкшен 23 червня 2026 року за 12 годин збільшилася втричі. До 7 липня вигоріло близько 390 км², згоріли до 150 будівель, зокрема гірськолижний курорт Ігл-Пойнт. NASA пояснює: сніжний покрив узимку був нижчим за норму, а початок літа — незвично теплим і сухим.',
+      en: 'The fire near Beaver and Junction tripled in size within 12 hours on 23 June 2026. By 7 July about 390 km² had burned and up to 150 buildings were lost, including the Eagle Point ski resort. NASA explains: winter snowpack was below normal and the start of summer unusually warm and dry.',
+    },
+    see: { uk: 'Хибні кольори 7-2-1: ліворуч 20 червня, праворуч 12 липня 2026. Темно-руда пляма серед зелених лісів — вигоріла територія.', en: 'False colour 7-2-1: left 20 June, right 12 July 2026. The dark rusty patch in the green forest is the burnt area.' },
+    source: { title: 'NASA Earth Observatory — Cottonwood Fire Chars Utah', url: 'https://science.nasa.gov/earth/earth-observatory/cottonwood-fire-chars-utah/' },
+    swipe: S('falsecolor_721', '2026-06-20', 'falsecolor_721', '2026-07-12'),
+  },
+  {
+    id: 'europe_heat_2026', cat: 'heat', causes: true, lon: -0.58, lat: 44.84, alt: 0.6, date: '2026-06-24',
+    title: { uk: 'Рекордна спека в Європі (літо 2026)', en: 'Record heat in Europe (summer 2026)' },
+    text: {
+      uk: 'Літо 2026 року в Західній Європі стало найспекотнішим за всю історію спостережень. У Лондоні 26 травня було +35,1 °C (рекорд травня на 2,3 °C), у Бордо 24 червня — +42,5 °C, третій рекорд поспіль. До серпня пройшло п’ять хвиль спеки; річки міліли через посуху.',
+      en: 'Summer 2026 was the hottest on record in Western Europe. London hit 35.1 °C on 26 May (beating the May record by 2.3 °C), Bordeaux 42.5 °C on 24 June, its third record in a row. Five heat waves came by August; rivers ran low because of the drought.',
+    },
+    see: { uk: 'Шар — середня температура повітря за червень 2026 (MERRA-2). Графіки нижче — денні максимуми в Бордо порівняно з нормою.', en: 'The layer is the mean air temperature in June 2026 (MERRA-2). Charts below show daily maxima in Bordeaux versus normal.' },
+    source: { title: 'NASA — Europe’s Scorching Summer', url: 'https://science.nasa.gov/earth/europes-scorching-summer/' },
+    layer: { id: 't2m', date: '2026-06-01' },
+  },
+  {
+    id: 'isaias_2026', cat: 'storm', causes: true, lon: -86.5, lat: 28.8, alt: 0.45, date: '2026-10-10',
+    title: { uk: 'Ураган Ісаяс (жовтень 2026)', en: 'Hurricane Isaias (October 2026)' },
+    text: {
+      uk: 'Єдиний ураган атлантичного сезону 2026 року. 9 жовтня він посилився до 3-ї категорії (вітер до 195 км/год), а 10 жовтня вийшов на сушу біля міста Дестін (Флорида) з вітром 165 км/год. Загинули щонайменше 9 людей, збитки — понад 2 млрд доларів.',
+      en: 'The only hurricane of the 2026 Atlantic season. On 9 October it reached Category 3 (winds up to 195 km/h) and on 10 October made landfall near Destin, Florida, with 165 km/h winds. At least 9 people died and damage exceeded $2 billion.',
+    },
+    see: { uk: 'Ліворуч — аномалія температури води 6 жовтня (червоне = тепліше за норму): «паливо» урагану. Праворуч — сам ураган 9 жовтня, видно око.', en: 'Left — sea temperature anomaly on 6 October (red = warmer than normal): the hurricane’s fuel. Right — the hurricane itself on 9 October, with its eye.' },
+    source: { title: 'NOAA NESDIS — 2026 Hurricane Season Media Gallery', url: 'https://www.nesdis.noaa.gov/imagery/hurricanes/2026-hurricane-season-media-gallery' },
+    swipe: S('sst_anom', '2026-10-06', 'truecolor_modis', '2026-10-09'),
+  },
+  {
+    id: 'lake_powell_2026', cat: 'water', causes: true, lon: -111.1, lat: 37.2, alt: 0.05, date: '2026-09-10',
+    title: { uk: 'Озеро Пауелл — рекордно низько (2026)', en: 'Lake Powell at a record low (2026)' },
+    text: {
+      uk: 'Водосховище на річці Колорадо 10 вересня 2026 року опустилося до 3517 футів над рівнем моря — нижче попереднього рекорду 2023 року. Від нього залежать вода й електрика для мільйонів людей на південному заході США. Причина — «сніжна посуха» в горах і тепла весна на тлі мегапосухи, що триває з 2000 року.',
+      en: 'On 10 September 2026 the reservoir on the Colorado River fell to 3,517 feet above sea level — below the 2023 record. Water and electricity for millions in the US Southwest depend on it. The cause: a “snow drought” in the mountains and a warm spring during a megadrought lasting since 2000.',
+    },
+    see: { uk: 'Хибні кольори 7-2-1: ліворуч 1 вересня 2017, праворуч 10 вересня 2026 — темні затоки озера стали вужчими. Графіки — погода у Скелястих горах, звідки береться вода.', en: 'False colour 7-2-1: left 1 September 2017, right 10 September 2026 — the dark arms of the lake have narrowed. Charts show the weather in the Rocky Mountains where the water comes from.' },
+    source: { title: 'NASA Earth Observatory — Lake Powell Drops to Record-Low Levels', url: 'https://science.nasa.gov/earth/earth-observatory/lake-powell-drops-to-record-low-levels/' },
+    swipe: S('falsecolor_721', '2017-09-01', 'falsecolor_721', '2026-09-10'),
+  },
+  {
+    id: 'thailand_floods_2026', cat: 'water', causes: true, lon: 101.52, lat: 13.99, alt: 0.05, date: '2026-10-02',
+    title: { uk: 'Повені в Таїланді (вересень–жовтень 2026)', en: 'Floods in Thailand (Sep–Oct 2026)' },
+    text: {
+      uk: 'З середини вересня 2026 року повені охопили 50 провінцій Таїланду: постраждали понад 4 млн людей, затоплено 270 тис. га полів і садів. У Бангкоку за 48 годин випало майже 300 мм — майже місячна норма. Над країною кілька днів стояла зона низького тиску, яка тягнула вологу з теплої Сіамської затоки.',
+      en: 'From mid-September 2026 floods hit 50 provinces of Thailand: more than 4 million people affected, 270,000 ha of fields and orchards flooded. Bangkok got almost 300 mm in 48 hours — nearly a month’s worth. A low-pressure system stalled for days, pulling moisture from the warm Gulf of Thailand.',
+    },
+    see: { uk: 'Хибні кольори: ліворуч 1 грудня 2025 (звичайно), праворуч 2 жовтня 2026 — темно-синя вода розлилася долиною річки Банг-Паконг (провінція Прачінбурі).', en: 'False colour: left 1 December 2025 (normal), right 2 October 2026 — dark blue water across the Bang Pakong river valley (Prachin Buri province).' },
+    source: { title: 'NASA Earth Observatory — Floodwaters Overwhelm Thailand', url: 'https://science.nasa.gov/earth/earth-observatory/floodwaters-overwhelm-thailand/' },
+    swipe: S('falsecolor_721', '2025-12-01', 'falsecolor_721', '2026-10-02'),
+  },
+  {
+    id: 'flores_quake_2026', cat: 'quake', lon: 121.35, lat: -8.31, alt: 0.2, date: '2026-08-15',
+    title: { uk: 'Землетрус і цунамі біля острова Флорес (2026)', en: 'Earthquake and tsunami off Flores (2026)' },
+    text: {
+      uk: '15 серпня 2026 року о 05:58 за місцевим часом біля північного узбережжя острова Флорес (Індонезія) стався землетрус магнітудою 7,8 на глибині близько 10 км. Хвиля цунамі заввишки до 2,7 м накрила прибережні села; загинули щонайменше 142 людини.',
+      en: 'On 15 August 2026 at 05:58 local time a magnitude 7.8 earthquake struck off the north coast of Flores (Indonesia) at about 10 km depth. A tsunami up to 2.7 m high hit coastal villages; at least 142 people died.',
+    },
+    why: {
+      uk: 'Чому це сталося: тут не клімат, а рух тектонічних плит. Австралійська плита насувається на Зондську приблизно на 7 см на рік. Частину цього тиску «бере» Флореський задуговий насув на північ від острова. Коли напруга в розломі перевищила міцність порід, вони різко зсунулися — дно моря підскочило й підняло воду, утворивши цунамі. Тому для цунамі важливі не погода, а сейсмографи й датчики рівня моря (NASA тестує систему GUARDIAN, яка помічає цунамі за сигналами супутників GPS).',
+      en: 'Why it happened: not climate but moving tectonic plates. The Australian plate pushes under the Sunda plate by about 7 cm a year. Part of that squeeze is taken by the Flores back-arc thrust north of the island. When the stress exceeded the rock strength, the fault slipped suddenly — the sea floor jumped and lifted the water into a tsunami. So for tsunamis what matters is seismometers and sea-level sensors, not weather (NASA is testing GUARDIAN, which spots tsunamis from GPS satellite signals).',
+    },
+    source: { title: 'Wikipedia — 2026 Flores earthquake (USGS data)', url: 'https://en.wikipedia.org/wiki/2026_Flores_earthquake' },
+  },
   // ------------------------------------------------------------------ war in Ukraine
   {
     id: 'kakhovka', cat: 'war', lon: 34.0, lat: 47.25, alt: 0.045, date: '2023-06-06',
@@ -47,7 +130,7 @@ export const EVENTS = [
     swipe: S('nightlights_daily', '2021-11-23', 'nightlights_daily', '2022-11-25'),
   },
   {
-    id: 'front_fires_2022', cat: 'war', lon: 37.4, lat: 49.2, alt: 0.12, date: '2022-09-10',
+    id: 'front_fires_2022', fires: true, cat: 'war', lon: 37.4, lat: 49.2, alt: 0.12, date: '2022-09-10',
     title: { uk: 'Пожежі вздовж лінії фронту (Харківщина, 2022)', en: 'Fires along the front line (Kharkiv region, 2022)' },
     text: {
       uk: 'Під час звільнення Харківщини у вересні 2022 року супутники NASA зафіксували десятки «теплових точок» уздовж лінії бойових дій — горіли поля, ліси, техніка й будинки після обстрілів. Порівняй з тим самим місцем у 2021 році: тоді вогнища були розкидані по полях (це спалювання стерні), а не зібрані в лінію. Графік пожеж в Україні за роками — у вкладці «Уся планета».',
@@ -55,14 +138,14 @@ export const EVENTS = [
     },
     front: '2022-10-01', frontCompare: '2022-09-01',
     see: {
-      uk: 'Біла пунктирна лінія — фронт на 1 вересня 2022, червона штриховка — окупована територія на 1 жовтня 2022. Простір між ними (зелений) — Харківщина, звільнена у вересні 2022. Червоні точки — пожежі, які супутник побачив 10 вересня, у розпал наступу.',
-      en: 'The white dashed line is the front on 1 September 2022, red hatching is occupied territory on 1 October 2022. The area between them (green) is the Kharkiv region liberated in September 2022. Red dots are fires the satellite saw on 10 September, at the height of the offensive.',
+      uk: 'Біла пунктирна лінія — фронт на 1 вересня 2022, червона штриховка — окупована територія на 1 жовтня 2022. Простір між ними (зелений) — Харківщина, звільнена у вересні 2022. Точки — пожежі день за днем (програвач праворуч угорі): жовті — горить сьогодні, темно-червоні — вже вигоріло.',
+      en: 'The white dashed line is the front on 1 September 2022, red hatching is occupied territory on 1 October 2022. The area between them (green) is the Kharkiv region liberated in September 2022. Dots are fires day by day (player top right): yellow burns today, dark red has already burned.',
     },
     source: { title: 'NASA FIRMS — Fire Information for Resource Management System', url: 'https://firms.modaps.eosdis.nasa.gov/map/' },
-    layer: { id: 'fires_noaa20', date: '2022-09-10' }, base: { id: 'bluemarble' },
+    base: { id: 'bluemarble' },
   },
   {
-    id: 'south_front_2023', cat: 'war', lon: 35.8, lat: 47.3, alt: 0.1, date: '2023-08-20',
+    id: 'south_front_2023', fires: true, cat: 'war', lon: 35.8, lat: 47.3, alt: 0.1, date: '2023-08-20',
     title: { uk: 'Південний фронт, літо 2023', en: 'Southern front, summer 2023' },
     text: {
       uk: 'Влітку 2023 року вогнища вишикувалися вздовж фронту на Запоріжжі. Степ, поля й лісосмуги горять від вибухів, а родючий чорнозем роками лишається забрудненим уламками, металами й мінами. За даними уряду України, сотні тисяч гектарів земель потребують розмінування.',
@@ -70,11 +153,11 @@ export const EVENTS = [
     },
     front: '2023-08-01',
     see: {
-      uk: 'Червоні точки (пожежі 20 серпня 2023) вишикувалися вздовж краю червоної штриховки — це і є лінія фронту на Запоріжжі. Сіра смуга — «сіра зона», де йдуть бої.',
-      en: 'Red dots (fires on 20 August 2023) line up along the edge of the red hatching — that is the front line in the Zaporizhzhia region. The grey strip is the “grey zone” where fighting goes on.',
+      uk: 'Пожежі червня–вересня 2023 (програвач праворуч угорі) вишиковуються вздовж краю червоної штриховки — це і є лінія фронту на Запоріжжі. Сіра смуга — «сіра зона», де йдуть бої.',
+      en: 'Fires of June–September 2023 (player top right) line up along the edge of the red hatching — that is the front line in the Zaporizhzhia region. The grey strip is the “grey zone” where fighting goes on.',
     },
     source: { title: 'NASA FIRMS', url: 'https://firms.modaps.eosdis.nasa.gov/map/' },
-    layer: { id: 'fires_noaa20', date: '2023-08-20' }, base: { id: 'bluemarble' },
+    base: { id: 'bluemarble' },
   },
   {
     id: 'chornobyl_2022', cat: 'war', lon: 30.1, lat: 51.39, alt: 0.03, date: '2022-02-24',
@@ -166,7 +249,7 @@ export const EVENTS = [
   },
   // ------------------------------------------------------------------ fire & smoke
   {
-    id: 'australia', cat: 'fire', lon: 148.5, lat: -35.5, alt: 0.3, date: '2020-01-04',
+    id: 'australia', fires: true, cat: 'fire', lon: 148.5, lat: -35.5, alt: 0.3, date: '2020-01-04',
     title: { uk: '«Чорне літо» в Австралії', en: 'Australia’s Black Summer' },
     text: {
       uk: 'Після найспекотнішого й найсухішого року в історії спостережень Австралії ліси на південному сході палали місяцями (2019–2020). Дим піднявся до стратосфери (15–19 км) і облетів усю Землю. Порівняй 4 січня 2019 і 4 січня 2020 року.',
@@ -177,7 +260,7 @@ export const EVENTS = [
     swipe: S('truecolor_modis', '2019-01-04', 'truecolor_modis', '2020-01-04'),
   },
   {
-    id: 'canada2023', cat: 'fire', lon: -74, lat: 46, alt: 0.3, date: '2023-06-06',
+    id: 'canada2023', fires: true, cat: 'fire', lon: -74, lat: 46, alt: 0.3, date: '2023-06-06',
     title: { uk: 'Дим канадських пожеж над Нью-Йорком', en: 'Canadian wildfire smoke over New York' },
     text: {
       uk: '2023 рік став рекордним за площею лісових пожеж у Канаді. 6–7 червня дим з Квебеку накрив північний схід США — у Нью-Йорку повітря стало найбруднішим щонайменше з 2002 року, скасовували рейси.',
@@ -188,14 +271,14 @@ export const EVENTS = [
     swipe: S('truecolor_modis', '2022-06-07', 'truecolor_modis', '2023-06-06'),
   },
   {
-    id: 'chornobyl_2020', cat: 'fire', lon: 29.9, lat: 51.3, alt: 0.04, date: '2020-04-05',
+    id: 'chornobyl_2020', fires: true, cat: 'fire', lon: 29.9, lat: 51.3, alt: 0.04, date: '2020-04-05',
     title: { uk: 'Пожежі в Чорнобильській зоні (2020)', en: 'Fires in the Chornobyl zone (2020)' },
     text: {
       uk: 'У квітні 2020 року в зоні відчуження понад тиждень горіли ліси й трава. Ґрунт і дерева там досі забруднені радіацією після аварії 1986 року, тому дим може переносити радіоактивні частинки. На знімку 5 квітня видно довгий шлейф диму.',
       en: 'In April 2020 forests and grass burned in the exclusion zone for more than a week. Soil and trees there are still contaminated after the 1986 accident, so smoke can carry radioactive particles. The 5 April image shows a long smoke plume.',
     },
     source: { title: 'NASA Earth Observatory — Fires Burn in Northern Ukraine', url: 'https://science.nasa.gov/earth/earth-observatory/fires-burn-in-northern-ukraine-146561/' },
-    layer: { id: 'fires', date: '2020-04-05' }, base: { id: 'truecolor_modis', date: '2020-04-05' },
+    base: { id: 'truecolor_modis', date: '2020-04-05' },
   },
   // ------------------------------------------------------------------ forests
   {

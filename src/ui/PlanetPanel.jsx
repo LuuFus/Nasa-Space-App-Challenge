@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { loadJSON } from '../lib/data.js';
-import { analyse, forecast, movingAverage } from '../lib/stats.js';
+import { analyse, forecastSen, movingAverage } from '../lib/stats.js';
 import { num } from '../lib/explain.js';
-import Chart from './Chart.jsx';
+import Chart, { yearTooltip } from './Chart.jsx';
 import Formula, { Term } from './Formula.jsx';
 import { suggestContourMap } from './ConsentPrompt.jsx';
 import { showTrendMap } from './TrendMaps.jsx';
@@ -89,10 +89,10 @@ export default function PlanetPanel() {
       {chartId !== 'fires_ua' && chartId !== 'front_area' && an && (
         <>
           <div className="explain"><b>{t('whatItMeans')}</b><p>{C.text(an, lang)}</p>
-            <p className="small">{lang === 'uk' ? 'Тренд' : 'Trend'}: {num(an.perDecade, C.digits + 1, lang)} {u} / 10 {lang === 'uk' ? 'р.' : 'yr'} · <Term id="mann_kendall">Mann–Kendall</Term> p {an.mk?.p < 0.001 ? '< 0.001' : num(an.mk?.p, 3, lang)} · <Term id="r_squared">R²</Term> = {num(an.lr.r2, 2, lang)}</p>
-            {(() => { const f = forecast(an.lr, 2050); return f && <p className="small">{lang === 'uk' ? 'Якщо тенденція збережеться, у 2050 році' : 'If the trend continues, in 2050'}: ≈ {num(f.y, C.digits, lang)} {u} ({num(f.lo, C.digits, lang)} … {num(f.hi, C.digits, lang)}).</p>; })()}
+            <p className="small">{lang === 'uk' ? 'Тренд' : 'Trend'}: {num(an.perDecade, C.digits + 1, lang)} {u} / 10 {lang === 'uk' ? 'р.' : 'yr'} · <Term id="sen_slope">{lang === 'uk' ? 'нахил Сена' : "Sen's slope"}</Term> · <Term id="mann_kendall">{lang === 'uk' ? 'Манн–Кендалл з поправкою на автокореляцію' : 'Mann–Kendall corrected for autocorrelation'}</Term>: Z = {num(an.mkMod?.Z, 2, lang)} (|Z| {Math.abs(an.mkMod?.Z ?? 0) > 1.96 ? '>' : '≤'} 1,96), p {an.p < 0.001 ? '< 0,001' : num(an.p, 3, lang)} · n = {an.n}</p>
+            {(() => { const f = forecastSen(an.line, 2050); return f && <p className="small">{lang === 'uk' ? 'Якщо тенденція збережеться, у 2050 році' : 'If the trend continues, in 2050'}: ≈ {num(f.y, C.digits, lang)} {u} ({num(f.lo, C.digits, lang)} … {num(f.hi, C.digits, lang)}).</p>; })()}
           </div>
-          <Formula tex={`\\hat y = a + b\\,x,\\quad b = ${num(an.lr.slope, 4, 'en')}\\ \\text{per year}`} />
+          <Formula tex={`\\beta = \\operatorname{median}\\frac{y_j-y_i}{x_j-x_i} = ${num(an.sen, 4, 'en')}\\ \\text{per year},\\quad Z = ${num(an.mkMod?.Z, 2, 'en')}`} />
           <div className="row">
             {C.map && <button onClick={() => suggestContourMap(C.map.reason, () => showTrendMap(C.map.id))}>🗺 {lang === 'uk' ? 'Показати на карті світу' : 'Show on the world map'}</button>}
             {C.layer && <button onClick={() => useStore.getState().setOverlay(C.layer)}>🗺 {lang === 'uk' ? 'Шар NASA на глобусі' : 'NASA layer on the globe'}</button>}
@@ -143,23 +143,23 @@ function seriesOption(ser, an, C, lang, t) {
   const u = typeof C.unit === 'string' ? C.unit : C.unit[lang];
   const data = ser.years.map((y, i) => [y, ser.values[i]]);
   const ma = movingAverage(ser.values, 5);
-  const lr = an.lr;
+  const line = an.line;
   const H = 2050;
   const band = [];
-  for (let y = an.last; y <= H; y++) { const f = forecast(lr, y); band.push([y, f.y, f.lo, f.hi]); }
+  for (let y = an.last; y <= H; y++) { const f = forecastSen(line, y); band.push([y, f.y, f.lo, f.hi]); }
   return {
     backgroundColor: 'transparent',
-    tooltip: { trigger: 'axis', valueFormatter: (x) => (x == null ? '—' : `${num(x, C.digits + 1, lang)} ${u}`) },
+    tooltip: { trigger: 'axis', formatter: yearTooltip((x) => `${num(x, C.digits + 1, lang)} ${u}`) },
     legend: { top: 4, textStyle: { fontSize: 11 } },
     grid: { left: 48, right: 14, top: 40, bottom: 58 },
-    xAxis: { type: 'value', min: ser.years[0], max: H, minInterval: 1, axisLabel: { formatter: String }, splitLine: { show: false } },
+    xAxis: { type: 'value', min: ser.years[0], max: H, minInterval: 1, axisLabel: { formatter: (x) => String(Math.round(x)) }, axisPointer: { label: { formatter: ({ value }) => String(Math.round(value)) } }, splitLine: { show: false } },
     yAxis: { type: 'value', scale: true, name: u },
     dataZoom: [{ type: 'inside' }, { type: 'slider', height: 18, bottom: 8 }],
     series: [
       { name: lang === 'uk' ? 'Дані' : 'Data', type: 'line', data, symbolSize: 3, color: '#4cc9f0',
         markPoint: C.marks ? { symbolSize: 34, label: { fontSize: 9 }, data: C.marks.map(([y, lbl]) => ({ coord: [y, ser.values[ser.years.indexOf(y)]], value: lbl[lang] })).filter((m) => m.coord[1] != null) } : undefined },
       { name: lang === 'uk' ? 'Середнє за 5 років' : '5-year average', type: 'line', data: ser.years.map((y, i) => [y, ma[i]]), symbol: 'none', color: '#ffd166', lineStyle: { width: 2 } },
-      { name: t('trend'), type: 'line', data: [[an.first, lr.intercept + lr.slope * an.first], [an.last, lr.intercept + lr.slope * an.last]], symbol: 'none', color: '#ff6b6b', lineStyle: { type: 'dashed' } },
+      { name: t('trend'), type: 'line', data: [[an.first, line.a + line.beta * an.first], [an.last, line.a + line.beta * an.last]], symbol: 'none', color: '#ff6b6b', lineStyle: { type: 'dashed' } },
       { name: t('forecast'), type: 'line', data: band.map((b) => [b[0], b[1]]), symbol: 'none', color: '#ff6b6b', lineStyle: { type: 'dotted' } },
       { name: t('forecast'), type: 'line', data: band.map((b) => [b[0], b[2]]), stack: 'b', symbol: 'none', lineStyle: { opacity: 0 }, color: '#ff6b6b', tooltip: { show: false } },
       { name: t('forecast'), type: 'line', data: band.map((b) => [b[0], b[3] - b[2]]), stack: 'b', symbol: 'none', lineStyle: { opacity: 0 }, areaStyle: { color: '#ff6b6b', opacity: 0.12 }, color: '#ff6b6b', tooltip: { show: false } },

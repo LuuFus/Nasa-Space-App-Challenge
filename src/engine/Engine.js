@@ -101,6 +101,11 @@ export class Engine {
     this.image = new SurfaceLayer(this, { lift: 0.000015, transparent: true, renderOrder: 4 });
     this.image.visible = false;
     this.scene.add(this.image.mesh);
+    // our own maps on the two sides of the before/after slider (e.g. 1980s vs 2016–2025)
+    this.imgL = new SurfaceLayer(this, { lift: 0.000016, transparent: true, renderOrder: 4.1 });
+    this.imgR = new SurfaceLayer(this, { lift: 0.000016, transparent: true, renderOrder: 4.1 });
+    this.imgL.visible = this.imgR.visible = false;
+    this.scene.add(this.imgL.mesh, this.imgR.mesh);
     this.tint = new SurfaceLayer(this, { lift: 0.00002, transparent: true, renderOrder: 5 });
     this.tint.visible = false;
     this.scene.add(this.tint.mesh);
@@ -277,9 +282,31 @@ export class Engine {
 
   setSwipe(s) {
     this.swipe = { ...this.swipe, ...s };
-    if (s.left) this._setPair(this.swipeL, this.swipeLFill, s.left.layer, s.left.date);
-    if (s.right) this._setPair(this.swipeR, this.swipeRFill, s.right.layer, s.right.date);
+    for (const [side, tiles, fill, img] of [['left', this.swipeL, this.swipeLFill, this.imgL], ['right', this.swipeR, this.swipeRFill, this.imgR]]) {
+      const v = s[side];
+      if (!v) continue;
+      if (v.image) {
+        tiles.visible = fill.visible = false;
+        this._loadImage(img, v.image);
+        img.sideIsImage = true;
+      } else {
+        img.sideIsImage = false;
+        this._setPair(tiles, fill, v.layer, v.date);
+      }
+    }
     this.requestRender();
+  }
+
+  _loadImage(surface, url) {
+    if (surface.url === url) return;
+    surface.url = url;
+    new THREE.TextureLoader().load(url, (tex) => {
+      if (surface.url !== url) return;
+      tex.userData.owned = true;
+      tex.minFilter = THREE.LinearFilter;
+      surface.setTexture(tex);
+      surface.setOpacity(0.92);
+    });
   }
 
   flyTo(lon, lat, alt, ms) { return this.controls.flyTo(lon, lat, alt, ms); }
@@ -480,7 +507,7 @@ export class Engine {
     v.frustum.setFromProjectionMatrix(this._vp.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse));
 
     const sw = this.swipe.enabled && !contour;
-    if (!sw) { this.base.update(v); this.baseFill.update(v); }
+    if (!sw || this.imgL.sideIsImage || this.imgR.sideIsImage) { this.base.update(v); this.baseFill.update(v); }
     this.overlay.update(v);
     this.overlayFill.update(v);
     this.clouds.update(v);
@@ -498,17 +525,20 @@ export class Engine {
       const W = this.width, H = this.height;
       const split = Math.round(W * this.swipe.split);
       const baseVis = this.base.group.visible;
-      this.base.group.visible = this.baseFill.group.visible = false;
       r.setScissorTest(true);
-      this.swipeL.group.visible = this.swipeLFill.group.visible = true;
-      r.setScissor(0, 0, split, H);
       r.setViewport(0, 0, W, H);
-      r.render(this.scene, this.camera);
-      this.swipeL.group.visible = this.swipeLFill.group.visible = false;
-      this.swipeR.group.visible = this.swipeRFill.group.visible = true;
-      r.setScissor(split, 0, W - split, H);
-      r.render(this.scene, this.camera);
-      this.swipeR.group.visible = this.swipeRFill.group.visible = false;
+      const pass = (tiles, fill, img, x, w) => {
+        const isImg = !!img.sideIsImage;
+        this.base.group.visible = this.baseFill.group.visible = isImg && baseVis;
+        tiles.group.visible = fill.group.visible = !isImg;
+        img.visible = isImg;
+        r.setScissor(x, 0, w, H);
+        r.render(this.scene, this.camera);
+        tiles.group.visible = fill.group.visible = false;
+        img.visible = false;
+      };
+      pass(this.swipeL, this.swipeLFill, this.imgL, 0, split);
+      pass(this.swipeR, this.swipeRFill, this.imgR, split, W - split);
       r.setScissorTest(false);
       this.base.group.visible = this.baseFill.group.visible = baseVis;
     }

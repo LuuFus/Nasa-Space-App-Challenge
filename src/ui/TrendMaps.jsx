@@ -79,6 +79,21 @@ export default function TrendMaps() {
             <div className="bar" style={{ background: `linear-gradient(to right, ${rgb(neg)}, ${rgb(mid)}, ${rgb(pos)})` }} />
             <div className="ticks"><span>−{num(active.vmax, 2, lang)}</span><span>0</span><span>+{num(active.vmax, 2, lang)} {active.unit}{active.kind === 'trend' ? ` / 10 ${lang === 'uk' ? 'р.' : 'yr'}` : ''}</span></div>
           </div>
+          {active.periods && (
+            <button className="primary" style={{ margin: '4px 0' }} onClick={() => {
+              const p = active.periods;
+              useStore.getState().setTrendMap(null);
+              useStore.getState().setSwipe({
+                enabled: true, split: 0.5, preset: null,
+                left: { image: dataUrl(p.early_url), label: `${p.early[0]}–${p.early[1]}`, title: active.title },
+                right: { image: dataUrl(p.late_url), label: `${p.late[0]}–${p.late[1]}`, title: active.title },
+              });
+            }}>⇆ {lang === 'uk' ? `Порівняти ${active.periods.early[0]}–${active.periods.early[1]} і ${active.periods.late[0]}–${active.periods.late[1]}` : `Compare ${active.periods.early[0]}–${active.periods.early[1]} with ${active.periods.late[0]}–${active.periods.late[1]}`}</button>
+          )}
+          {active.periods && <p className="muted small">{lang === 'uk'
+            ? `У порівнянні колір — відхилення середнього за ці роки від середнього за весь період (±${num(active.periods.vmax, 2, lang)} ${active.unit}): ліворуч ранні роки, праворуч останні.`
+            : `In the comparison the colour is the departure of those years' mean from the whole-period mean (±${num(active.periods.vmax, 2, lang)} ${active.unit}): early years left, recent years right.`}</p>}
+          {active.id === 't2m_trend' && <button onClick={() => showTrendMap('t2m_anom')}>▶ {lang === 'uk' ? 'Анімація по роках' : 'Year-by-year animation'}</button>}
           <label className="row small">{t('opacity')}
             <input type="range" min="0.2" max="1" step="0.05" value={trend.opacity} onChange={(e) => setTrendMap({ ...trend, opacity: +e.target.value })} />
           </label>

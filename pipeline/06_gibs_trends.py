@@ -39,12 +39,19 @@ LAYERS = [
          title={"uk": "Тренд зеленості рослин (NDVI)", "en": "Vegetation greenness trend (NDVI)"}, country=True, level=2),
     dict(id="lst_day", cat="lst_day", y0=2001, y1=2025, conv=lambda v: v - 273.15, unit="°C", pal="temp",
          title={"uk": "Тренд температури поверхні суші (вдень)", "en": "Daytime land-surface temperature trend"}, country=True, level=2),
+    dict(id="pm25", cat="pm25", y0=1980, y1=2025, conv=lambda v: v * 1e9, unit="µg/m³", pal="air",
+         title={"uk": "Тренд пилу PM2.5 біля землі", "en": "Near-surface dust PM2.5 trend"}, country=True),
+    dict(id="aod", cat="aod", y0=1980, y1=2025, conv=lambda v: v, unit="AOD", pal="air",
+         title={"uk": "Тренд аерозолів (каламутність повітря)", "en": "Aerosol (haze) trend"}, country=True),
+    dict(id="so2", cat="so2", y0=1980, y1=2025, conv=lambda v: v * 1e6, unit="mg/m²", pal="air",
+         title={"uk": "Тренд діоксиду сірки SO₂ (викиди)", "en": "Sulphur dioxide SO₂ trend (emissions)"}, country=True),
 ]
 
 PALETTES = {  # negative end, middle, positive end
     "temp": ([33, 102, 172], [247, 247, 247], [178, 24, 43]),
     "water": ([140, 81, 10], [245, 245, 245], [1, 102, 94]),
     "green": ([140, 81, 10], [245, 245, 245], [27, 120, 55]),
+    "air": ([26, 152, 80], [245, 245, 245], [118, 42, 131]),   # cleaner = green, dirtier = purple
 }
 
 
@@ -102,22 +109,45 @@ def normal_cdf(z):
 
 
 def trend_maps(years, cube):
-    """cube: [n_years, H, W] -> slope per decade, Mann-Kendall p-value."""
+    """cube: [n_years, H, W] -> Sen's slope per decade and the p-value of the
+    Mann–Kendall test with the Hamed & Rao (1998) correction for autocorrelation
+    (the same method as on the website)."""
     n = len(years)
-    x = np.array(years, dtype=np.float32)
-    xc = x - x.mean()
+    x = np.array(years, dtype=np.float64)
     valid = np.all(np.isfinite(cube), axis=0)
-    y = np.where(valid, cube, 0)
-    slope = np.tensordot(xc, y - y.mean(axis=0), axes=1) / (xc ** 2).sum()
-    S = np.zeros((H, W), dtype=np.float32)
+    y = np.where(valid, cube, 0).astype(np.float64)
+    # S statistic and Sen's slope (median of all pairwise slopes)
+    S = np.zeros((H, W))
     for i in range(n - 1):
         S += np.sign(y[i + 1:] - y[i]).sum(axis=0)
-    var = n * (n - 1) * (2 * n + 5) / 18
-    Z = np.where(S > 0, (S - 1) / math.sqrt(var), np.where(S < 0, (S + 1) / math.sqrt(var), 0))
+    # Sen's slope, computed in bands of rows to keep memory small
+    sen = np.zeros((H, W))
+    iu, ju = np.triu_indices(n, 1)
+    dx = (x[ju] - x[iu]).astype(np.float32)[:, None, None]
+    for r0 in range(0, H, 16):
+        band = y[:, r0:r0 + 16].astype(np.float32)
+        sen[r0:r0 + 16] = np.median((band[ju] - band[iu]) / dx, axis=0)
+    var_s = n * (n - 1) * (2 * n + 5) / 18
+    # ranks of the de-trended series, their autocorrelation at every lag
+    res = y - sen[None] * x[:, None, None]
+    ranks = res.argsort(axis=0).argsort(axis=0).astype(np.float64) + 1
+    rc = ranks - ranks.mean(axis=0)
+    den = (rc ** 2).sum(axis=0)
+    den[den == 0] = 1
+    limit = 1.959964 / np.sqrt(n)
+    corr = np.zeros((H, W))
+    for k in range(1, n - 2):
+        rho = (rc[:-k] * rc[k:]).sum(axis=0) / den
+        rho = np.where(np.abs(rho) > limit, rho, 0)
+        corr += (n - k) * (n - k - 1) * (n - k - 2) * rho
+    factor = 1 + 2 / (n * (n - 1) * (n - 2)) * corr
+    factor = np.where(factor > 0, factor, 1)
+    vs = var_s * factor
+    Z = np.where(S > 0, (S - 1) / np.sqrt(vs), np.where(S < 0, (S + 1) / np.sqrt(vs), 0))
     p = 2 * (1 - normal_cdf(np.abs(Z)))
-    slope = np.where(valid, slope * 10, np.nan)
+    slope = np.where(valid, sen * 10, np.nan)
     p = np.where(valid, p, np.nan)
-    return slope, p
+    return slope.astype(np.float32), p.astype(np.float32)
 
 
 def colorize(field, vmax, pal, sig=None):
@@ -200,6 +230,15 @@ def main():
                  "url": f"trends/{L['id']}_trend.png", "significantShare": round(sig_share, 3)}
         meta.append(entry)
         log(f"  trend map: ±{vmax} {L['unit']}/decade, significant on {sig_share:.0%} of the mapped area")
+        # mean of the first and of the last ~decade, as anomalies from the whole period:
+        # used to compare "then" and "now" side by side with the swipe slider
+        k = 10 if len(years) >= 30 else 5
+        whole = np.nanmean(cube, axis=0)
+        amax = nice(float(np.nanpercentile(np.abs(np.nanmean(cube[-k:], axis=0) - whole), 97)))
+        for tag, block in (("early", cube[:k]), ("late", cube[-k:])):
+            colorize(np.nanmean(block, axis=0) - whole, amax, L["pal"]).save(OUT / "trends" / f"{L['id']}_{tag}.png", optimize=True)
+        entry["periods"] = {"early": [years[0], years[k - 1]], "late": [years[-k], years[-1]], "vmax": amax,
+                            "early_url": f"trends/{L['id']}_early.png", "late_url": f"trends/{L['id']}_late.png"}
         if L.get("anomalies"):
             base = np.nanmean(cube[[i for i, y in enumerate(years) if 1991 <= y <= 2020]], axis=0)
             amax = 3.0

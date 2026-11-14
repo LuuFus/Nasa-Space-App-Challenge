@@ -35,6 +35,7 @@ export async function applyEvent(ev) {
     const compare = ev.frontCompare ? snapshotIndex(d.snapshots, ev.frontCompare) : null;
     st.setFront({ on: true, idx, compare });
   }
+  st.setFire(ev.fires ? { id: ev.id, day: 0, playing: true } : null);
   if (ev.lon != null) flyTo(ev.lon, ev.lat, ev.alt ?? 0.3);
 }
 
@@ -48,6 +49,7 @@ export function closeEvent(clearId = true) {
     st.setFront(u.front);
     if (!u.swipe) st.setSwipe({ enabled: false, preset: null });
   }
+  st.setFire(null);
   useStore.setState({ eventApplied: null, ...(clearId ? { eventId: null } : {}) });
 }
 

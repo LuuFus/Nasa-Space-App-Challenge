@@ -1,0 +1,62 @@
+/* Landing page — palette from the team's design (dark navy → bright blue) */
+.landing {
+  --l-blue: #1f7bd6;
+  --l-blue2: #0f4fb5;
+  --l-deep: #062265;
+  --l-navy: #000f52;
+  --l-night: #000521;
+  --l-card: #e6ecf5;
+  font-family: 'Manrope', system-ui, sans-serif;
+  color: #fff;
+  background: var(--l-night);
+  min-height: 100%;
+  overflow-x: hidden;
+}
+.landing h1, .landing h2, .l-brand, .l-start { font-family: 'Unbounded', 'Manrope', sans-serif; }
+
+.l-header { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; background: var(--l-night); border-bottom: 1px solid #ffffff14; }
+.l-brand { color: #fff; text-decoration: none; font-weight: 700; letter-spacing: 0.04em; display: flex; align-items: center; gap: 10px; }
+.l-dot { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8fd0ff, var(--l-blue) 45%, var(--l-deep) 75%); box-shadow: 0 0 12px #1f7bd6aa; }
+.l-nav { display: flex; align-items: center; gap: 10px; }
+.l-btn { color: #dfe8ff; text-decoration: none; padding: 8px 14px; border-radius: 22px; border: 1px solid #ffffff33; font-size: 14px; }
+.l-btn:hover { border-color: #fff; }
+.l-btn-primary { background: var(--l-blue); border-color: var(--l-blue); color: #fff; font-weight: 600; }
+.l-btn-primary:hover { background: #3a90e6; }
+.l-lang { display: flex; border: 1px solid #ffffff33; border-radius: 22px; overflow: hidden; }
+.l-lang button { background: none; border: none; color: #c9d6f2; padding: 7px 12px; border-radius: 0; font-size: 13px; }
+.l-lang button.on { background: #ffffff1f; color: #fff; }
+
+.l-hero { position: relative; min-height: calc(100vh - 58px); display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: var(--l-navy); }
+.l-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.55; filter: saturate(0.85); }
+/* blue veil: keeps the text readable and blends the video into the page colours */
+.l-veil { position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(0, 15, 82, 0.55) 0%, rgba(0, 15, 82, 0.35) 45%, rgba(0, 15, 82, 0.85) 82%, var(--l-deep) 92%, var(--l-blue) 100%),
+  radial-gradient(ellipse at center, rgba(0, 15, 82, 0) 30%, rgba(0, 5, 33, 0.55) 100%); }
+.l-hero-content { position: relative; z-index: 2; padding: 24px; max-width: 900px; }
+.l-hero h1 { font-size: clamp(32px, 6vw, 72px); margin: 0 0 14px; line-height: 1.05; text-shadow: 0 4px 30px #0009; }
+.l-sub { font-size: clamp(15px, 1.7vw, 20px); color: #d8e4ff; margin: 0 auto 30px; max-width: 640px; }
+.l-start { display: inline-block; padding: 15px 46px; border-radius: 40px; background: #fff; color: var(--l-navy); text-decoration: none; font-weight: 700; font-size: 18px; box-shadow: 0 10px 40px #1f7bd680; transition: transform 0.2s, box-shadow 0.2s; }
+.l-start:hover { transform: translateY(-2px); box-shadow: 0 14px 50px #1f7bd6aa; }
+.l-more { display: block; margin: 34px auto 0; background: none; border: 1px solid #ffffff55; color: #e8efff; padding: 10px 22px; border-radius: 30px; font-family: inherit; font-size: 15px; cursor: pointer; animation: l-bounce 2.8s ease-in-out infinite; }
+.l-more:hover { border-color: #fff; }
+@keyframes l-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .l-more { animation: none; } .l-video { display: none; } }
+.l-credit { position: absolute; right: 12px; bottom: 10px; z-index: 2; font-size: 11px; color: #ffffffaa; text-decoration: none; }
+
+.l-about { background: var(--l-blue); padding: 70px 24px 90px; display: flex; justify-content: center; }
+.l-card { background: var(--l-card); color: #0b1d3a; border-radius: 18px; padding: 40px 44px; max-width: 900px; width: 100%; min-height: 260px; box-shadow: 0 20px 60px #00052155; }
+.l-card h2 { margin: 0 0 14px; font-size: 26px; color: var(--l-navy); }
+.l-card p { font-size: 17px; line-height: 1.6; margin: 0; }
+
+.l-footer { background: var(--l-night); padding: 34px 28px 26px; text-align: center; }
+.l-foot-text { max-width: 760px; margin: 0 auto 18px; color: #d8e4ff; font-size: 15px; line-height: 1.6; }
+.l-links { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.l-link { display: inline-flex; align-items: center; gap: 8px; color: #e8efff; text-decoration: none; padding: 9px 16px; border-radius: 24px; border: 1px solid #ffffff2a; background: #ffffff0a; font-family: inherit; font-size: 14px; cursor: pointer; }
+.l-link:hover { border-color: var(--l-blue); color: #fff; }
+.l-sources { text-align: left; max-width: 760px; margin: 18px auto 0; color: #c9d6f2; font-size: 13px; line-height: 1.7; }
+.l-sources a { color: #8fc6ff; }
+.l-small { margin-top: 18px; font-size: 11px; color: #ffffff66; }
+@media (max-width: 640px) {
+  .l-header { padding: 10px 14px; }
+  .l-card { padding: 26px 22px; }
+}

@@ -6,6 +6,8 @@ import { closeEvent, clearSwipe } from '../lib/actions.js';
 import { fmtDate } from '../lib/dates.js';
 import { loadJSON } from '../lib/data.js';
 import { layerById } from './GlobeView.jsx';
+import { CatIcon } from './Icons.jsx';
+import FireTimeline from './FireTimeline.jsx';
 
 function longDate(date, lang, monthOnly = false) {
   if (!date) return '';
@@ -20,6 +22,9 @@ export default function MapOverlay() {
   const { t, pick, lang } = useT();
   const s = useStore();
   const [front, setFront] = useState(null);
+  const [folded, setFolded] = useState(false);
+  // while comparing years the banner folds itself so it does not cover the pictures
+  useEffect(() => { setFolded(s.swipe.enabled); }, [s.swipe.enabled, s.eventId]);
   useEffect(() => { if (s.front.on && !front) loadJSON('front.json').then(setFront); }, [s.front.on]);
   const ov = layerById(s.catalog, s.overlayId);
   const base = layerById(s.catalog, s.baseId);
@@ -45,7 +50,7 @@ export default function MapOverlay() {
           </div>
         )}
         {s.front.on && snaps && (
-          <div className="chip-map front">⚠ {lang === 'uk' ? 'Лінія фронту' : 'Front line'} ·
+          <div className="chip-map front"><span className="ua-badge" /> {lang === 'uk' ? 'Лінія фронту' : 'Front line'} ·
             <button onClick={() => s.setFront({ idx: Math.max(0, fIdx - 1) })}>◀</button>
             <b>{longDate(snaps[fIdx].date, lang, fIdx !== snaps.length - 1)}</b>
             <button onClick={() => s.setFront({ idx: Math.min(snaps.length - 1, fIdx + 1) })}>▶</button>
@@ -55,18 +60,22 @@ export default function MapOverlay() {
       </div>
 
       {ev && (
-        <div className="event-banner">
+        <div className={`event-banner${folded ? ' folded' : ''}${s.swipe.enabled ? ' at-bottom' : ''}`}>
           <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
-            <b>{EVENT_CATS[ev.cat].icon} {pick(ev.title)}</b>
-            <button onClick={() => closeEvent()} title={lang === 'uk' ? 'Закрити подію' : 'Close event'}>✕ {lang === 'uk' ? 'Закрити' : 'Close'}</button>
+            <b><CatIcon cat={ev.cat} /> {pick(ev.title)}</b>
+            <span className="row" style={{ flexWrap: 'nowrap' }}>
+              <button onClick={() => setFolded(!folded)} title={lang === 'uk' ? 'Згорнути / розгорнути' : 'Fold / unfold'}>{folded ? (lang === 'uk' ? 'ⓘ Що ти бачиш' : 'ⓘ What you see') : '▾'}</button>
+              <button onClick={() => closeEvent()} title={lang === 'uk' ? 'Закрити подію' : 'Close event'}>✕ {lang === 'uk' ? 'Закрити' : 'Close'}</button>
+            </span>
           </div>
-          {ev.see && <p><b>{lang === 'uk' ? 'Що ти бачиш: ' : 'What you see: '}</b>{pick(ev.see)}</p>}
-          {s.front.on && <FrontLegend lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} />}
+          {!folded && ev.see && <p><b>{lang === 'uk' ? 'Що ти бачиш: ' : 'What you see: '}</b>{pick(ev.see)}</p>}
+          {!folded && s.front.on && <FrontLegend lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} />}
         </div>
       )}
       {!ev && s.front.on && <div className="event-banner small-banner"><FrontLegend lang={lang} compare={s.front.compare != null && snaps ? snaps[s.front.compare].date : null} /></div>}
 
       {s.swipe.enabled && <Swipe />}
+      {s.fire && <FireTimeline />}
     </>
   );
 }
@@ -108,12 +117,12 @@ function Swipe() {
         <div className="swipe-knob" title={t('dragHint')}>⇆</div>
       </div>
       <div className="swipe-date left" style={{ right: `calc(${100 - swipe.split * 100}% + 14px)` }}>
-        <div className="big">◀ {fmtDate(L, swipe.left?.date, lang)}</div>
-        <div className="small">{pick(L?.title)}</div>
+        <div className="big">◀ {swipe.left?.image ? swipe.left.label : fmtDate(L, swipe.left?.date, lang)}</div>
+        <div className="small">{swipe.left?.image ? pick(swipe.left.title) : pick(L?.title)}</div>
       </div>
       <div className="swipe-date right" style={{ left: `calc(${pct} + 14px)` }}>
-        <div className="big">{fmtDate(R, swipe.right?.date, lang)} ▶</div>
-        <div className="small">{pick(R?.title)}</div>
+        <div className="big">{swipe.right?.image ? swipe.right.label : fmtDate(R, swipe.right?.date, lang)} ▶</div>
+        <div className="small">{swipe.right?.image ? pick(swipe.right.title) : pick(R?.title)}</div>
       </div>
       <button className="swipe-exit" onClick={clearSwipe}>✕ {t('turnOff')}</button>
     </>
