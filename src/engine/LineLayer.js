@@ -10,12 +10,11 @@ import { DEG, GLSL_PROJECTION, haversineKm } from './projection.js';
 
 const VERT = /* glsl */ `
 ${GLSL_PROJECTION}
-attribute vec2 aA;
-attribute vec2 aB;
+attribute vec4 aAB;      // segment end points (lon, lat of A, lon, lat of B), radians
 attribute vec2 aCorner;   // x: 0 at A, 1 at B; y: 0 inner edge, 1 outer edge
 attribute vec4 aColor;
 attribute vec4 aStyle;    // inset px, width px, dash px, gap px
-attribute float aDist;    // km from the start of the line
+attribute vec2 aDist2;    // km from the start of the line at A and at B
 attribute float aRank;
 uniform vec2 uViewport;
 uniform float uLift;
@@ -27,6 +26,8 @@ varying vec4 vColor;
 varying vec2 vDash;
 varying float vDist;
 void main() {
+  vec2 aA = aAB.xy;
+  vec2 aB = aAB.zw;
   if (aRank > uMaxRank) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
   // on the globe, hide segments that are over the horizon (no depth test is used)
   if (uMorph <= 0.0 && (dot(globePos(aA, 1.0), uCam) < 1.0 || dot(globePos(aB, 1.0), uCam) < 1.0)) {
@@ -51,7 +52,7 @@ void main() {
   gl_Position = c;
   vColor = aColor;
   vDash = aStyle.zw * uDpr;
-  vDist = aDist;
+  vDist = mix(aDist2.x, aDist2.y, aCorner.x);
 }`;
 
 const FRAG = /* glsl */ `
@@ -105,14 +106,17 @@ export class LineLayer {
   /**
    * lines: [{ coords: [lon,lat,lon,lat,...] (degrees), closed, color: [r,g,b,a],
    *           width, inset (default -width/2 = centred), dash, gap, rank }]
+   * One instance per segment (4 shared corner vertices), so even ~500k border
+   * segments take only ~25 MB of GPU memory.
    */
   setLines(lines) {
     let nSeg = 0;
     for (const l of lines) nSeg += l.coords.length / 2 - (l.closed ? 0 : 1);
-    const A = new Float32Array(nSeg * 8), B = new Float32Array(nSeg * 8);
-    const C = new Float32Array(nSeg * 8), COL = new Float32Array(nSeg * 16);
-    const ST = new Float32Array(nSeg * 16), DI = new Float32Array(nSeg * 4), RK = new Float32Array(nSeg * 4);
-    const idx = new Uint32Array(nSeg * 6);
+    const AB = new Float32Array(nSeg * 4);
+    const COL = new Uint8Array(nSeg * 4);
+    const ST = new Float32Array(nSeg * 4);
+    const DI = new Float32Array(nSeg * 2);
+    const RK = new Float32Array(nSeg);
     let s = 0;
     for (const l of lines) {
       const co = l.coords;
@@ -121,6 +125,7 @@ export class LineLayer {
       const width = l.width ?? 1;
       const inset = l.inset ?? -width / 2;
       const col = l.color ?? [1, 1, 1, 1];
+      const c0 = Math.round(col[0] * 255), c1 = Math.round(col[1] * 255), c2 = Math.round(col[2] * 255), c3 = Math.round((col[3] ?? 1) * 255);
       let dist = 0;
       for (let i = 0; i < segs; i++) {
         const j = (i + 1) % n;
@@ -129,36 +134,27 @@ export class LineLayer {
         // cuts made by the data along the 180° meridian or at the poles are not real borders
         const fake = (Math.abs(lon1) > 179.999 && Math.abs(lon2) > 179.999) ||
           (lat1 < -89.99 && lat2 < -89.99) || (lat1 > 89.99 && lat2 > 89.99) || Math.abs(lon1 - lon2) > 180;
-        if (fake) { dist += segKm; continue; }
-        for (let v = 0; v < 4; v++) {
-          const q = s * 4 + v;
-          A[q * 2] = lon1 * DEG; A[q * 2 + 1] = lat1 * DEG;
-          B[q * 2] = lon2 * DEG; B[q * 2 + 1] = lat2 * DEG;
-          const atB = v === 1 || v === 3 ? 1 : 0;
-          const outer = v >= 2 ? 1 : 0;
-          C[q * 2] = atB; C[q * 2 + 1] = outer;
-          COL.set(col.length === 4 ? col : [...col, 1], q * 4);
-          ST[q * 4] = inset; ST[q * 4 + 1] = width; ST[q * 4 + 2] = l.dash ?? 0; ST[q * 4 + 3] = l.gap ?? 0;
-          DI[q] = atB ? dist + segKm : dist;
-          RK[q] = l.rank ?? 0;
+        if (!fake) {
+          AB[s * 4] = lon1 * DEG; AB[s * 4 + 1] = lat1 * DEG; AB[s * 4 + 2] = lon2 * DEG; AB[s * 4 + 3] = lat2 * DEG;
+          COL[s * 4] = c0; COL[s * 4 + 1] = c1; COL[s * 4 + 2] = c2; COL[s * 4 + 3] = c3;
+          ST[s * 4] = inset; ST[s * 4 + 1] = width; ST[s * 4 + 2] = l.dash ?? 0; ST[s * 4 + 3] = l.gap ?? 0;
+          DI[s * 2] = dist; DI[s * 2 + 1] = dist + segKm;
+          RK[s] = l.rank ?? 0;
+          s++;
         }
-        const b = s * 4;
-        idx.set([b, b + 2, b + 1, b + 1, b + 2, b + 3], s * 6);
-        s++;
         dist += segKm;
       }
     }
-    const g = new THREE.BufferGeometry();
-    const nv = s * 4;
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nv * 3), 3));
-    g.setAttribute('aA', new THREE.BufferAttribute(A.subarray(0, nv * 2), 2));
-    g.setAttribute('aB', new THREE.BufferAttribute(B.subarray(0, nv * 2), 2));
-    g.setAttribute('aCorner', new THREE.BufferAttribute(C.subarray(0, nv * 2), 2));
-    g.setAttribute('aColor', new THREE.BufferAttribute(COL.subarray(0, nv * 4), 4));
-    g.setAttribute('aStyle', new THREE.BufferAttribute(ST.subarray(0, nv * 4), 4));
-    g.setAttribute('aDist', new THREE.BufferAttribute(DI.subarray(0, nv), 1));
-    g.setAttribute('aRank', new THREE.BufferAttribute(RK.subarray(0, nv), 1));
-    g.setIndex(new THREE.BufferAttribute(idx.subarray(0, s * 6), 1));
+    const g = new THREE.InstancedBufferGeometry();
+    // corner (x: 0 at A / 1 at B, y: 0 inner / 1 outer edge)
+    g.setAttribute('aCorner', new THREE.BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), 2));
+    g.setIndex([0, 2, 1, 1, 2, 3]);
+    g.setAttribute('aAB', new THREE.InstancedBufferAttribute(AB.subarray(0, s * 4), 4));
+    g.setAttribute('aColor', new THREE.InstancedBufferAttribute(COL.subarray(0, s * 4), 4, true));
+    g.setAttribute('aStyle', new THREE.InstancedBufferAttribute(ST.subarray(0, s * 4), 4));
+    g.setAttribute('aDist2', new THREE.InstancedBufferAttribute(DI.subarray(0, s * 2), 2));
+    g.setAttribute('aRank', new THREE.InstancedBufferAttribute(RK.subarray(0, s), 1));
+    g.instanceCount = s;
     this.mesh.geometry.dispose();
     this.mesh.geometry = g;
     this.engine.requestRender();
