@@ -1,12 +1,18 @@
 import { useT } from '../i18n/index.js';
+import { useState } from 'react';
+import { Rocket } from 'lucide-react';
 import { SOURCES } from '../content/sources.js';
+import RoadmapDialog from './Roadmap.jsx';
 
 
 export default function AboutPanel() {
   const { t, pick, lang } = useT();
   const uk = lang === 'uk';
+  const [plans, setPlans] = useState(false);
   return (
     <div>
+      <button type="button" className="btn-accent rm-open" onClick={() => setPlans(true)}><Rocket size={15} strokeWidth={1.75} /> {uk ? 'Майбутні оновлення: ШІ-помічник та інше' : 'Coming next: AI assistant and more'}</button>
+      <RoadmapDialog open={plans} onClose={() => setPlans(false)} lang={lang} />
       <h3>{t('appTitle')}</h3>
       <p className="desc">{uk
         ? 'Інтерактивна Земля для школярів і студентів: дивись супутникові дані NASA на 3D-глобусі або на контурній карті, порівнюй країни, перевіряй, чи зміни справжні, а не випадкові, і дізнавайся, що вони означають у житті.'
@@ -28,6 +34,10 @@ export default function AboutPanel() {
         <li>{uk ? 'Карти трендів і NDVI країн отримано, перетворивши кольори знімків GIBS назад у числа за офіційною палітрою: точність обмежена кроком палітри (наприклад, ~0,5 °C).' : 'Trend maps and country NDVI were obtained by turning GIBS image colours back into numbers using the official colour map: precision is limited by the palette step (e.g. ~0.5 °C).'}</li>
         <li>{uk ? 'Прогноз — це продовження лінійного тренду, а не кліматична модель.' : 'The forecast extends a linear trend; it is not a climate model.'}</li>
       </ul>
+      <h4>{uk ? 'Як ми працювали' : 'How we worked'}</h4>
+      <p className="desc small">{uk
+        ? 'Під час розробки ми використовували ШІ-асистента Claude (Anthropic) у Claude Code: він допомагав писати код, тексти пояснень і перевіряти дані. Ідеї, вибір даних, дизайн і перевірку результатів робила команда.'
+        : 'During development we used the AI assistant Claude (Anthropic) in Claude Code: it helped write code and explanations and check data. Ideas, data choices, design and checking the results were done by the team.'}</p>
       <p className="muted small">{uk ? 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала. Логотип NASA показано лише як посилання на хакатон.' : 'This is a student hackathon project, not an official NASA product, and it is not endorsed by NASA. The NASA logo is shown only as a reference to the hackathon.'}</p>
       <p className="muted small">{t('team')}</p>
     </div>

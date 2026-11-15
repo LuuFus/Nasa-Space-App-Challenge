@@ -316,6 +316,14 @@ export class TileLayer {
     });
   }
 
+  /** true when the picture on the screen is complete: no stand-in tiles, nothing that is shown still loading */
+  isComplete() {
+    if (!this.visible || !this.urlFn) return true;
+    if (this._usedPrev > 0) return false;
+    for (const t of this.tiles.values()) if (t.used === this.frame && (t.state === 'loading' || t.state === 'pending' || t.state === 'idle')) return false;
+    return true;
+  }
+
   /** Choose tiles for this frame. view: { camera, frustum, focalPx, morph, frame } */
   update(view) {
     this.inUse = 0;

@@ -15,6 +15,20 @@ export async function flyTo(lon, lat, alt = 0.3) {
   return eng.flyTo(lon, lat, alt, 2200);
 }
 
+/** fly so that a whole box [west, south, east, north] fits on the screen */
+export async function flyToBox(bbox, center) {
+  const [w, s, e, n] = bbox;
+  if (useStore.getState().mode === 'osm' && e - w < 180) {
+    const { whenMap } = await import('../map/instance.js');
+    (await whenMap()).fitBounds([[w, s], [e, n]], { padding: 70, duration: 2000, maxZoom: 7.5 });
+    return;
+  }
+  const lon = center?.[0] ?? (w + e) / 2, lat = center?.[1] ?? (s + n) / 2;
+  const dlon = e - w > 180 ? 70 : e - w;   // a country across the 180th meridian (Russia, USA, Fiji)
+  const spanKm = Math.max((n - s) * 111, dlon * 111 * Math.cos((lat * Math.PI) / 180));
+  return flyTo(lon, lat, Math.min(2.4, Math.max(0.03, (spanKm * 1.5) / 4638)));
+}
+
 /**
  * apply an event / preset: fly there, set layers and dates, maybe open a swipe or the front line.
  * { swipe: false } = only show it on the map (the "after" picture instead of the split screen).
@@ -84,6 +98,26 @@ export function showNight() {
   if (st.mode === 'osm') st.setBasemap('satellite');
   else if (st.mode !== 'globe') st.setMode('globe');
   flyTo(18, 34, 2.1);
+}
+
+/** resolves when the pictures on the screen have loaded (or after maxMs) */
+export async function waitForPictures(maxMs = 10000) {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const t0 = performance.now();
+  await sleep(350);
+  while (performance.now() - t0 < maxMs) {
+    if (useStore.getState().mode === 'osm') {
+      const { getMap } = await import('../map/instance.js');
+      const m = getMap();
+      if (!m || (m.loaded() && m.areTilesLoaded())) return true;
+    } else {
+      const { getEngine } = await import('../engine/instance.js');
+      const e = getEngine();
+      if (!e || !e.isBusy()) return true;
+    }
+    await sleep(250);
+  }
+  return false;
 }
 
 export function clearSwipe() {

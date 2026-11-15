@@ -19,6 +19,7 @@ export const STRINGS = {
   swipe: { uk: 'Було / стало', en: 'Before / after' },
   events: { uk: 'Події', en: 'Events' },
   glossary: { uk: 'Глосарій', en: 'Glossary' },
+  notes: { uk: 'Мої нотатки', en: 'My notes' },
   about: { uk: 'Про проєкт', en: 'About' },
   view: { uk: 'Вигляд', en: 'View' },
   clouds: { uk: 'Хмари', en: 'Clouds' },

@@ -1,6 +1,7 @@
 // Every data source, picture and tool the project uses (shown on the first page
 // and in the "About" panel). Licence notes are kept short and honest.
 export const SOURCES = [
+  ['Claude (Anthropic) — ШІ-асистент / AI assistant', 'https://www.anthropic.com/claude', { uk: 'ми використовували ШІ під час розробки: Claude (модель Claude Opus 5.5) у Claude Code допомагав писати код, тексти пояснень і перевіряти дані. Ідеї, вибір даних, дизайн і перевірку результатів робила команда IT Detectives', en: 'we used AI during development: Claude (the Claude Opus 5.5 model) in Claude Code helped write code and explanations and check data. Ideas, data choices, design and checking the results were done by team IT Detectives' }],
   ['NASA GIBS (WMTS / WMS)', 'https://gibs.earthdata.nasa.gov', { uk: 'усі супутникові знімки й шари на глобусі, офіційні палітри — суспільне надбання (NASA)', en: 'all satellite imagery and globe layers, official colour maps — public domain (NASA)' }],
   ['NASA POWER', 'https://power.larc.nasa.gov', { uk: 'клімат 246 країн 1981–2025 і погода для подій 2026 року — NASA, вільне використання', en: 'climate of 246 countries 1981–2025 and weather for the 2026 events — NASA, free use' }],
   ['NASA GISS GISTEMP v4', 'https://data.giss.nasa.gov/gistemp/', { uk: 'температура планети з 1880 року', en: 'planet temperature since 1880' }],
@@ -24,5 +25,8 @@ export const SOURCES = [
   ['Wikipedia', 'https://en.wikipedia.org', { uk: 'дати й цифри деяких подій 2026 року (тексти власні, лише посилання)', en: 'dates and figures for some 2026 events (own texts, links only)' }],
   ['Шрифти Cormorant Garamond, Inter, JetBrains Mono', 'https://fontsource.org', { uk: 'SIL Open Font License 1.1', en: 'SIL Open Font License 1.1' }],
   ['React, Three.js, MapLibre GL, ECharts, KaTeX, Zustand, Vite, Lucide', 'https://github.com', { uk: 'бібліотеки з відкритим кодом (MIT / BSD-3 / Apache-2.0 / ISC); іконки — Lucide (ISC) і власні', en: 'open-source libraries (MIT / BSD-3 / Apache-2.0 / ISC); icons — Lucide (ISC) and our own' }],
+  ['Figma', 'https://www.figma.com', { uk: 'макети дизайну сторінок, які зробила команда', en: 'the team’s page design mock-ups' }],
+  ['Python: requests, NumPy, Pillow', 'https://www.python.org', { uk: 'пайплайн, що перетворює дані NASA на файли сайту (папка pipeline/)', en: 'the pipeline that turns NASA data into the site’s files (pipeline/ folder)' }],
+  ['GitHub', 'https://github.com/LuuFus/Nasa-Space-App-Challenge', { uk: 'код проєкту й уся історія розробки', en: 'the project code and its whole development history' }],
   ['Shaders', 'https://shaders.com', { uk: 'WebGPU-ефекти стартової сторінки (брижі під курсором, полярне сяйво) — MIT', en: 'WebGPU effects of the start page (ripples under the cursor, aurora) — MIT' }],
 ];

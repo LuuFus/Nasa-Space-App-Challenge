@@ -478,10 +478,11 @@ export default function MapView({ active }) {
           if (my !== seq) return;
           const val = valueAt(layer, rgba, st.lang);
           if (val) setHover((h) => (h && h.lon === lon ? { ...h, val, layer } : h));
+          useStore.setState({ probe: val ? { layer: layer.id, value: val.value, text: val.text } : null });
         });
       }
     };
-    const out = () => { seq++; setHover(null); };
+    const out = () => { seq++; setHover(null); useStore.setState({ probe: null }); };
     const click = (e) => {
       const { lng, lat } = e.lngLat;
       const lon = ((((lng + 180) % 360) + 360) % 360) - 180;

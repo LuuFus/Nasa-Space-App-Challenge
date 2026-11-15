@@ -145,13 +145,14 @@ export default function GlobeView() {
     const eng = engRef.current;
     if (!eng) return;
     const offHover = eng.on('hover', (p) => {
-      if (!p) { setHover(null); vecRef.current?.setHover(null); return; }
+      if (!p) { setHover(null); vecRef.current?.setHover(null); useStore.setState({ probe: null }); return; }
       const c = countryAt(countries, p.lon, p.lat);
       vecRef.current?.setHover(c?.id || null);
       const st = useStore.getState();
       const ov = layerById(st.catalog, st.overlayId);
       const val = ov ? valueAt(ov, eng.sampleOverlay(p.lon, p.lat), st.lang) : null;
       setHover({ ...p, country: c, val, layer: ov });
+      useStore.setState({ probe: val && ov ? { layer: ov.id, value: val.value, text: val.text } : null });
     });
     const offClick = eng.on('click', (p) => {
       const c = countryAt(countries, p.lon, p.lat);

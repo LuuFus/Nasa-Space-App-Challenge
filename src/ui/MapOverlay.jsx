@@ -43,7 +43,7 @@ export default function MapOverlay() {
         )}
         {ov && (
           <div className="chip-map"><Layers size={14} strokeWidth={1.75} /> {pick(ov.title)}{ov.period && <> · <b>{fmtDate(ov, s.dates[ov.id] ?? ov.date, lang)}</b></>}
-            <button title={t('none')} aria-label={t('none')} onClick={() => s.setOverlay(null)}><X size={14} strokeWidth={1.75} /></button>
+            <button className="chip-off" title={lang === 'uk' ? 'Вимкнути шар' : 'Turn the layer off'} onClick={() => s.setOverlay(null)}><X size={14} strokeWidth={1.75} /> {lang === 'uk' ? 'Вимкнути' : 'Off'}</button>
           </div>
         )}
         {s.trendMap && (

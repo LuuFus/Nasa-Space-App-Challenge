@@ -11,6 +11,7 @@ import { SOURCES } from '../content/sources.js';
 import { ABOUT, BRAND, CTA, FEATURES, FOOTER, HERO, NAV, PHOTOS, SECTIONS, STATS, STEPS, TOOLS, VIDEO } from './content.js';
 import { CursorAura, ShaderBoundary, trackLight, useReveal, useWebGPU } from './effects.jsx';
 import { LIcon } from './icons.jsx';
+import RoadmapDialog from '../ui/Roadmap.jsx';
 
 // WebGPU effects live in their own chunk: browsers without WebGPU never load it
 const HeroShader = lazy(() => import('./shaders.jsx').then((m) => ({ default: m.HeroShader })));
@@ -55,7 +56,7 @@ const Mark = () => (
   </svg>
 );
 
-function Header({ lang, setLang, pick }) {
+function Header({ lang, setLang, pick, openPlans }) {
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);
@@ -73,7 +74,7 @@ function Header({ lang, setLang, pick }) {
           {NAV.map((n) => (n.primary
             ? <Chip key={n.id} href={n.href} variant="ice" className={n.show ? '' : 'is-hidden'}>{pick(n.label)}</Chip>
             : <a key={n.id} className={`l-navlink${n.show ? '' : ' is-hidden'}`} href={n.href}
-              onClick={n.scroll ? (e) => { e.preventDefault(); scrollToId(n.href.slice(1)); } : undefined}>{pick(n.label)}</a>))}
+              onClick={n.scroll ? (e) => { e.preventDefault(); scrollToId(n.href.slice(1)); } : n.dialog ? (e) => { e.preventDefault(); openPlans(); } : undefined}>{pick(n.label)}</a>))}
         </nav>
         <div className="l-tools">
           {TOOLS.lang && (
@@ -301,7 +302,7 @@ function SourcesDialog({ open, onClose, pick }) {
   );
 }
 
-function Footer({ pick }) {
+function Footer({ pick, openPlans }) {
   const [open, setOpen] = useState(false);
   return (
     <footer className="l-footer">
@@ -310,7 +311,11 @@ function Footer({ pick }) {
           <div className="l-foot-about">
             <p className="l-foot-team">IT Detectives</p>
             <p className="l-foot-text">{pick(FOOTER.text)}</p>
-            <Chip onClick={() => setOpen(true)} variant="ghost" icon={<BookIcon />} iconFirst aria-haspopup="dialog">{pick(FOOTER.sources)}</Chip>
+            <div className="l-foot-btns">
+              <Chip onClick={() => setOpen(true)} variant="ghost" icon={<BookIcon />} iconFirst aria-haspopup="dialog">{pick(FOOTER.sources)}</Chip>
+              <Chip onClick={openPlans} variant="ghost" icon="↗" aria-haspopup="dialog">{pick(FOOTER.roadmap)}</Chip>
+            </div>
+            <p className="l-foot-ai">{pick(FOOTER.ai)}</p>
           </div>
           <ul className="l-logos">
             {FOOTER.partners.map((p) => (
@@ -336,11 +341,12 @@ export default function Landing() {
   const lang = useStore((s) => s.lang);
   const setLang = useStore((s) => s.setLang);
   const pick = (o) => pickLang(lang, o);
+  const [plans, setPlans] = useState(false);
   useReveal();
   return (
     <div className="landing">
       <CursorAura />
-      <Header lang={lang} setLang={setLang} pick={pick} />
+      <Header lang={lang} setLang={setLang} pick={pick} openPlans={() => setPlans(true)} />
       <main>
         <Hero lang={lang} pick={pick} />
         <About pick={pick} />
@@ -349,7 +355,8 @@ export default function Landing() {
         <Photos pick={pick} />
         <Cta pick={pick} />
       </main>
-      <Footer pick={pick} />
+      <Footer pick={pick} openPlans={() => setPlans(true)} />
+      <RoadmapDialog open={plans} onClose={() => setPlans(false)} lang={lang} />
     </div>
   );
 }

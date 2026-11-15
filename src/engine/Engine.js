@@ -475,6 +475,12 @@ export class Engine {
     this.uniforms.uPxPerKm.value = (this.focalPx / Math.max(alt, 1e-6) / 6371) * (m >= 0.5 ? 0.86 : 1);
   }
 
+  /** true while pictures of the current view are still loading (base picture or data layer) */
+  isBusy() {
+    // only what is on the screen counts (tiles fetched ahead for later do not hold the player)
+    return this.uploads.length > 0 || [this.overlay, this.base, this.swipeL, this.swipeR].some((l) => !l.isComplete());
+  }
+
   /** stop drawing while another view (the OpenStreetMap one) covers the engine */
   setPaused(p) {
     this.paused = p;

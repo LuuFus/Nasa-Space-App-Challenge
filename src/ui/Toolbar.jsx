@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { Flag, STROKE, Switch } from './Icons.jsx';
+import SearchBox from './SearchBox.jsx';
 
 const BASE = import.meta.env.BASE_URL || './';
 
@@ -116,6 +117,8 @@ export default function Toolbar() {
           ))}
         </div>
       </div>
+
+      <SearchBox />
 
       <div className="seg-ctl lang" role="group" aria-label={uk ? 'Мова' : 'Language'}>
         <button type="button" className={lang === 'uk' ? 'on' : ''} aria-pressed={lang === 'uk'} onClick={() => s.setLang('uk')}><Flag code="uk" /> UA</button>

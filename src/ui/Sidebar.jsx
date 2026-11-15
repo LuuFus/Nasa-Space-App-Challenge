@@ -10,12 +10,13 @@ const load = {
   planet: () => import('./PlanetPanel.jsx'),
   swipe: () => import('./SwipePanel.jsx'),
   events: () => import('./EventsPanel.jsx'),
+  notes: () => import('./NotesPanel.jsx'),
   glossary: () => import('./GlossaryPanel.jsx'),
   about: () => import('./AboutPanel.jsx'),
 };
 const PANELS = Object.fromEntries(Object.entries(load).map(([k, f]) => [k, lazy(f)]));
 PANELS.layers = LayersPanel;
-const TABS = ['layers', 'compare', 'planet', 'swipe', 'events', 'glossary', 'about'];
+const TABS = ['layers', 'compare', 'planet', 'swipe', 'events', 'notes', 'glossary', 'about'];
 const DEFAULT_W = 400;
 
 /**

@@ -1,5 +1,5 @@
 import {
-  BookOpen, Cloud, Droplets, Flame, GitCompareArrows, Globe, Info, Layers, LineChart, Radar, Shield,
+  BookOpen, NotebookPen, Cloud, Droplets, Flame, GitCompareArrows, Globe, Info, Layers, LineChart, Radar, Shield,
   Snowflake, SplitSquareHorizontal, Sparkles, Sun, Thermometer, Tornado, Trees, Waves, Wind,
 } from 'lucide-react';
 import { EVENT_CATS } from '../content/events.js';
@@ -10,7 +10,7 @@ export const STROKE = 1.75;
 /** side rail */
 export const TAB_ICONS = {
   layers: Layers, compare: GitCompareArrows, planet: Globe, swipe: SplitSquareHorizontal,
-  events: Radar, glossary: BookOpen, about: Info,
+  events: Radar, notes: NotebookPen, glossary: BookOpen, about: Info,
 };
 
 /** data-layer categories in the Layers tab */

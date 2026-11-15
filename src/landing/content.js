@@ -9,6 +9,7 @@ export const asset = (path) => `${BASE}${path}`;
 export const NAV = [
   { id: 'about', label: { uk: 'Про проєкт', en: 'About' }, href: '#about', show: true, scroll: true },
   { id: 'features', label: { uk: 'Можливості', en: 'Features' }, href: '#features', show: true, scroll: true },
+  { id: 'roadmap', label: { uk: 'Плани', en: 'Roadmap' }, href: '#roadmap', show: true, dialog: 'roadmap' },
   { id: 'research', label: { uk: 'Дослідження', en: 'Research' }, href: '#/research', show: false },
   { id: 'glossary', label: { uk: 'Глосарій', en: 'Glossary' }, href: '#/glossary', show: false },
   { id: 'ai', label: { uk: 'Штучний інтелект', en: 'AI assistant' }, href: '#/ai', show: false },
@@ -59,8 +60,8 @@ export const ABOUT = {
   kicker: { uk: 'Про проєкт', en: 'About the project' },
   title: { uk: 'Супутники NASA бачать, як змінюється Земля. Ми допомагаємо це зрозуміти.', en: 'NASA satellites see how the Earth changes. We help you understand it.' },
   lead: {
-    uk: 'Earth Trend Detective — інтерактивна Земля для школярів, студентів і вчителів. Ти обираєш тему — температуру, ліси, пожежі, лід чи забруднення повітря, — а сайт показує справжні супутникові дані, перевіряє, чи зміна справді є трендом, і пояснює результат простими словами.',
-    en: 'Earth Trend Detective is an interactive Earth for school students, university students and teachers. You pick a topic — temperature, forests, fires, ice or air pollution — and the site shows real satellite data, checks whether a change is really a trend and explains the result in plain words.',
+    uk: 'Earth Trend Detective — інтерактивна Земля для кожного, кому цікаво, як змінюється наша планета. Ти обираєш тему — температуру, ліси, пожежі, лід чи забруднення повітря, — а сайт показує справжні супутникові дані NASA, перевіряє, чи зміна справді є трендом, і пояснює результат простими словами.',
+    en: 'Earth Trend Detective is an interactive Earth for anyone curious about how our planet is changing. You pick a topic — temperature, forests, fires, ice or air pollution — and the site shows real satellite data, checks whether a change is really a trend and explains the result in plain words.',
   },
   pillars: [
     {
@@ -80,8 +81,8 @@ export const ABOUT = {
     {
       icon: 'people', title: { uk: 'Для кого', en: 'Who it is for' },
       text: {
-        uk: 'Для уроків географії, біології, фізики й інформатики, для проєктних робіт і олімпіад — і для кожного, хто хоче побачити війну в Україні та зміни клімату очима супутників. Українською й англійською, безкоштовно, без реєстрації.',
-        en: 'For geography, biology, physics and computer-science lessons, school projects and olympiads — and for anyone who wants to see the war in Ukraine and climate change through the eyes of satellites. In Ukrainian and English, free, no sign-up.',
+        uk: 'Для всіх, хто хоче сам розібратися, що відбувається з планетою. Школярам і студентам — для уроків, проєктів МАН та олімпіад. Вчителям — щоб пояснювати клімат на живих прикладах. Журналістам, дослідникам і просто допитливим — щоб перевіряти факти власними очима. Спеціальних знань не треба; українською й англійською, безкоштовно, без реєстрації.',
+        en: 'For everyone who wants to figure out for themselves what is happening to the planet. Students — for lessons, science fairs and olympiads. Teachers — to explain the climate with live examples. Journalists, researchers and the simply curious — to check facts with their own eyes. No special knowledge needed; in Ukrainian and English, free, no sign-up.',
       },
     },
   ],
@@ -192,6 +193,11 @@ export const FOOTER = {
     { id: 'noosphere', name: 'Noosphere Engineering School', url: 'https://noosphereglobal.com/', logo: asset('brand/noosphere.png'), tile: 'white' },
   ],
   sources: { uk: 'Джерела', en: 'Sources' },
+  roadmap: { uk: 'Майбутні оновлення', en: 'Coming next' },
+  ai: {
+    uk: 'Під час розробки ми використовували ШІ-асистента Claude (Anthropic) — він допомагав писати код і тексти. Ідеї, дані, дизайн і перевірку зробила команда. Докладніше — у «Джерелах».',
+    en: 'During development we used the AI assistant Claude (Anthropic) — it helped write code and texts. Ideas, data, design and checking were done by the team. More in “Sources”.',
+  },
   sourcesTitle: { uk: 'Джерела даних і матеріалів', en: 'Data sources and materials' },
   disclaimer: {
     uk: 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала. Логотипи належать їхнім власникам і ведуть на їхні сайти.',

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, X, Moon, TriangleAlert } from 'lucide-react';
+
+import { ChevronRight, ExternalLink, X, Moon, TriangleAlert } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { showNight } from '../lib/actions.js';
 import { activeHotspots } from '../content/hotspots.js';
 import { useT } from '../i18n/index.js';
-import { fmtDate, firstDate, lastDate, periodOf, snapDate, stepDate, worldviewUrl } from '../lib/dates.js';
+import { worldviewUrl } from '../lib/dates.js';
+import LayerDate from './LayerDate.jsx';
 import Legend from './Legend.jsx';
 import TrendMaps from './TrendMaps.jsx';
 import FrontControls from './FrontControls.jsx';
@@ -34,6 +35,37 @@ export default function LayersPanel() {
   };
   return (
     <div className="layers-panel">
+      {ov && (
+        <section className="card active-layer">
+          <div className="card-head">
+            <span className="active-tag">{uk ? 'Увімкнений шар' : 'Layer on'}</span>
+            <button type="button" className="btn-off" onClick={() => s.setOverlay(null)}>
+              <X size={15} strokeWidth={STROKE} /> {uk ? 'Вимкнути шар' : 'Turn off'}
+            </button>
+          </div>
+          <h4>{pick(ov.title)}</h4>
+          <p className="desc">{pick(ov.desc)}</p>
+          {(() => {
+            const n = activeHotspots(ov.id, null).length;
+            return n > 0 && s.toggles.hotspots && (
+              <p className="hs-hint"><TriangleAlert size={14} strokeWidth={STROKE} /> {uk
+                ? `На карті ${n} ${n === 1 ? 'значок' : n < 5 ? 'значки' : 'значків'} — місця, де з цим шаром щось незвичне. Наведи на значок: там пояснення, фото й графік.`
+                : `${n} sign${n === 1 ? '' : 's'} on the map mark places where this layer shows something unusual. Point at a sign for an explanation, a photo and a chart.`}</p>
+            );
+          })()}
+          <LayerDate layer={ov} />
+          <label className="row small">{t('opacity')}
+            <input type="range" min="0.1" max="1" step="0.05" value={s.overlayOpacity} onChange={(e) => s.setOverlayOpacity(+e.target.value)} />
+            <span className="mono">{Math.round(s.overlayOpacity * 100)}%</span>
+          </label>
+          <Legend layer={ov} />
+          <div className="card-foot">
+            <a className="ext" href={worldviewUrl(ov, s.dates[ov.id] ?? ov.date)} target="_blank" rel="noreferrer">{t('openWorldview')} <ExternalLink size={12} strokeWidth={STROKE} /></a>
+            <span className="muted small">NASA GIBS · <span className="mono">{ov.gibs}</span></span>
+          </div>
+        </section>
+      )}
+
       {/* 1. base map */}
       <section className="block">
         <h3 className="block-title"><span className="block-num mono">01</span>{uk ? 'Базова підкладка' : 'Base map'}</h3>
@@ -80,8 +112,10 @@ export default function LayersPanel() {
                   {items.map((l) => {
                     const on = s.overlayId === l.id || (l.base && s.baseId === l.id);
                     return (
-                      <button key={l.id} type="button" className={on ? 'layer-row on' : 'layer-row'} aria-pressed={on} onClick={() => choose(l)}>
+                      <button key={l.id} type="button" className={on ? 'layer-row on' : 'layer-row'} aria-pressed={on} onClick={() => choose(l)}
+                        title={on && !l.base ? (uk ? 'Натисни ще раз, щоб вимкнути' : 'Click again to turn off') : undefined}>
                         {pick(l.title)}
+                        {on && !l.base && <span className="row-off"><X size={13} strokeWidth={STROKE} /></span>}
                       </button>
                     );
                   })}
@@ -102,82 +136,8 @@ export default function LayersPanel() {
         </div>
       </section>
 
-      {ov && (
-        <section className="card active-layer">
-          <div className="card-head">
-            <h4>{pick(ov.title)}</h4>
-            <button type="button" className="icon-btn" onClick={() => s.setOverlay(null)} title={uk ? 'Вимкнути шар' : 'Turn the layer off'}>
-              <X size={15} strokeWidth={STROKE} />
-            </button>
-          </div>
-          <p className="desc">{pick(ov.desc)}</p>
-          {(() => {
-            const n = activeHotspots(ov.id, null).length;
-            return n > 0 && s.toggles.hotspots && (
-              <p className="hs-hint"><TriangleAlert size={14} strokeWidth={STROKE} /> {uk
-                ? `На карті ${n} ${n === 1 ? 'значок' : n < 5 ? 'значки' : 'значків'} — місця, де з цим шаром щось незвичне. Наведи на значок: там пояснення, фото й графік.`
-                : `${n} sign${n === 1 ? '' : 's'} on the map mark places where this layer shows something unusual. Point at a sign for an explanation, a photo and a chart.`}</p>
-            );
-          })()}
-          <LayerDate layer={ov} />
-          <label className="row small">{t('opacity')}
-            <input type="range" min="0.1" max="1" step="0.05" value={s.overlayOpacity} onChange={(e) => s.setOverlayOpacity(+e.target.value)} />
-            <span className="mono">{Math.round(s.overlayOpacity * 100)}%</span>
-          </label>
-          <Legend layer={ov} />
-          <div className="card-foot">
-            <a className="ext" href={worldviewUrl(ov, s.dates[ov.id] ?? ov.date)} target="_blank" rel="noreferrer">{t('openWorldview')} <ExternalLink size={12} strokeWidth={STROKE} /></a>
-            <span className="muted small">NASA GIBS · <span className="mono">{ov.gibs}</span></span>
-          </div>
-        </section>
-      )}
     </div>
   );
 }
 
 /** date picker + previous / next + simple animation through time */
-export function LayerDate({ layer }) {
-  const { t, lang } = useT();
-  const dates = useStore((s) => s.dates);
-  const setDate = useStore((s) => s.setDate);
-  const date = dates[layer.id] ?? layer.date;
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef(null);
-  const p = periodOf(layer);
-  useEffect(() => {
-    if (!playing) return;
-    timer.current = setInterval(() => {
-      const cur = useStore.getState().dates[layer.id] ?? layer.date;
-      const nx = stepDate(layer, cur, p === 'P1D' ? 30 : 1);
-      if (nx === cur) { setPlaying(false); return; }
-      setDate(layer.id, nx);
-    }, 1600);
-    return () => clearInterval(timer.current);
-  }, [playing, layer.id]);
-  if (!p) return null;
-  const uk = lang === 'uk';
-  const type = p === 'P1M' ? 'month' : 'date';
-  const value = p === 'P1M' ? date?.slice(0, 7) : date;
-  return (
-    <div className="date-ctl">
-      <div className="date-row">
-        <button type="button" className="icon-btn" onClick={() => setDate(layer.id, stepDate(layer, date, -1))} title={uk ? 'Назад' : 'Back'}><ChevronLeft size={16} strokeWidth={STROKE} /></button>
-        <input className="mono" type={p === 'P1Y' ? 'number' : type} value={p === 'P1Y' ? date?.slice(0, 4) : value}
-          aria-label={t('date')}
-          min={p === 'P1Y' ? firstDate(layer)?.slice(0, 4) : type === 'month' ? firstDate(layer)?.slice(0, 7) : firstDate(layer)}
-          max={p === 'P1Y' ? lastDate(layer)?.slice(0, 4) : type === 'month' ? lastDate(layer)?.slice(0, 7) : lastDate(layer)}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (!v) return;
-            const d = p === 'P1Y' ? `${v}-${(layer.date || '2000-01-01').slice(5)}` : type === 'month' ? v + '-01' : v;
-            setDate(layer.id, snapDate(layer, d));
-          }} />
-        <button type="button" className="icon-btn" onClick={() => setDate(layer.id, stepDate(layer, date, 1))} title={uk ? 'Далі' : 'Next'}><ChevronRight size={16} strokeWidth={STROKE} /></button>
-        <button type="button" className={playing ? 'icon-btn on' : 'icon-btn'} onClick={() => setPlaying(!playing)} title={playing ? (uk ? 'Зупинити' : 'Stop') : (uk ? 'Анімація в часі' : 'Animate through time')}>
-          {playing ? <Pause size={15} strokeWidth={STROKE} /> : <Play size={15} strokeWidth={STROKE} />}
-        </button>
-      </div>
-      <div className="muted small">{fmtDate(layer, date, lang)} · <span className="mono">{firstDate(layer)?.slice(0, 4)}–{lastDate(layer)?.slice(0, 4)}</span></div>
-    </div>
-  );
-}

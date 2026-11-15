@@ -21,6 +21,8 @@ export const useStore = create((set, get) => ({
   setWx: (w) => set({ wx: { ...get().wx, ...w } }),
   // colour of countries by trend (Compare tab): fn(countryId) -> CSS colour, or null
   choropleth: null,
+  // value of the data layer under the mouse, for the arrow on the legend: { layer, value, text }
+  probe: null,
   // the open card of a hot spot (src/ui/Hotspots.jsx): { id, x, y, pinned }
   hotspot: null,
   spot: null,               // { lon, lat } of the point forecast card
