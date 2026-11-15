@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, X, Moon } from 'lucide-react';
 import { useStore } from '../state/store.js';
+import { showNight } from '../lib/actions.js';
 import { useT } from '../i18n/index.js';
 import { fmtDate, firstDate, lastDate, periodOf, snapDate, stepDate, worldviewUrl } from '../lib/dates.js';
 import Legend from './Legend.jsx';
@@ -84,6 +85,15 @@ export default function LayersPanel() {
                     );
                   })}
                   {c === 'climate' && <TrendMaps />}
+                  {c === 'lights' && (
+                    <button type="button" className={s.baseId === 'nightlights' ? 'night-btn on' : 'night-btn'} onClick={showNight}>
+                      <Moon size={18} strokeWidth={STROKE} />
+                      <span>
+                        <b>{uk ? 'Подивитися на Землю вночі' : 'See the Earth at night'}</b>
+                        <small>{uk ? 'Уся планета у світлі міст: видно, де живуть люди, де газові факели, а де темрява.' : 'The whole planet in city lights: where people live, where gas flares burn and where it is dark.'}</small>
+                      </span>
+                    </button>
+                  )}
                 </div>
               </details>
             );

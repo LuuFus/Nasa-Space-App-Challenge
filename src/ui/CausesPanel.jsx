@@ -16,6 +16,48 @@ const P = {
   WS2M: { uk: 'Вітер', en: 'Wind', unit: { uk: 'м/с', en: 'm/s' }, mode: 'diff' },
   PRECSNOLAND: { uk: 'Снігопад', en: 'Snowfall', unit: { uk: 'мм/добу', en: 'mm/day' }, mode: 'pct' },
 };
+// How far from the normal is "noticeable", "strong" and "dangerous" — rough
+// thresholds used by weather services for heat waves and droughts, written for students.
+// `bad`: +1 = above the normal is the problem (heat, wind, flood rain), -1 = below.
+const LEVELS = [
+  { color: '#5b8def', uk: 'близько до норми', en: 'close to normal' },
+  { color: '#f2c94c', uk: 'помітно', en: 'noticeable' },
+  { color: '#f2994a', uk: 'сильно', en: 'strong' },
+  { color: '#eb5757', uk: 'небезпечно', en: 'dangerous' },
+];
+const SCALE = {
+  T2M_MAX: { bad: 1, th: [1, 2.5, 4],
+    what: { uk: 'на скільки градусів денний максимум був вищим (+) чи нижчим (−) за звичайний для цього місяця', en: 'how many degrees the daily maximum was above (+) or below (−) the usual for the month' },
+    risk: { uk: 'Від +2,5 °C — хвиля спеки: тепловий удар у людей, рослини в’януть. Від +4 °C — небезпечна спека: рекорди, лісові пожежі, перевантаження енергосистеми.', en: 'From +2.5 °C — a heat wave: heat stroke, wilting plants. From +4 °C — dangerous heat: records, wildfires, overloaded power grids.' } },
+  PRECTOTCORR: { bad: -1, pct: true, th: [90, 70, 50], wet: [130, 170, 250],
+    what: { uk: 'скільки відсотків від звичайної кількості опадів випало (100 % — рівно норма)', en: 'what percent of the usual rain fell (100% = exactly normal)' },
+    risk: { uk: 'Менше 70 % — посуха: висихають ґрунт і трава. Менше 50 % — сильна посуха: неврожай, пожежі, міліють річки. Для повеней навпаки: понад 170 % — ґрунт не встигає вбирати воду.', en: 'Below 70% — drought: soil and grass dry out. Below 50% — severe drought: crop failure, fires, shallow rivers. For floods it is the other way: above 170% the soil cannot soak up the water.' } },
+  GWETROOT: { bad: -1, th: [-3, -7, -12],
+    what: { uk: 'на скільки процентних пунктів ґрунт на глибині коренів був сухішим (−) чи вологішим (+) за норму', en: 'how many percentage points the root-zone soil was drier (−) or wetter (+) than normal' },
+    risk: { uk: 'Від −7 — посуха ґрунту: рослинам бракує води, трава й ліс легко займаються. Від −12 — небезпечно: неврожай, загибель лісу, великі пожежі.', en: 'From −7 — soil drought: plants lack water, grass and forest catch fire easily. From −12 — dangerous: crop failure, dying forests, big fires.' } },
+  RH2M: { bad: -1, th: [-3, -7, -12],
+    what: { uk: 'на скільки процентних пунктів повітря було сухішим (−) чи вологішим (+) за норму', en: 'how many percentage points the air was drier (−) or wetter (+) than normal' },
+    risk: { uk: 'Від −7 — сухе повітря швидко висушує траву й гілки. Від −12 — будь-яка іскра може стати пожежею.', en: 'From −7 — dry air quickly dries grass and twigs. From −12 — any spark can become a fire.' } },
+  WS2M: { bad: 1, th: [0.3, 0.7, 1.2],
+    what: { uk: 'на скільки метрів за секунду вітер був сильнішим (+) чи слабшим (−) за звичайний', en: 'how many metres per second the wind was stronger (+) or weaker (−) than usual' },
+    risk: { uk: 'Це середній вітер за місяць — пориви в окремі дні в кілька разів сильніші. Навіть +1 м/с у середньому означає частіші бурі й швидше поширення вогню.', en: 'This is the monthly mean wind — gusts on single days are several times stronger. Even +1 m/s on average means more storms and faster-spreading fires.' } },
+  PRECSNOLAND: { bad: -1, pct: true, th: [80, 60, 40],
+    what: { uk: 'скільки відсотків від звичайного снігу випало (100 % — норма)', en: 'what percent of the usual snow fell (100% = normal)' },
+    risk: { uk: 'Менше 60 % — «сніжна посуха»: навесні річкам бракує талої води. Менше 40 % — небезпечно для водосховищ, полів і міст.', en: 'Below 60% — a “snow drought”: rivers lack meltwater in spring. Below 40% — dangerous for reservoirs, farms and cities.' } },
+};
+const WET_KINDS = new Set(['flood', 'hurricane']);
+/** 0..3 — how far from the normal, in the direction that caused the event */
+function level(param, v, kind) {
+  const sc = SCALE[param];
+  if (v == null || !sc) return 0;
+  if (sc.pct) {
+    if (WET_KINDS.has(kind)) return sc.wet.filter((t) => v >= t).length;
+    return sc.th.filter((t) => v <= t).length;
+  }
+  const x = v * sc.bad;
+  return sc.th.filter((t) => x >= Math.abs(t)).length;
+}
+
 const KIND_PARAMS = {
   fire: ['T2M_MAX', 'PRECTOTCORR', 'GWETROOT', 'RH2M', 'WS2M'],
   heat: ['T2M_MAX', 'GWETROOT', 'RH2M', 'PRECTOTCORR'],
@@ -111,6 +153,36 @@ function explainCauses(c, lang) {
   return out;
 }
 
+/** what the colours and numbers of the monthly chart mean, and when it gets dangerous */
+function ChartGuide({ c, param, lang }) {
+  const uk = lang === 'uk';
+  const sc = SCALE[param];
+  if (!sc) return null;
+  const ev = c.months.find((r) => r.month === c.date.slice(0, 7)) || c.months[c.months.length - 1];
+  const x = ev[param];
+  const k = P[param].scale || 1;
+  let example = '';
+  if (x) {
+    const v = P[param].mode === 'pct' ? Math.round((x.value / x.normal) * 100) : (x.value - x.normal) * k;
+    const valTxt = P[param].mode === 'pct' ? `${v} %` : `${v > 0 ? '+' : ''}${num(v, 1, lang)} ${u(param, lang)}`;
+    example = uk
+      ? `Приклад: у ${MONTHS_IN[+ev.month.slice(5) - 1]} ${ev.month.slice(0, 4)} стовпчик показує ${valTxt}: звичайно тут ${num(x.normal * k, 1, lang)} ${u(param, lang)}, а було ${num(x.value * k, 1, lang)} ${u(param, lang)}. Рівень — «${LEVELS[level(param, P[param].mode === 'pct' ? Math.round((x.value / x.normal) * 100) : +((x.value - x.normal) * k).toFixed(2), c.kind)].uk}».`
+      : `Example: in ${MONTHS.en[+ev.month.slice(5) - 1]} ${ev.month.slice(0, 4)} the bar shows ${valTxt}: usually ${num(x.normal * k, 1, lang)} ${u(param, lang)}, but it was ${num(x.value * k, 1, lang)} ${u(param, lang)}. Level — “${LEVELS[level(param, P[param].mode === 'pct' ? Math.round((x.value / x.normal) * 100) : +((x.value - x.normal) * k).toFixed(2), c.kind)].en}”.`;
+  }
+  return (
+    <div className="chart-guide">
+      <div className="cg-legend">
+        {LEVELS.map((l) => <span key={l.en}><i style={{ background: l.color }} />{l[lang]}</span>)}
+        <span><i className="cg-event" />{uk ? 'місяць події' : 'month of the event'}</span>
+      </div>
+      <p><b>{uk ? 'Що означає число. ' : 'What the number means. '}</b>{uk ? 'Кожен стовпчик — один місяць; пунктир — норма (середнє 1991–2020 для цього місяця). Число — ' : 'Each bar is one month; the dashed line is the normal (the 1991–2020 average for that month). The number is '}{sc.what[lang]}.</p>
+      <p><b>{uk ? 'Колір — наскільки це далеко від норми ' : 'The colour shows how far from the normal it is '}</b>{uk ? '(у бік, що спричинив подію): синій — майже норма, жовтий — помітно, помаранчевий — сильно, червоний — небезпечно.' : '(in the direction that caused the event): blue — about normal, yellow — noticeable, orange — strong, red — dangerous.'}</p>
+      <p><b>{uk ? 'Наскільки небезпечно. ' : 'How dangerous. '}</b>{sc.risk[lang]}</p>
+      {example && <p className="cg-example">{example}</p>}
+    </div>
+  );
+}
+
 export default function CausesPanel({ eventId }) {
   const { lang } = useT();
   const uk = lang === 'uk';
@@ -122,23 +194,59 @@ export default function CausesPanel({ eventId }) {
     if (!c || !param) return null;
     const meta = P[param];
     const sc = meta.scale || 1;
+    const evMonth = c.date.slice(0, 7);
+    const vals = c.months.map((r) => {
+      const x = r[param];
+      if (!x) return null;
+      return meta.mode === 'pct' ? (x.normal > 0 ? Math.round((x.value / x.normal) * 100) : null) : +((x.value - x.normal) * sc).toFixed(2);
+    });
+    const scl = SCALE[param];
+    const unitTxt = meta.mode === 'pct' ? (uk ? '% норми' : '% of normal') : u(param, lang);
+    // background bands: where "noticeable", "strong", "dangerous" begin
+    const bands = [];
+    if (scl) {
+      const edges = scl.pct ? (WET_KINDS.has(c.kind) ? scl.wet : scl.th) : scl.th.map((t) => Math.abs(t) * scl.bad);
+      edges.forEach((e0, i) => {
+        const up = scl.pct ? WET_KINDS.has(c.kind) : scl.bad > 0;
+        const ok = vals.filter((v) => v != null);
+        const e1 = edges[i + 1] ?? (up ? Math.max(e0, ...ok) : Math.min(e0, ...ok));
+        bands.push([{ yAxis: e0, itemStyle: { color: LEVELS[i + 1].color, opacity: 0.08 + i * 0.03 } }, { yAxis: e1 }]);
+      });
+    }
     const monthsOpt = {
       backgroundColor: 'transparent',
       title: { text: uk ? 'Місяці перед подією: відхилення від норми 1991–2020' : 'Months before the event: departure from the 1991–2020 normal', textStyle: { fontSize: 11, color: '#c7d1e3' }, left: 4, top: 2 },
-      tooltip: { trigger: 'axis' },
-      grid: { left: 44, right: 10, top: 30, bottom: 26 },
-      xAxis: { type: 'category', data: c.months.map((r) => r.month), axisLabel: { fontSize: 10 } },
-      yAxis: { type: 'value', name: meta.mode === 'pct' ? '% норми' : `Δ ${u(param, lang)}`, nameTextStyle: { fontSize: 10 } },
+      tooltip: {
+        trigger: 'axis',
+        formatter: (ps) => {
+          const pt = (Array.isArray(ps) ? ps : [ps])[0];
+          const i = pt.dataIndex, v = vals[i], r = c.months[i], x = r[param];
+          if (v == null) return '';
+          const lv = level(param, v, c.kind);
+          const sign = meta.mode === 'pct' ? '' : v > 0 ? '+' : '';
+          const norm = x ? `${uk ? 'норма' : 'normal'} ${num(x.normal * sc, 1, lang)}, ${uk ? 'було' : 'was'} ${num(x.value * sc, 1, lang)} ${u(param, lang)}` : '';
+          return `<b>${mname(r.month, lang)} ${r.month.slice(0, 4)}</b>${r.month === evMonth ? (uk ? ' — місяць події' : ' — month of the event') : ''}<br/>`
+            + `${sign}${num(v, meta.mode === 'pct' ? 0 : 1, lang)} ${unitTxt}<br/>${norm}<br/>`
+            + `<span style="color:${LEVELS[lv].color}">● ${LEVELS[lv][lang]}</span>`;
+        },
+      },
+      grid: { left: 44, right: 10, top: 34, bottom: 26 },
+      xAxis: { type: 'category', data: c.months.map((r) => `${mname(r.month, lang).slice(0, 3)} ${r.month.slice(2, 4)}`), axisLabel: { fontSize: 10 } },
+      yAxis: { type: 'value', name: meta.mode === 'pct' ? (uk ? '% норми' : '% of normal') : `Δ ${u(param, lang)}`, nameTextStyle: { fontSize: 10 } },
       series: [{
         type: 'bar',
-        data: c.months.map((r) => {
-          const x = r[param];
-          if (!x) return null;
-          const v = meta.mode === 'pct' ? (x.normal > 0 ? Math.round((x.value / x.normal) * 100) : null) : +((x.value - x.normal) * sc).toFixed(2);
-          const bad = meta.mode === 'pct' ? (c.kind === 'flood' || c.kind === 'hurricane' ? v > 100 : v < 100) : (param === 'T2M_MAX' ? v > 0 : param === 'WS2M' ? v > 0 : v < 0);
-          return { value: v, itemStyle: { color: r.month === c.date.slice(0, 7) ? '#ffd166' : bad ? '#ff6b6b' : '#4cc9f0' } };
+        data: vals.map((v, i) => {
+          if (v == null) return null;
+          const ev = c.months[i].month === evMonth;
+          return {
+            value: v,
+            itemStyle: { color: LEVELS[level(param, v, c.kind)].color, borderColor: ev ? '#ffffff' : 'transparent', borderWidth: ev ? 2 : 0 },
+            label: ev ? { show: true, position: v < (meta.mode === 'pct' ? 100 : 0) ? 'bottom' : 'top', formatter: uk ? 'подія' : 'event', color: '#fff', fontSize: 10, fontWeight: 600 } : undefined,
+          };
         }),
-        markLine: meta.mode === 'pct' ? { symbol: 'none', data: [{ yAxis: 100 }], lineStyle: { color: '#fff', type: 'dashed' } } : undefined,
+        markLine: { symbol: 'none', silent: true, data: [{ yAxis: meta.mode === 'pct' ? 100 : 0 }], lineStyle: { color: '#fff', type: 'dashed', opacity: 0.7 },
+          label: { formatter: uk ? 'норма' : 'normal', fontSize: 10, color: '#c7d1e3' } },
+        markArea: bands.length ? { silent: true, data: bands } : undefined,
       }],
     };
     const days = c.days;
@@ -165,7 +273,8 @@ export default function CausesPanel({ eventId }) {
       <div className="row small">
         {KIND_PARAMS[c.kind].map((p) => <button key={p} className={param === p ? 'on' : ''} onClick={() => setParam(p)}>{P[p][lang]}</button>)}
       </div>
-      {opts && <Chart option={opts.monthsOpt} height={190} />}
+      {opts && <Chart option={opts.monthsOpt} height={210} />}
+      {opts && <ChartGuide c={c} param={param} lang={lang} />}
       {opts && <Chart option={opts.daysOpt} height={190} />}
       <p className="muted small">{c.source}. {uk ? 'Точка' : 'Point'}: {c.point[1].toFixed(2)}°, {c.point[0].toFixed(2)}°.</p>
     </div>

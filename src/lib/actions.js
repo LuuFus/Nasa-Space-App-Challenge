@@ -68,6 +68,24 @@ export function closeEvent(clearId = true) {
   useStore.setState({ eventApplied: null, ...(clearId ? { eventId: null } : {}) });
 }
 
+/**
+ * The Earth at night: the Black Marble picture (city lights seen by Suomi NPP)
+ * as the whole globe, without other colours on top.
+ */
+export function showNight() {
+  const st = useStore.getState();
+  if (st.eventApplied) closeEvent();
+  if (st.swipe.enabled) st.setSwipe({ enabled: false, preset: null });
+  st.setOverlay(null);
+  st.setTrendMap(null);
+  st.setBase('nightlights');
+  // bright borders and rivers would hide the lights: only the names of countries stay
+  for (const k of ['tint', 'clouds', 'borders', 'rivers', 'capitals']) st.toggle(k, false);
+  if (st.mode === 'osm') st.setBasemap('satellite');
+  else if (st.mode !== 'globe') st.setMode('globe');
+  flyTo(18, 34, 2.1);
+}
+
 export function clearSwipe() {
   useStore.getState().setSwipe({ enabled: false, preset: null });
 }

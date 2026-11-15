@@ -172,10 +172,17 @@ const FRAG = /* glsl */ `
 uniform sampler2D uTex;
 uniform float uOpacity;
 uniform int uMode;      // 0 = as is, 1 = keep only clouds, 2 = black "no data" becomes a hole
+uniform float uTexel;   // one texel of the tile texture
 varying vec2 vUv;
+float noData(vec2 uv) { vec3 c = texture2D(uTex, uv).rgb; return step(max(c.r, max(c.g, c.b)), 0.045); }
 void main() {
   vec4 c = texture2D(uTex, vUv);
-  if (uMode == 2 && max(c.r, max(c.g, c.b)) < 0.035) discard;
+  if (uMode == 2) {
+    // the hole is widened by ~2 texels: the edge of a swath is blurred into dark
+    // grey by filtering, which would otherwise show as thin black seams
+    float t = uTexel * 2.0;
+    if (noData(vUv) + noData(vUv + vec2(t, 0.0)) + noData(vUv - vec2(t, 0.0)) + noData(vUv + vec2(0.0, t)) + noData(vUv - vec2(0.0, t)) > 0.5) discard;
+  }
   if (uMode == 1) {
     float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
     float sat = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
@@ -248,7 +255,7 @@ export class TileLayer {
         uniforms: {
           uMorph: this.engine.uniforms.uMorph,
           uTex: { value: null }, uUV: { value: new THREE.Vector3(0, 0, 1) },
-          uLift: { value: this.lift }, uOpacity: { value: 1 }, uMode: { value: this.mode },
+          uLift: { value: this.lift }, uOpacity: { value: 1 }, uMode: { value: this.mode }, uTexel: { value: 1 / TILE_PX },
         },
         transparent: this.transparent,
         depthTest: this.engine.depthOn,

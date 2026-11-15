@@ -182,11 +182,10 @@ function Features({ pick, lang }) {
         <div className="l-feature-list">
           {FEATURES.map((f, i) => (
             <article key={f.id} className={i % 2 ? 'l-feature flip' : 'l-feature'} data-reveal>
-              <a className="l-shot" href="#/earth" onPointerMove={trackLight} aria-label={`${pick(f.title)} — ${lang === 'uk' ? 'відкрити' : 'open'}`}>
+              <figure className="l-shot">
                 <span className="l-shot-bar" aria-hidden="true"><i /><i /><i /></span>
                 <img src={f.shot} alt={pick(f.title)} loading="lazy" width="1280" height="768" />
-                <span className="l-shot-glare" aria-hidden="true" />
-              </a>
+              </figure>
               <div className="l-feature-text">
                 <span className="l-feature-num mono">{String(i + 1).padStart(2, '0')}</span>
                 <h3>{pick(f.title)}</h3>
@@ -240,6 +239,7 @@ function Photos({ pick }) {
               <figcaption>
                 <b>{pick(p.title)}</b>
                 <span>{pick(p.text)}</span>
+                {p.action && <a className="l-photo-action" href={p.action.href}>{pick(p.action.label)} →</a>}
                 <a href={p.url} target="_blank" rel="noreferrer">{p.credit} ↗</a>
               </figcaption>
             </figure>

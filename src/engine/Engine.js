@@ -4,30 +4,30 @@ import { DEG, FLAT_H, FLAT_W, equalEarthInverse, flatPos, globePos, vecToLonLat 
 import { TileLayer, gibsUrl, scheduler } from './TileLayer.js';
 import { SurfaceLayer } from './SurfaceLayer.js';
 import { Labels } from './Labels.js';
+import { fillersFor } from '../lib/gaps.js';
 
 // colours are used exactly as written (sRGB numbers), NASA tiles are shown untouched
 THREE.ColorManagement.enabled = false;
 
 // Daily satellite pictures have black stripes between orbits ("no data").
-// Those pixels are made transparent and a second picture fills them:
-// the twin satellite on the same day (Terra <-> Aqua, NOAA-20 <-> Suomi NPP).
+// Those pixels are made transparent and a second picture of the same day fills
+// them. MODIS (Terra, Aqua) leaves wedge-shaped gaps near the equator and both
+// MODIS satellites are old, so their gaps are filled with VIIRS (NOAA-20 since
+// 2018, Suomi NPP since 2012): its 3000 km wide swaths overlap and leave no gaps.
+const T = (gibs, maxLevel = 8, tms = '250m') => ({ gibs, tms, format: 'jpg', maxLevel });
+const NOAA20 = T('VIIRS_NOAA20_CorrectedReflectance_TrueColor');
+const SNPP = T('VIIRS_SNPP_CorrectedReflectance_TrueColor');
+const viirsOn = (date, older) => (date >= '2018-01-05' ? NOAA20 : date >= '2012-01-20' ? SNPP : older);
 const TWIN = {
-  MODIS_Terra_CorrectedReflectance_TrueColor: { gibs: 'MODIS_Aqua_CorrectedReflectance_TrueColor', tms: '250m', format: 'jpg', maxLevel: 8 },
-  MODIS_Aqua_CorrectedReflectance_TrueColor: { gibs: 'MODIS_Terra_CorrectedReflectance_TrueColor', tms: '250m', format: 'jpg', maxLevel: 8 },
-  VIIRS_NOAA20_CorrectedReflectance_TrueColor: { gibs: 'VIIRS_SNPP_CorrectedReflectance_TrueColor', tms: '250m', format: 'jpg', maxLevel: 8 },
-  MODIS_Terra_CorrectedReflectance_Bands721: { gibs: 'MODIS_Aqua_CorrectedReflectance_Bands721', tms: '250m', format: 'jpg', maxLevel: 8 },
+  MODIS_Terra_CorrectedReflectance_TrueColor: (d) => viirsOn(d, T('MODIS_Aqua_CorrectedReflectance_TrueColor')),
+  MODIS_Aqua_CorrectedReflectance_TrueColor: (d) => viirsOn(d, T('MODIS_Terra_CorrectedReflectance_TrueColor')),
+  VIIRS_NOAA20_CorrectedReflectance_TrueColor: () => SNPP,
+  VIIRS_SNPP_CorrectedReflectance_TrueColor: (d) => (d >= '2018-01-05' ? NOAA20 : T('MODIS_Aqua_CorrectedReflectance_TrueColor')),
+  MODIS_Terra_CorrectedReflectance_Bands721: () => T('MODIS_Aqua_CorrectedReflectance_Bands721'),
   // Landsat mosaics of the 1980s have empty areas: show Blue Marble there
-  Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual: { gibs: 'BlueMarble_NextGeneration', tms: '500m', format: 'jpg', maxLevel: 7, static: true },
+  Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual: () => ({ ...T('BlueMarble_NextGeneration', 7, '500m'), static: true }),
 };
-// daily data layers with swath gaps: the previous day fills them
-const GAPPY = new Set(['OMI_Nitrogen_Dioxide_Tropo_Column', 'TROPOMI_L2_Nitrogen_Dioxide_Tropospheric_Column',
-  'OMPS_Ozone_Total_Column', 'OMI_Ozone_TOMS_Total_Column', 'MODIS_Aqua_L2_Chlorophyll_A']);
-
-function prevDay(date) {
-  const d = new Date(date + 'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
+// daily data layers with holes: other satellites and the previous day fill them (src/lib/gaps.js)
 
 const COLORS = {
   space: new THREE.Color(0x000000),
@@ -95,9 +95,13 @@ export class Engine {
     this.land.visible = false;
     this.scene.add(this.land.mesh);
     this.overlay = new TileLayer(this, { id: 'overlay', transparent: true, renderOrder: 3, lift: 0.00001, maxTextures: 160 });
-    this.overlayFill = new TileLayer(this, { id: 'overlayFill', transparent: true, renderOrder: 2.9, lift: 0.000008, maxTextures: 100 });
-    this.overlayFill.visible = false;
-    this.scene.add(this.overlay.group, this.overlayFill.group);
+    this.overlayFills = [2.9, 2.8, 2.7].map((ro, i) => {
+      const l = new TileLayer(this, { id: `overlayFill${i}`, transparent: true, renderOrder: ro, lift: 0.000008 - i * 0.000001, maxTextures: 80 });
+      l.visible = false;
+      this.scene.add(l.group);
+      return l;
+    });
+    this.scene.add(this.overlay.group);
     this.image = new SurfaceLayer(this, { lift: 0.000015, transparent: true, renderOrder: 4 });
     this.image.visible = false;
     this.scene.add(this.image.mesh);
@@ -158,7 +162,7 @@ export class Engine {
   // ------------------------------------------------------------------ public API
   /** main picture + its gap filler (twin satellite) */
   _setPair(main, fill, layer, date) {
-    const twin = TWIN[layer.gibs];
+    const twin = TWIN[layer.gibs]?.(date || '');
     main.visible = true;
     main.setSource(gibsUrl(layer, date), layer.maxLevel, `${layer.id}@${date}`, twin ? 2 : 0);
     fill.visible = !!twin;
@@ -172,22 +176,23 @@ export class Engine {
   }
 
   setOverlay(layer, date, opacity = 0.85) {
-    if (!layer) { this.overlay.visible = false; this.overlayFill.visible = false; this.overlayLayer = null; this.requestRender(); return; }
+    if (!layer) { this.overlay.visible = false; this.overlayFills.forEach((f) => { f.visible = false; }); this.overlayLayer = null; this.requestRender(); return; }
     this.overlay.visible = true;
     this.overlayLayer = layer;
     this.overlay.setSource(gibsUrl(layer, date), layer.maxLevel, `${layer.id}@${date}`);
     this.overlay.setOpacity(opacity);
-    const gappy = GAPPY.has(layer.gibs) && date;
-    this.overlayFill.visible = !!gappy;
-    if (gappy) {
-      const d = prevDay(date);
-      this.overlayFill.setSource(gibsUrl(layer, d), layer.maxLevel, `${layer.id}@${d}`);
-      this.overlayFill.setOpacity(opacity);
-    }
+    const fills = fillersFor(layer, date);
+    this.overlayFills.forEach((f, i) => {
+      const x = fills[i];
+      f.visible = !!x;
+      if (!x) return;
+      f.setSource(gibsUrl(x.layer, x.date), x.layer.maxLevel, `${x.layer.id}@${x.date}`);
+      f.setOpacity(opacity);
+    });
     this.requestRender();
   }
 
-  setOverlayOpacity(o) { this.overlay.setOpacity(o); this.overlayFill.setOpacity(o); this.requestRender(); }
+  setOverlayOpacity(o) { this.overlay.setOpacity(o); this.overlayFills.forEach((f) => f.setOpacity(o)); this.requestRender(); }
 
   enqueueUpload(fn) { this.uploads.push(fn); this.dirty = true; }
 
@@ -526,7 +531,7 @@ export class Engine {
     const sw = this.swipe.enabled && !contour;
     if (!sw || this.imgL.sideIsImage || this.imgR.sideIsImage) { this.base.update(v); this.baseFill.update(v); }
     this.overlay.update(v);
-    this.overlayFill.update(v);
+    for (const f of this.overlayFills) if (f.visible) f.update(v);
     this.clouds.update(v);
     if (sw) { this.swipeL.update(v); this.swipeR.update(v); this.swipeLFill.update(v); this.swipeRFill.update(v); }
     for (const l of this.lineLayers) l.update(v);

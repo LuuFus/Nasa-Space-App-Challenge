@@ -158,6 +158,7 @@ export const PHOTOS = [
     title: { uk: 'Чорна куля', en: 'Black Marble' },
     text: { uk: 'Вогні міст уночі за даними Suomi NPP. За такими знімками видно, де зникло світло під час блекаутів.', en: 'City lights at night from Suomi NPP. Pictures like this show where the lights went out during blackouts.' },
     credit: 'NASA Earth Observatory',
+    action: { href: '#/earth/night', label: { uk: 'Подивитися Землю вночі на 3D-глобусі', en: 'See the night Earth on the 3D globe' } },
   },
   {
     id: 'epic', src: asset('landing/photos/epic-2025-06-21.jpg'), year: '2025', url: 'https://epic.gsfc.nasa.gov',

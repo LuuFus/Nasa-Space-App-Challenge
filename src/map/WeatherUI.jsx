@@ -95,7 +95,12 @@ function Timeline({ fc, tIdx, L, state, retry }) {
         <div className="wx-ticks mono">{ticks.map((v) => <span key={v}>{v}</span>)}</div>
       </div>
       <p className="wx-desc">{pick(L.desc)}</p>
-      {state.error ? (
+      {state.wait > 0 && (
+        <p className="wx-note"><Loader2 size={14} className="spin" /> {uk
+          ? `Безкоштовний сервіс прогнозу дає обмежену кількість запитів на хвилину. Решту карти домалюю через ${state.wait} с.`
+          : `The free forecast service allows a limited number of requests per minute. The rest of the map comes in ${state.wait} s.`}</p>
+      )}
+      {state.error && !fc ? (
         <p className="wx-note">{uk ? 'Не вдалося завантажити прогноз' : 'Could not load the forecast'}: {state.error}. <button type="button" className="link" onClick={retry}>{uk ? 'Спробувати ще' : 'Try again'}</button></p>
       ) : !fc ? (
         <p className="wx-note"><Loader2 size={14} className="spin" /> {uk ? 'Завантажую прогноз…' : 'Loading the forecast…'}</p>

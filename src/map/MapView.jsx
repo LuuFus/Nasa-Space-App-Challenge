@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre finds its worker next to its own file; after bundling it lives elsewhere, so say where
@@ -14,9 +14,10 @@ import { getEngine } from '../engine/instance.js';
 import { markerIcon } from '../ui/markerIcon.js';
 import { buildStyle, firstLabelLayer, FONT, GLYPHS, setLabelLanguage } from './basemaps.js';
 import { gibsSource, sampleGibs } from './gibs.js';
+import { fillersFor } from '../lib/gaps.js';
 import { fillColorExpr, frontAreas, frontLines, HATCHED, hatchImage } from './frontLayer.js';
 import { altToZoom, setMap, zoomToAlt } from './instance.js';
-import { covers, gridFor, loadGrid, nowIndex, sampleField } from './weather/data.js';
+import { nowIndex, sampleField, WxBlocks } from './weather/data.js';
 import { wxLayer } from './weather/layers.js';
 import { WindParticles } from './weather/particles.js';
 import { isolines, renderField } from './weather/render.js';
@@ -32,6 +33,7 @@ const BLANK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAw
 const WORLD = [[-180, 85.05], [180, 85.05], [180, -85.05], [-180, -85.05]];
 const START_STYLE = { version: 8, glyphs: GLYPHS, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#0d1626' } }] };
 const SEL = { a: '#ff9f1c', b: '#8f5cff' };
+const NASA_IDS = ['etd-nasa', 'etd-nasa-f0', 'etd-nasa-f1', 'etd-nasa-f2'];
 
 maplibregl.setWorkerUrl(workerUrl);
 
@@ -110,10 +112,11 @@ export default function MapView({ active }) {
   const [countries, setCountries] = useState(null);
   const [hover, setHover] = useState(null);
   const [view, setView] = useState(0);           // +1 after the map stopped moving
-  const [fc, setFc] = useState(null);            // weather forecast grid
-  const [aq, setAq] = useState(null);            // air-quality grid
-  const [wxState, setWxState] = useState({ loading: false, error: null });
   const [retry, setRetry] = useState(0);
+  const [wxTick, setWxTick] = useState(0);       // +1 when a block of the forecast arrives
+  const [wxBounds, setWxBounds] = useState(null); // bounds of the current view
+  const blocks = useRef(null);
+  blocks.current ??= new WxBlocks(() => setWxTick((v) => v + 1));
   const { t, pick, lang } = useT();
   const s = useStore();
   const { catalog, basemap, baseId, overlayId, dates, overlayOpacity, toggles, front, fire, trendMap, selA, selB, panel, wx } = s;
@@ -210,13 +213,25 @@ export default function MapView({ active }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!ready) return;
-    if (map.getLayer('etd-nasa')) map.removeLayer('etd-nasa');
-    if (map.getSource('etd-nasa')) map.removeSource('etd-nasa');
+    for (const id of NASA_IDS) {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
+    }
     if (!ov) return;
+    const op = useStore.getState().overlayOpacity;
+    // holes of daily data are filled from other satellites / the day before (added first = underneath)
+    fillersFor(ov, ovDate).reverse().forEach((f, i) => {
+      const id = `etd-nasa-f${i}`;
+      map.addSource(id, gibsSource(f.layer, f.date));
+      map.addLayer({ id, type: 'raster', source: id, paint: { 'raster-opacity': op, 'raster-fade-duration': 200 } }, 'etd-trend');
+    });
     map.addSource('etd-nasa', gibsSource(ov, ovDate));
-    map.addLayer({ id: 'etd-nasa', type: 'raster', source: 'etd-nasa', paint: { 'raster-opacity': useStore.getState().overlayOpacity, 'raster-fade-duration': 200 } }, 'etd-trend');
+    map.addLayer({ id: 'etd-nasa', type: 'raster', source: 'etd-nasa', paint: { 'raster-opacity': op, 'raster-fade-duration': 200 } }, 'etd-trend');
   }, [ready, ov?.id, ovDate]);
-  useEffect(() => { if (ready && mapRef.current.getLayer('etd-nasa')) mapRef.current.setPaintProperty('etd-nasa', 'raster-opacity', overlayOpacity); }, [ready, overlayOpacity]);
+  useEffect(() => {
+    if (!ready) return;
+    for (const id of NASA_IDS) if (mapRef.current.getLayer(id)) mapRef.current.setPaintProperty(id, 'raster-opacity', overlayOpacity);
+  }, [ready, overlayOpacity]);
 
   // ---------------------------------------------------------------- trend maps (our own pictures)
   useEffect(() => {
@@ -313,21 +328,35 @@ export default function MapView({ active }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !weatherOn || !active) return;
-    const b = map.getBounds();
-    const g = gridFor([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
-    const jobs = [];
-    if (!covers(fc?.grid, g)) jobs.push(() => loadGrid(g, 'forecast').then((d) => !dead && setFc(d)));
-    if (L.api === 'air' && !covers(aq?.grid, g)) jobs.push(() => loadGrid(g, 'air').then((d) => !dead && setAq(d)));
-    if (!jobs.length) return;
-    let dead = false;
     // wait until the map has rested a moment: one request per stop, not per frame
     const timer = setTimeout(() => {
-      setWxState({ loading: true, error: null });
-      Promise.all(jobs.map((j) => j())).then(() => !dead && setWxState({ loading: false, error: null }))
-        .catch((e) => !dead && setWxState({ loading: false, error: e.message || String(e) }));
-    }, 300);
-    return () => { dead = true; clearTimeout(timer); };
+      const b = map.getBounds();
+      const bounds = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
+      blocks.current.want(bounds, 'forecast');
+      if (L.api === 'air') blocks.current.want(bounds, 'air');
+      setWxBounds(bounds);
+    }, 250);
+    return () => clearTimeout(timer);
   }, [weatherOn, L?.api, view, active, retry]);
+  // glue the blocks of the view together (or use a coarser / finer step that is
+  // already loaded); while nothing fits yet, the last picture stays instead of holes
+  const lastFc = useRef(null);
+  const lastAq = useRef(null);
+  const fcNew = useMemo(() => (wxBounds ? blocks.current.best(wxBounds, 'forecast') : null), [wxBounds, wxTick]);
+  const aqNew = useMemo(() => (wxBounds && L?.api === 'air' ? blocks.current.best(wxBounds, 'air') : null), [wxBounds, wxTick, L?.api]);
+  const keep = (m, last) => (m?.times && (m.coverage >= 0.6 || !m.pending || !last.current?.times) ? m : last.current);
+  lastFc.current = keep(fcNew, lastFc);
+  lastAq.current = keep(aqNew, lastAq);
+  const fc = lastFc.current?.times ? lastFc.current : null;
+  const aq = lastAq.current?.times ? lastAq.current : null;
+  const pending = (fcNew?.pending || 0) + (aqNew?.pending || 0);
+  const waitSec = blocks.current.waitSeconds();
+  useEffect(() => {   // a countdown while the service asks us to wait
+    if (!waitSec) return;
+    const id = setTimeout(() => setWxTick((v) => v + 1), 1000);
+    return () => clearTimeout(id);
+  }, [waitSec, wxTick]);
+  const wxState = { loading: pending > 0, wait: pending > 0 ? waitSec : 0, error: blocks.current.error };
   // start at the step closest to now
   useEffect(() => { if (fc && wx.t == null) s.setWx({ t: nowIndex(fc.times) }); }, [fc]);
 
