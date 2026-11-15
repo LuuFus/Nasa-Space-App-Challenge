@@ -1,7 +1,7 @@
 import { useT } from '../i18n/index.js';
 import { useState } from 'react';
 import { Rocket } from 'lucide-react';
-import { SOURCES } from '../content/sources.js';
+import { SOURCE_GROUPS } from '../content/sources.js';
 import RoadmapDialog from './Roadmap.jsx';
 
 
@@ -24,10 +24,15 @@ export default function AboutPanel() {
         <li>{uk ? '«Порівняти країни» — клацни дві країни на карті й отримай графік, пояснення та прогноз.' : '“Compare countries” — click two countries on the map to get a chart, explanation and forecast.'}</li>
         <li>{uk ? '«Було / стало» — тягни повзунок і порівнюй роки.' : '“Before / after” — drag the slider to compare years.'}</li>
       </ul>
-      <h4>{uk ? 'Звідки дані' : 'Where the data comes from'}</h4>
-      <ul className="desc small">
-        {SOURCES.map(([n, u, d]) => <li key={n}><a href={u} target="_blank" rel="noreferrer">{n}</a> — {pick(d)}</li>)}
-      </ul>
+      <h4>{uk ? 'Джерела: дані, матеріали, інструменти' : 'Sources: data, materials, tools'}</h4>
+      {SOURCE_GROUPS.map((g) => (
+        <details key={g.id} className="src-group" open={g.id === 'ai' || g.id === 'nasa'}>
+          <summary>{pick(g.title)} <span className="muted">({g.items.length})</span></summary>
+          <ul className="desc small">
+            {g.items.map(([n, u, d]) => <li key={n}>{u ? <a href={u} target="_blank" rel="noreferrer">{n}</a> : <b>{n}</b>} — {pick(d)}</li>)}
+          </ul>
+        </details>
+      ))}
       <h4>{uk ? 'Чесно про обмеження' : 'Honest limitations'}</h4>
       <ul className="desc small">
         <li>{uk ? 'Значення країни — середнє з кількох точок NASA POWER усередині неї (від 1 для малих до 16 для найбільших країн), а не з кожного кілометра.' : 'A country value is the average of several NASA POWER points inside it (1 for small countries up to 16 for the largest), not every kilometre.'}</li>

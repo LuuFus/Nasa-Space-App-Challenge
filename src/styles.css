@@ -642,3 +642,8 @@ details.acc.deep > :not(summary) { margin-left: 12px; margin-right: 12px; }
 
 .vm-proj { display: flex; margin: 2px 0 8px; }
 .vm-proj button { flex: 1; font-size: 12px; padding: 5px 8px !important; }
+
+/* grouped source list in "About" */
+.src-group { margin: 4px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.15); }
+.src-group summary { cursor: pointer; padding: 6px 0; font-size: 13px; font-weight: 600; }
+.src-group ul { margin-top: 2px; }

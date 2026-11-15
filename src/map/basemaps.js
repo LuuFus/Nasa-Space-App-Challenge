@@ -7,7 +7,7 @@
 import { gibsSource } from './gibs.js';
 
 const OSM_ATTR = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>';
-const OFM_ATTR = '<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> ' + OSM_ATTR;
+const OFM_ATTR = '<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> ' + OSM_ATTR;
 export const GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
 export const FONT = ['Noto Sans Regular'];
 export const FONT_BOLD = ['Noto Sans Bold'];

@@ -7,7 +7,7 @@ import '@fontsource/inter/500.css';
 import './landing.css';
 import { useStore } from '../state/store.js';
 import { pickLang } from '../i18n/index.js';
-import { SOURCES } from '../content/sources.js';
+import { SOURCE_GROUPS } from '../content/sources.js';
 import { ABOUT, BRAND, CTA, FEATURES, FOOTER, HERO, NAV, PHOTOS, SECTIONS, STATS, STEPS, TOOLS, VIDEO } from './content.js';
 import { CursorAura, ShaderBoundary, trackLight, useReveal, useWebGPU } from './effects.jsx';
 import { LIcon } from './icons.jsx';
@@ -56,7 +56,7 @@ const Mark = () => (
   </svg>
 );
 
-function Header({ lang, setLang, pick, openPlans }) {
+function Header({ lang, setLang, pick, openDialog }) {
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);
@@ -74,12 +74,12 @@ function Header({ lang, setLang, pick, openPlans }) {
           {NAV.map((n) => (n.primary
             ? <Chip key={n.id} href={n.href} variant="ice" className={n.show ? '' : 'is-hidden'}>{pick(n.label)}</Chip>
             : <a key={n.id} className={`l-navlink${n.show ? '' : ' is-hidden'}`} href={n.href}
-              onClick={n.scroll ? (e) => { e.preventDefault(); scrollToId(n.href.slice(1)); } : n.dialog ? (e) => { e.preventDefault(); openPlans(); } : undefined}>{pick(n.label)}</a>))}
+              onClick={n.scroll ? (e) => { e.preventDefault(); scrollToId(n.href.slice(1)); } : n.dialog ? (e) => { e.preventDefault(); openDialog(n.dialog); } : undefined}>{pick(n.label)}</a>))}
         </nav>
         <div className="l-tools">
           {TOOLS.lang && (
             <div className="l-lang" role="group" aria-label={lang === 'uk' ? 'Мова' : 'Language'}>
-              {[['uk', 'UA'], ['en', 'EN']].map(([code, txt]) => (
+              {[['en', 'EN'], ['uk', 'UA']].map(([code, txt]) => (
                 <button key={code} type="button" className={lang === code ? 'on' : ''} aria-pressed={lang === code} onClick={() => setLang(code)}>{txt}</button>
               ))}
             </div>
@@ -293,17 +293,24 @@ function SourcesDialog({ open, onClose, pick }) {
         <h3>{pick(FOOTER.sourcesTitle)}</h3>
         <button type="button" className="l-close" onClick={onClose} aria-label="Close">✕</button>
       </div>
-      <ol className="l-sources">
-        {SOURCES.map(([n, u, d]) => (
-          <li key={n}><a href={u} target="_blank" rel="noreferrer">{n}</a><span>{pick(d)}</span></li>
+      <p className="l-sources-lead">{pick(FOOTER.sourcesLead)}</p>
+      <div className="l-sources-all">
+        {SOURCE_GROUPS.map((g) => (
+          <section key={g.id} className="l-sources-group">
+            <h4>{pick(g.title)}</h4>
+            <ol className="l-sources">
+              {g.items.map(([n, u, d]) => (
+                <li key={n}>{u ? <a href={u} target="_blank" rel="noreferrer">{n}</a> : <b>{n}</b>}<span>{pick(d)}</span></li>
+              ))}
+            </ol>
+          </section>
         ))}
-      </ol>
+      </div>
     </dialog>
   );
 }
 
-function Footer({ pick, openPlans }) {
-  const [open, setOpen] = useState(false);
+function Footer({ pick, openDialog }) {
   return (
     <footer className="l-footer">
       <div className="l-wrap">
@@ -312,8 +319,8 @@ function Footer({ pick, openPlans }) {
             <p className="l-foot-team">IT Detectives</p>
             <p className="l-foot-text">{pick(FOOTER.text)}</p>
             <div className="l-foot-btns">
-              <Chip onClick={() => setOpen(true)} variant="ghost" icon={<BookIcon />} iconFirst aria-haspopup="dialog">{pick(FOOTER.sources)}</Chip>
-              <Chip onClick={openPlans} variant="ghost" icon="↗" aria-haspopup="dialog">{pick(FOOTER.roadmap)}</Chip>
+              <Chip onClick={() => openDialog('sources')} variant="ghost" icon={<BookIcon />} iconFirst aria-haspopup="dialog">{pick(FOOTER.sources)}</Chip>
+              <Chip onClick={() => openDialog('roadmap')} variant="ghost" icon="↗" aria-haspopup="dialog">{pick(FOOTER.roadmap)}</Chip>
             </div>
             <p className="l-foot-ai">{pick(FOOTER.ai)}</p>
           </div>
@@ -332,7 +339,6 @@ function Footer({ pick, openPlans }) {
           <p>© 2026 IT Detectives</p>
         </div>
       </div>
-      <SourcesDialog open={open} onClose={() => setOpen(false)} pick={pick} />
     </footer>
   );
 }
@@ -341,12 +347,13 @@ export default function Landing() {
   const lang = useStore((s) => s.lang);
   const setLang = useStore((s) => s.setLang);
   const pick = (o) => pickLang(lang, o);
-  const [plans, setPlans] = useState(false);
+  // 'sources' | 'roadmap' | null; #sources in the address opens the sources list
+  const [dialog, setDialog] = useState(() => (window.location.hash === '#sources' ? 'sources' : null));
   useReveal();
   return (
     <div className="landing">
       <CursorAura />
-      <Header lang={lang} setLang={setLang} pick={pick} openPlans={() => setPlans(true)} />
+      <Header lang={lang} setLang={setLang} pick={pick} openDialog={setDialog} />
       <main>
         <Hero lang={lang} pick={pick} />
         <About pick={pick} />
@@ -355,8 +362,9 @@ export default function Landing() {
         <Photos pick={pick} />
         <Cta pick={pick} />
       </main>
-      <Footer pick={pick} openPlans={() => setPlans(true)} />
-      <RoadmapDialog open={plans} onClose={() => setPlans(false)} lang={lang} />
+      <Footer pick={pick} openDialog={setDialog} />
+      <SourcesDialog open={dialog === 'sources'} onClose={() => setDialog(null)} pick={pick} />
+      <RoadmapDialog open={dialog === 'roadmap'} onClose={() => setDialog(null)} lang={lang} />
     </div>
   );
 }

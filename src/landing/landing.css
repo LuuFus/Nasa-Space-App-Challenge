@@ -370,7 +370,11 @@
   transition: border-color 0.3s ease, color 0.3s ease;
 }
 .l-close:hover { border-color: var(--cyan); color: var(--cyan); }
-.l-sources { margin: 0; padding: 8px 28px 26px; list-style: none; counter-reset: src; }
+.l-sources-lead { margin: 0; padding: 16px 28px 0; color: rgba(248, 250, 252, 0.78); }
+.l-sources-all { counter-reset: src; padding: 0 0 26px; }
+.l-sources-group h4 { margin: 0; padding: 22px 28px 4px; font: 600 12px/1.3 var(--ui); letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); }
+.l-sources { margin: 0; padding: 0 28px; list-style: none; }
+.l-sources b { font-weight: 500; }
 .l-sources li {
   counter-increment: src; display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 8px;
   padding: 12px 0; border-bottom: 1px solid rgba(248, 250, 252, 0.08);

@@ -10,6 +10,7 @@ export const NAV = [
   { id: 'about', label: { uk: 'Про проєкт', en: 'About' }, href: '#about', show: true, scroll: true },
   { id: 'features', label: { uk: 'Можливості', en: 'Features' }, href: '#features', show: true, scroll: true },
   { id: 'roadmap', label: { uk: 'Плани', en: 'Roadmap' }, href: '#roadmap', show: true, dialog: 'roadmap' },
+  { id: 'sources', label: { uk: 'Джерела', en: 'Sources' }, href: '#sources', show: true, dialog: 'sources' },
   { id: 'research', label: { uk: 'Дослідження', en: 'Research' }, href: '#/research', show: false },
   { id: 'glossary', label: { uk: 'Глосарій', en: 'Glossary' }, href: '#/glossary', show: false },
   { id: 'ai', label: { uk: 'Штучний інтелект', en: 'AI assistant' }, href: '#/ai', show: false },
@@ -18,7 +19,7 @@ export const NAV = [
 
 // Right side of the header.
 export const TOOLS = {
-  lang: true,                                                    // UA / EN switch (works already)
+  lang: true,                                                    // EN / UA switch (English by default)
   auth: { show: false, label: { uk: 'Авторизація', en: 'Sign in' }, href: '#/auth' },
 };
 
@@ -199,6 +200,10 @@ export const FOOTER = {
     en: 'During development we used the AI assistant Claude (Anthropic) — it helped write code and texts. Ideas, data, design and checking were done by the team. More in “Sources”.',
   },
   sourcesTitle: { uk: 'Джерела даних і матеріалів', en: 'Data sources and materials' },
+  sourcesLead: {
+    uk: 'Усе, що ми використали для цього проєкту: дані, супутники, карти, статті, фото, відео, логотипи, шрифти, бібліотеки коду й інструменти, зокрема ШІ.',
+    en: 'Everything we used for this project: data, satellites, maps, articles, photos, video, logos, fonts, code libraries and tools, including AI.',
+  },
   disclaimer: {
     uk: 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала. Логотипи належать їхнім власникам і ведуть на їхні сайти.',
     en: 'This is a student hackathon project, not an official NASA product, and it is not endorsed by NASA. Logos belong to their owners and link to their websites.',
