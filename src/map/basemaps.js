@@ -37,12 +37,19 @@ function nameExpr(lang) {
     : ['coalesce', ['get', 'name:en'], ['get', 'name:latin'], ['get', 'name']];
 }
 
-/** localise names, hide "disputed" border lines (the project shows Ukraine in its official borders) */
-function adapt(style, lang) {
+/**
+ * localise names, hide "disputed" border lines (the project shows Ukraine in its
+ * official borders); on dark maps names get a light colour and a dark outline, so
+ * they stay readable over the colours of weather and NASA layers
+ */
+function adapt(style, lang, light = false) {
   for (const l of style.layers) {
     const tf = l.layout?.['text-field'];
     if (tf && JSON.stringify(tf).includes('name')) l.layout['text-field'] = nameExpr(lang);
     if (l.id === 'boundary_disputed') (l.layout ||= {}).visibility = 'none';
+    if (light && l.type === 'symbol') {
+      l.paint = { ...l.paint, 'text-color': '#e8eef7', 'text-halo-color': 'rgba(3,8,24,0.88)', 'text-halo-width': 1.4, 'text-halo-blur': 0.4 };
+    }
   }
   for (const src of Object.values(style.sources)) if (src.type === 'vector') src.attribution = OFM_ATTR;
   return style;
@@ -71,9 +78,9 @@ export async function buildStyle(id, lang, sat) {
     });
   }
   if (id === 'light') return adapt(await fetchStyle('positron'), lang);
-  if (id === 'dark') return adapt(await fetchStyle('dark'), lang);
+  if (id === 'dark') return adapt(await fetchStyle('dark'), lang, true);
   // satellite: NASA picture + only names and borders of the dark style on top
-  const dark = adapt(await fetchStyle('dark'), lang);
+  const dark = adapt(await fetchStyle('dark'), lang, true);
   const keep = dark.layers.filter((l) => l.type === 'symbol' || l['source-layer'] === 'boundary');
   const base = rasterStyle('sat', gibsSource(sat.layer, sat.date));
   return {
@@ -90,7 +97,9 @@ export function firstLabelLayer(map) {
 
 /** switch the names of a vector style to another language without reloading it */
 export function setLabelLanguage(map, lang) {
-  for (const l of map.getStyle().layers) {
+  const style = map.style?._loaded ? map.getStyle() : null;
+  if (!style) return;          // a new style is loading: it is built in the right language already
+  for (const l of style.layers) {
     if (l.type !== 'symbol' || l.id.startsWith('etd-')) continue;
     const tf = map.getLayoutProperty(l.id, 'text-field');
     if (tf && JSON.stringify(tf).includes('name')) map.setLayoutProperty(l.id, 'text-field', nameExpr(lang));

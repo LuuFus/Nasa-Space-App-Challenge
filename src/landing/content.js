@@ -7,6 +7,8 @@ export const asset = (path) => `${BASE}${path}`;
 // Header navigation. `show: false` = already built and styled, hidden until the
 // feature exists (the item stays in the page with display: none).
 export const NAV = [
+  { id: 'about', label: { uk: 'Про проєкт', en: 'About' }, href: '#about', show: true, scroll: true },
+  { id: 'features', label: { uk: 'Можливості', en: 'Features' }, href: '#features', show: true, scroll: true },
   { id: 'research', label: { uk: 'Дослідження', en: 'Research' }, href: '#/research', show: false },
   { id: 'glossary', label: { uk: 'Глосарій', en: 'Glossary' }, href: '#/glossary', show: false },
   { id: 'ai', label: { uk: 'Штучний інтелект', en: 'AI assistant' }, href: '#/ai', show: false },
@@ -34,21 +36,147 @@ export const HERO = {
 
 // Background video: NASA Scientific Visualization Studio, "Earth Observing Fleet
 // (January 2023)" — NASA's Earth-observing satellites on their orbits (public domain).
-// We cut 36 s of it, slowed it down a little and saved it at 1280×720 without sound.
+// The original 1920×1080 60 fps WebM from the SVS page; the older 1280×720 cut stays
+// as a fallback for browsers without WebM.
 export const VIDEO = {
+  webm: asset('video/earth-fleet-1080p.webm'),
   src: asset('video/earth-orbit.mp4'),
   poster: asset('video/earth-orbit.jpg'),
   page: 'https://svs.gsfc.nasa.gov/5061/',
   credit: 'NASA’s Scientific Visualization Studio · Earth Observing Fleet (2023)',
 };
 
-// "About" card — placeholder until the team writes the text.
+// Small numbers under the hero
+export const STATS = [
+  { value: '39', label: { uk: 'шарів даних NASA', en: 'NASA data layers' } },
+  { value: '246', label: { uk: 'країн для порівняння', en: 'countries to compare' } },
+  { value: '1880', label: { uk: 'з цього року є температура планети', en: 'the planet’s temperature since' } },
+  { value: '58', label: { uk: 'місячних знімків фронту з 2022', en: 'monthly front-line snapshots since 2022' } },
+];
+
+// "About": what the project is, which problem it solves, for whom
 export const ABOUT = {
-  title: { uk: 'Про проєкт', en: 'About the project' },
-  text: {
-    uk: 'Тут буде опис проєкту, його мета та можливості дослідження... [Текст для заміни]',
-    en: 'The project description, its goal and what you can explore will go here... [Placeholder text]',
+  kicker: { uk: 'Про проєкт', en: 'About the project' },
+  title: { uk: 'Супутники NASA бачать, як змінюється Земля. Ми допомагаємо це зрозуміти.', en: 'NASA satellites see how the Earth changes. We help you understand it.' },
+  lead: {
+    uk: 'Earth Trend Detective — інтерактивна Земля для школярів, студентів і вчителів. Ти обираєш тему — температуру, ліси, пожежі, лід чи забруднення повітря, — а сайт показує справжні супутникові дані, перевіряє, чи зміна справді є трендом, і пояснює результат простими словами.',
+    en: 'Earth Trend Detective is an interactive Earth for school students, university students and teachers. You pick a topic — temperature, forests, fires, ice or air pollution — and the site shows real satellite data, checks whether a change is really a trend and explains the result in plain words.',
   },
+  pillars: [
+    {
+      icon: 'problem', title: { uk: 'Проблема', en: 'The problem' },
+      text: {
+        uk: 'Про клімат говорять усі, але перевірити самому складно. Дані NASA розкидані по десятках сайтів, у незвичних форматах і одиницях. А один спекотний рік — ще не тренд: без статистики легко повірити і паніці, і запереченню.',
+        en: 'Everyone talks about the climate, but checking it yourself is hard. NASA data sits on dozens of websites in unusual formats and units. And one hot year is not a trend yet: without statistics it is easy to believe both panic and denial.',
+      },
+    },
+    {
+      icon: 'solution', title: { uk: 'Наше рішення', en: 'Our solution' },
+      text: {
+        uk: 'Усе в одному місці: 3D-Земля, контурна карта й карта OpenStreetMap з прогнозом погоди. Програма сама рахує тренд (нахил Сена й тест Манна–Кендалла), показує, наскільки йому можна вірити, і пояснює формули на прикладах із життя.',
+        en: 'Everything in one place: a 3D Earth, a contour map and an OpenStreetMap map with a weather forecast. The app computes the trend itself (Sen’s slope and the Mann–Kendall test), shows how far you can trust it and explains the formulas with everyday examples.',
+      },
+    },
+    {
+      icon: 'people', title: { uk: 'Для кого', en: 'Who it is for' },
+      text: {
+        uk: 'Для уроків географії, біології, фізики й інформатики, для проєктних робіт і олімпіад — і для кожного, хто хоче побачити війну в Україні та зміни клімату очима супутників. Українською й англійською, безкоштовно, без реєстрації.',
+        en: 'For geography, biology, physics and computer-science lessons, school projects and olympiads — and for anyone who wants to see the war in Ukraine and climate change through the eyes of satellites. In Ukrainian and English, free, no sign-up.',
+      },
+    },
+  ],
+};
+
+// What you can explore — each card has a screenshot of the site (public/landing/shots)
+export const FEATURES = [
+  {
+    id: 'globe', shot: asset('landing/shots/globe.webp'),
+    title: { uk: '3D Земля', en: '3D Earth' },
+    text: {
+      uk: 'Справжні знімки супутників NASA на глобусі: обери день із 2000 року й наклади один із 39 шарів — температуру, рослинність, пожежі, нічні вогні, забруднення повітря.',
+      en: 'Real NASA satellite pictures on a globe: pick any day since 2000 and add one of 39 layers — temperature, vegetation, fires, night lights, air pollution.',
+    },
+  },
+  {
+    id: 'weather', shot: asset('landing/shots/weather.webp'),
+    title: { uk: 'Карта OSM і прогноз погоди', en: 'OSM map and weather forecast' },
+    text: {
+      uk: 'Детальна карта OpenStreetMap з містами й дорогами та живий прогноз на 4 дні: рух вітру, температура, опади, тиск з ізобарами, грози, пил і PM2.5. Клікни будь-де — отримаєш прогноз у точці.',
+      en: 'A detailed OpenStreetMap map with towns and roads and a live 4-day forecast: moving wind, temperature, rain, pressure with isobars, thunderstorms, dust and PM2.5. Click anywhere for a point forecast.',
+    },
+  },
+  {
+    id: 'front', shot: asset('landing/shots/front.webp'),
+    title: { uk: 'Війна в Україні', en: 'War in Ukraine' },
+    text: {
+      uk: 'Як змінювалася окупована територія щомісяця з лютого 2022 року — за офіційним переліком Мінрозвитку. А ще пожежі вздовж фронту, підрив Каховської ГЕС і блекаути, помітні з космосу.',
+      en: 'How the occupied territory changed month by month since February 2022, from the official government list. Plus fires along the front, the destroyed Kakhovka dam and blackouts seen from space.',
+    },
+  },
+  {
+    id: 'compare', shot: asset('landing/shots/compare.webp'),
+    title: { uk: 'Порівняння країн і тренди', en: 'Countries and trends' },
+    text: {
+      uk: 'Дві країни поруч: 15 показників із 1981 року, перевірка тренду на значущість, прогноз до 2050 року й формули з підставленими числами — щоб кожен крок можна було перевірити.',
+      en: 'Two countries side by side: 15 indicators since 1981, a significance test for every trend, a forecast to 2050 and formulas with real numbers — so every step can be checked.',
+    },
+  },
+  {
+    id: 'swipe', shot: asset('landing/shots/swipe.webp'),
+    title: { uk: 'Було / стало', en: 'Before / after' },
+    text: {
+      uk: 'Потягни повзунок між двома знімками: Аральське море в 1985 і 2025 роках, Каховське водосховище до й після, озеро Урмія, вирубка лісів Амазонії.',
+      en: 'Drag the slider between two pictures: the Aral Sea in 1985 and 2025, the Kakhovka reservoir before and after, Lake Urmia, Amazon deforestation.',
+    },
+  },
+];
+
+// How it works, from a satellite to a conclusion
+export const STEPS = [
+  { icon: 'satellite', title: { uk: 'Супутники', en: 'Satellites' }, text: { uk: 'Terra, Aqua, Suomi NPP, NOAA-20 та інші щодня фотографують усю планету.', en: 'Terra, Aqua, Suomi NPP, NOAA-20 and others photograph the whole planet every day.' } },
+  { icon: 'data', title: { uk: 'Дані NASA', en: 'NASA data' }, text: { uk: 'Знімки GIBS, клімат POWER, пожежі FIRMS, температура GISTEMP — ми перетворюємо їх на числа.', en: 'GIBS imagery, POWER climate, FIRMS fires, GISTEMP temperature — we turn them into numbers.' } },
+  { icon: 'test', title: { uk: 'Перевірка', en: 'The test' }, text: { uk: 'Нахил Сена й тест Манна–Кендалла відділяють справжній тренд від випадкових коливань.', en: 'Sen’s slope and the Mann–Kendall test tell a real trend from random ups and downs.' } },
+  { icon: 'answer', title: { uk: 'Висновок', en: 'The answer' }, text: { uk: 'Графік, формула й пояснення простими словами — висновок робиш ти сам.', en: 'A chart, a formula and a plain-language explanation — you draw the conclusion yourself.' } },
+];
+
+// Our planet: public-domain NASA photos (public/landing/photos)
+export const PHOTOS = [
+  {
+    id: 'earthrise', src: asset('landing/photos/earthrise-1968.jpg'), year: '1968', url: 'https://images.nasa.gov/details/as08-14-2383',
+    title: { uk: 'Схід Землі', en: 'Earthrise' },
+    text: { uk: 'Apollo 8, 24 грудня 1968 року. Люди вперше побачили Землю, що сходить над Місяцем.', en: 'Apollo 8, 24 December 1968. People saw the Earth rise above the Moon for the first time.' },
+    credit: 'NASA / Apollo 8',
+  },
+  {
+    id: 'bluemarble', src: asset('landing/photos/blue-marble-1972.jpg'), year: '1972', url: 'https://images.nasa.gov/details/as17-148-22727',
+    title: { uk: 'Блакитна куля', en: 'The Blue Marble' },
+    text: { uk: 'Apollo 17, 7 грудня 1972 року, з відстані 29 000 км: уся Африка, Антарктида й Аравія на одному кадрі.', en: 'Apollo 17, 7 December 1972, from 29,000 km: all of Africa, Antarctica and Arabia in one frame.' },
+    credit: 'NASA / Apollo 17',
+  },
+  {
+    id: 'blackmarble', src: asset('landing/photos/black-marble-2016.jpg'), year: '2016', url: 'https://images.nasa.gov/details/GSFC_20171208_Archive_e001591',
+    title: { uk: 'Чорна куля', en: 'Black Marble' },
+    text: { uk: 'Вогні міст уночі за даними Suomi NPP. За такими знімками видно, де зникло світло під час блекаутів.', en: 'City lights at night from Suomi NPP. Pictures like this show where the lights went out during blackouts.' },
+    credit: 'NASA Earth Observatory',
+  },
+  {
+    id: 'epic', src: asset('landing/photos/epic-2025-06-21.jpg'), year: '2025', url: 'https://epic.gsfc.nasa.gov',
+    title: { uk: 'Земля сьогодні', en: 'The Earth today' },
+    text: { uk: '21 червня 2025 року, день літнього сонцестояння: камера EPIC на супутнику DSCOVR за 1,5 млн км знімає Землю щодня.', en: '21 June 2025, the summer solstice: the EPIC camera on DSCOVR, 1.5 million km away, photographs the Earth every day.' },
+    credit: 'NASA EPIC / DSCOVR',
+  },
+];
+
+export const CTA = {
+  title: { uk: 'Готовий до розслідування?', en: 'Ready to investigate?' },
+  text: { uk: 'Обери тему, знайди докази в даних і перевір їх числами. Земля чекає на свого детектива.', en: 'Pick a topic, find the evidence in the data and check it with numbers. The Earth is waiting for its detective.' },
+  start: { uk: 'Відкрити 3D Землю', en: 'Open the 3D Earth' },
+};
+
+export const SECTIONS = {
+  features: { kicker: { uk: 'Можливості', en: 'Features' }, title: { uk: 'Що можна дослідити', en: 'What you can explore' } },
+  steps: { kicker: { uk: 'Як це працює', en: 'How it works' }, title: { uk: 'Від супутника до висновку', en: 'From a satellite to a conclusion' } },
+  photos: { kicker: { uk: 'Наша планета', en: 'Our planet' }, title: { uk: 'Земля з космосу: 1968 → 2025', en: 'The Earth from space: 1968 → 2025' }, note: { uk: 'Усі фото — NASA, суспільне надбання.', en: 'All photos — NASA, public domain.' } },
 };
 
 export const FOOTER = {
