@@ -396,7 +396,7 @@ export default function MapView({ active }) {
     const id = setTimeout(() => setWxTick((v) => v + 1), 1000);
     return () => clearTimeout(id);
   }, [waitSec, wxTick]);
-  const wxState = { loading: pending > 0, wait: pending > 0 ? waitSec : 0, error: blocks.current.error };
+  const wxState = { loading: pending > 0, wait: pending > 0 ? waitSec : 0, limit: blocks.current.limit, error: blocks.current.error };
   // start at the step closest to now
   useEffect(() => { if (fc && wx.t == null) s.setWx({ t: nowIndex(fc.times) }); }, [fc]);
 

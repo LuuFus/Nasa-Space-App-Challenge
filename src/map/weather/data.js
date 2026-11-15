@@ -53,6 +53,7 @@ export class WxBlocks {
     this.queue = [];               // block keys waiting for download
     this.busy = 0;
     this.waitUntil = 0;            // when the limit was hit: do not ask before this time
+    this.limit = null;             // which limit was hit: 'minute' | 'hour' | 'day'
     this.error = null;
   }
 
@@ -183,12 +184,15 @@ export class WxBlocks {
         b.t = Date.now();
       }
       this.error = null;
+      this.limit = null;
     } catch (e) {
       if (e.status === 429 || /limit/i.test(e.message)) {
-        // the service says "too many": put the blocks back and wait a minute
+        // the service says "too many": put the blocks back and wait — a minute for the
+        // per-minute limit, longer for the hourly / daily limit of this internet address
         bs.forEach((b) => { b.status = 'queued'; });
         this.queue.unshift(...keys);
-        this.waitUntil = Date.now() + 65000;
+        this.limit = /daily/i.test(e.message) ? 'day' : /hourly/i.test(e.message) ? 'hour' : 'minute';
+        this.waitUntil = Date.now() + { minute: 65000, hour: 10 * 60000, day: 30 * 60000 }[this.limit];
       } else {
         bs.forEach((b) => { b.status = 'error'; b.t = Date.now(); });
         this.error = e.message || String(e);

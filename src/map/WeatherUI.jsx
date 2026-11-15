@@ -95,7 +95,15 @@ function Timeline({ fc, tIdx, L, state, retry }) {
         <div className="wx-ticks mono">{ticks.map((v) => <span key={v}>{v}</span>)}</div>
       </div>
       <p className="wx-desc">{pick(L.desc)}</p>
-      {state.wait > 0 && (
+      {state.wait > 0 && state.limit === 'day' ? (
+        <p className="wx-note">{uk
+          ? 'Безкоштовний сервіс прогнозу (Open-Meteo) вичерпав денний ліміт запитів для твоєї інтернет-адреси. Спробуй завтра — решта сайту працює як завжди.'
+          : 'The free forecast service (Open-Meteo) has used up today’s request limit for your internet address. Please try again tomorrow — the rest of the site works as usual.'}</p>
+      ) : state.wait > 0 && state.limit === 'hour' ? (
+        <p className="wx-note"><Loader2 size={14} className="spin" /> {uk
+          ? `Безкоштовний сервіс прогнозу вичерпав ліміт запитів на цю годину. Спробую ще раз через ${Math.ceil(state.wait / 60)} хв.`
+          : `The free forecast service has used up this hour’s request limit. I will try again in ${Math.ceil(state.wait / 60)} min.`}</p>
+      ) : state.wait > 0 && (
         <p className="wx-note"><Loader2 size={14} className="spin" /> {uk
           ? `Безкоштовний сервіс прогнозу дає обмежену кількість запитів на хвилину. Решту карти домалюю через ${state.wait} с.`
           : `The free forecast service allows a limited number of requests per minute. The rest of the map comes in ${state.wait} s.`}</p>
@@ -103,7 +111,7 @@ function Timeline({ fc, tIdx, L, state, retry }) {
       {state.error && !fc ? (
         <p className="wx-note">{uk ? 'Не вдалося завантажити прогноз' : 'Could not load the forecast'}: {state.error}. <button type="button" className="link" onClick={retry}>{uk ? 'Спробувати ще' : 'Try again'}</button></p>
       ) : !fc ? (
-        <p className="wx-note"><Loader2 size={14} className="spin" /> {uk ? 'Завантажую прогноз…' : 'Loading the forecast…'}</p>
+        state.limit !== 'day' && <p className="wx-note"><Loader2 size={14} className="spin" /> {uk ? 'Завантажую прогноз…' : 'Loading the forecast…'}</p>
       ) : (
         <>
           <div className="wx-row">
