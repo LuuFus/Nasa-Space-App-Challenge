@@ -17,6 +17,7 @@ sh('npm run build');
 fs.writeFileSync('dist/.nojekyll', '');          // serve files as they are (no Jekyll)
 fs.rmSync('dist/.git', { recursive: true, force: true });
 sh('git init -q', 'dist');
+sh('git config core.autocrlf false', 'dist');   // publish the files byte for byte (Windows)
 sh('git checkout -q -b gh-pages', 'dist');
 sh('git add -A', 'dist');
 sh(`git commit -q -m "Site built from ${branch} @ ${commit}"`, 'dist');

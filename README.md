@@ -69,8 +69,8 @@ npm run deploy     # builds dist/ and pushes it to the gh-pages branch
 ```
 
 The site then opens at `https://<user>.github.io/<repository>/`. All asset paths are relative and the app uses
-`#/…` addresses, so no server setup is needed. In the repository settings, **Settings → Pages → Build and
-deployment** must be set to *Deploy from a branch*, branch `gh-pages`, folder `/ (root)`.
+`#/…` addresses, so no server setup is needed. GitHub turns Pages on by itself after the first push of `gh-pages`;
+if it does not, set **Settings → Pages → Build and deployment** to *Deploy from a branch*, branch `gh-pages`, folder `/ (root)`.
 
 ## Rebuild the data
 

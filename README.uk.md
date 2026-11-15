@@ -61,8 +61,8 @@ npm test           # unit tests for the statistics
 npm run deploy     # збирає dist/ і відправляє його в гілку gh-pages
 ```
 
-Сайт відкривається за адресою `https://<user>.github.io/<repository>/`. У налаштуваннях репозиторію
-**Settings → Pages → Build and deployment** має бути *Deploy from a branch*, гілка `gh-pages`, папка `/ (root)`.
+Сайт відкривається за адресою `https://<user>.github.io/<repository>/`. GitHub сам вмикає Pages після першого
+`gh-pages`; якщо ні — у **Settings → Pages → Build and deployment** вибери *Deploy from a branch*, гілка `gh-pages`, папка `/ (root)`.
 
 ## Дані
 
