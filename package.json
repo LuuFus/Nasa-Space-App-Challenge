@@ -3,12 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "IT Detectives — NASA Space Apps 2026: Earth System Trend Detective. 3D globe + contour map with NASA layers, country comparisons and trend analysis.",
+  "description": "IT Detectives — NASA Space Apps 2026: Earth System Trend Detective. 3D globe, contour map and OpenStreetMap map with NASA layers, country comparisons and trend analysis.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/lib/stats.test.js"
+    "test": "node --test src/lib/stats.test.js",
+    "deploy": "node scripts/deploy-pages.mjs",
+    "sources": "node scripts/sources-md.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
