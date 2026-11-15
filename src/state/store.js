@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 // One place for everything the user can switch on and off.
 export const useStore = create((set, get) => ({
-  lang: localStorage.getItem('lang') || 'uk',
+  lang: localStorage.getItem('lang') || 'en',   // English first; Ukrainian one click away
   setLang: (lang) => { localStorage.setItem('lang', lang); set({ lang }); },
 
   // catalogue of map layers (public/data/layers.json)

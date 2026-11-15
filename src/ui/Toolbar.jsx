@@ -126,8 +126,8 @@ export default function Toolbar() {
       <SearchBox />
 
       <div className="seg-ctl lang" role="group" aria-label={uk ? 'Мова' : 'Language'}>
-        <button type="button" className={lang === 'uk' ? 'on' : ''} aria-pressed={lang === 'uk'} onClick={() => s.setLang('uk')}><Flag code="uk" /> UA</button>
         <button type="button" className={lang === 'en' ? 'on' : ''} aria-pressed={lang === 'en'} onClick={() => s.setLang('en')}><Flag code="en" /> EN</button>
+        <button type="button" className={lang === 'uk' ? 'on' : ''} aria-pressed={lang === 'uk'} onClick={() => s.setLang('uk')}><Flag code="uk" /> UA</button>
       </div>
     </header>
   );

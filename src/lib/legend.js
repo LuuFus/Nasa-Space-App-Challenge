@@ -29,7 +29,7 @@ export function fmtNum(v, digits) {
   return v.toFixed(d);
 }
 
-export function unitsOf(layer, lang = 'uk') {
+export function unitsOf(layer, lang = 'en') {
   const L = layer?.legend;
   if (!L) return '';
   const u = layer.transform?.units ?? L.units ?? '';
@@ -46,7 +46,7 @@ function labelText(L, i, lang) {
 }
 
 /** rgba from a tile -> { value, text } or null */
-export function valueAt(layer, rgba, lang = 'uk') {
+export function valueAt(layer, rgba, lang = 'en') {
   const L = layer?.legend;
   if (!L || !rgba || rgba[3] < 10) return null;
   const m = lookup(L);
@@ -109,7 +109,7 @@ function niceTicks(lo, hi) {
 }
 
 /** legend scale with round ticks and a function that places any value on the bar */
-export function legendScale(layer, lang = 'uk') {
+export function legendScale(layer, lang = 'en') {
   const L = layer?.legend;
   if (!L || L.type === 'classification' || L.labels) return null;
   const ents = L.entries.map((e, i) => [e, i]).filter(([e]) => !e[5]);
@@ -129,7 +129,7 @@ export function legendScale(layer, lang = 'uk') {
 }
 
 /** CSS gradient + tick labels for drawing a legend bar */
-export function legendBar(layer, lang = 'uk') {
+export function legendBar(layer, lang = 'en') {
   const L = layer?.legend;
   if (!L) return null;
   const ents = L.entries.map((e, i) => [e, i]).filter(([e]) => !e[5]);

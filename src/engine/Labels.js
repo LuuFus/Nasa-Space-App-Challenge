@@ -10,7 +10,7 @@ export class Labels {
     this.root.className = 'labels-layer';
     container.appendChild(this.root);
     this.groups = new Map(); // kind -> { items, visible }
-    this.lang = 'uk';
+    this.lang = 'en';
     this.dirty = true;
   }
 

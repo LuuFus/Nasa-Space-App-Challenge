@@ -4,7 +4,7 @@
 import { VARIABLES, unitText } from '../content/variables.js';
 import { analyse, forecastSen } from './stats.js';
 
-export function num(v, digits = 1, lang = 'uk') {
+export function num(v, digits = 1, lang = 'en') {
   if (v == null || !Number.isFinite(v)) return '—';
   const s = v.toFixed(digits);
   return lang === 'uk' ? s.replace('.', ',').replace('-', '−') : s.replace('-', '−');
