@@ -43,7 +43,7 @@ export default function AboutPanel() {
       <p className="desc small">{uk
         ? 'Під час розробки ми використовували ШІ-асистента Claude (Anthropic) у Claude Code: він допомагав писати код, тексти пояснень і перевіряти дані. Ідеї, вибір даних, дизайн і перевірку результатів робила команда.'
         : 'During development we used the AI assistant Claude (Anthropic) in Claude Code: it helped write code and explanations and check data. Ideas, data choices, design and checking the results were done by the team.'}</p>
-      <p className="muted small">{uk ? 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала. Логотип NASA показано лише як посилання на хакатон.' : 'This is a student hackathon project, not an official NASA product, and it is not endorsed by NASA. The NASA logo is shown only as a reference to the hackathon.'}</p>
+      <p className="muted small">{uk ? 'Це студентський проєкт хакатону, а не офіційний продукт NASA; NASA його не схвалювала.' : 'This is a student hackathon project, not an official NASA product, and it is not endorsed by NASA.'}</p>
       <p className="muted small">{t('team')}</p>
     </div>
   );

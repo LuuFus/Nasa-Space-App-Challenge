@@ -5,7 +5,6 @@ import { useT } from '../i18n/index.js';
 import { Flag, STROKE, Switch } from './Icons.jsx';
 import SearchBox from './SearchBox.jsx';
 
-const BASE = import.meta.env.BASE_URL || './';
 
 // map display options, grouped; shown in a menu under the view switch
 const GROUPS = [
@@ -59,7 +58,12 @@ export default function Toolbar() {
   return (
     <header className="toolbar">
       <a className="brand" href="#/" title={uk ? 'На головну сторінку' : 'To the start page'}>
-        <img src={`${BASE}brand/nasa.png`} alt="NASA" height="28" className="brand-logo" />
+        {/* the project's own mark (the NASA insignia may not be used without NASA's permission) */}
+        <svg className="brand-logo" viewBox="0 0 32 32" width="28" height="28" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="7.5" stroke="currentColor" strokeWidth="1.4" />
+          <ellipse cx="16" cy="16" rx="14" ry="5" transform="rotate(-24 16 16)" stroke="#38BDF8" strokeWidth="1.2" />
+          <circle cx="28.2" cy="10.6" r="1.8" fill="#38BDF8" />
+        </svg>
         <span className="brand-text">
           <b>{t('appTitle')}</b>
           <span>{t('team')}</span>

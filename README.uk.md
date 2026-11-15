@@ -187,11 +187,10 @@ pipeline/      01…10 Python scripts that turn NASA (and other open) data into 
 - [NASA Scientific Visualization Studio](https://svs.gsfc.nasa.gov/5061/) — фонове відео стартової сторінки «Earth Observing Fleet (January 2023)» — супутники NASA на орбітах; оригінал 1920×1080 60 кадрів/с, копія 1280×720 і кадр-обкладинка; суспільне надбання
 - [NASA Image and Video Library](https://images.nasa.gov) — фото «Схід Землі» (Apollo 8, 1968), «Блакитна куля» (Apollo 17, 1972), «Чорна куля» (Suomi NPP, 2016) — суспільне надбання
 - **Screenshots of this site** — картинки можливостей на стартовій сторінці й у README — скриншоти нашого власного сайту
-- [Lucide icons](https://lucide.dev) — іконки інтерфейсу й маркерів подій — ISC; іконки стартової сторінки намальовані для цього проєкту (SVG-код)
+- [Lucide icons](https://lucide.dev) — іконки інтерфейсу й маркерів подій — ISC; іконки стартової сторінки й знак проєкту (планета з орбітою) намальовані для цього проєкту (SVG-код)
 - [Fonts: Cormorant Garamond, Inter, JetBrains Mono (Fontsource), Noto Sans](https://fontsource.org) — SIL Open Font License 1.1
 - [NASA Space Apps Challenge logo](https://www.spaceappschallenge.org) — показано, щоб назвати хакатон; належить NASA Space Apps
 - [Noosphere Engineering School logo](https://noosphereglobal.com/) — логотип нашого партнера, наданий командою; належить власнику
-- [NASA logo](https://www.nasa.gov/nasa-brand-center/) — належить NASA; показано лише як посилання на хакатон. Це студентський проєкт, NASA його не схвалювала
 
 ### Бібліотеки з відкритим кодом
 

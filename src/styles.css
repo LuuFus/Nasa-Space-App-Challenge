@@ -107,7 +107,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
   background: rgba(4, 11, 36, 0.9); border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
-.brand-logo { height: 28px; width: auto; flex: none; }
+.brand-logo { height: 28px; width: auto; flex: none; color: var(--white); }
 .brand-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
 .brand-text b { font: 600 14px/1.2 var(--ui); color: var(--white); white-space: nowrap; }
 .brand-text span { font-size: 11px; color: var(--text-2); white-space: nowrap; }

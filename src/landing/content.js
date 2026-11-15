@@ -189,7 +189,6 @@ export const FOOTER = {
   },
   // logos supplied by the team; `tile` = background the logo is designed for
   partners: [
-    { id: 'nasa', name: 'NASA', url: 'https://www.nasa.gov/', logo: asset('brand/nasa.png'), tile: 'clear' },
     { id: 'spaceapps', name: 'NASA Space Apps Challenge', url: 'https://www.spaceappschallenge.org/', logo: asset('brand/space-apps.png'), tile: 'navy' },
     { id: 'noosphere', name: 'Noosphere Engineering School', url: 'https://noosphereglobal.com/', logo: asset('brand/noosphere.png'), tile: 'white' },
   ],

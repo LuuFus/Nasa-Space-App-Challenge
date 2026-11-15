@@ -164,11 +164,10 @@ export const SOURCE_GROUPS = [
         uk: 'фото «Схід Землі» (Apollo 8, 1968), «Блакитна куля» (Apollo 17, 1972), «Чорна куля» (Suomi NPP, 2016) — суспільне надбання',
       }],
       ['Screenshots of this site', null, { en: 'the pictures of the features on the start page and in README are screenshots of our own site', uk: 'картинки можливостей на стартовій сторінці й у README — скриншоти нашого власного сайту' }],
-      ['Lucide icons', 'https://lucide.dev', { en: 'interface and event-marker icons — ISC; the start-page icons were drawn for this project (SVG code)', uk: 'іконки інтерфейсу й маркерів подій — ISC; іконки стартової сторінки намальовані для цього проєкту (SVG-код)' }],
+      ['Lucide icons', 'https://lucide.dev', { en: 'interface and event-marker icons — ISC; the start-page icons and the project mark (planet with an orbit) were drawn for this project (SVG code)', uk: 'іконки інтерфейсу й маркерів подій — ISC; іконки стартової сторінки й знак проєкту (планета з орбітою) намальовані для цього проєкту (SVG-код)' }],
       ['Fonts: Cormorant Garamond, Inter, JetBrains Mono (Fontsource), Noto Sans', 'https://fontsource.org', { en: 'SIL Open Font License 1.1', uk: 'SIL Open Font License 1.1' }],
       ['NASA Space Apps Challenge logo', 'https://www.spaceappschallenge.org', { en: 'shown to name the hackathon; belongs to NASA Space Apps', uk: 'показано, щоб назвати хакатон; належить NASA Space Apps' }],
       ['Noosphere Engineering School logo', 'https://noosphereglobal.com/', { en: 'logo of our partner, supplied by the team; belongs to its owner', uk: 'логотип нашого партнера, наданий командою; належить власнику' }],
-      ['NASA logo', 'https://www.nasa.gov/nasa-brand-center/', { en: 'belongs to NASA; shown only as a reference to the hackathon. This is a student project, not endorsed by NASA', uk: 'належить NASA; показано лише як посилання на хакатон. Це студентський проєкт, NASA його не схвалювала' }],
     ],
   },
   {

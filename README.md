@@ -207,11 +207,10 @@ The same list is on the site (start page → **Sources**, and the **About** pane
 - [NASA Scientific Visualization Studio](https://svs.gsfc.nasa.gov/5061/) — start-page background video “Earth Observing Fleet (January 2023)” — NASA satellites in orbit; the original 1920×1080 60 fps file, a 1280×720 copy and its poster frame; public domain
 - [NASA Image and Video Library](https://images.nasa.gov) — photos “Earthrise” (Apollo 8, 1968), “The Blue Marble” (Apollo 17, 1972), “Black Marble” (Suomi NPP, 2016) — public domain
 - **Screenshots of this site** — the pictures of the features on the start page and in README are screenshots of our own site
-- [Lucide icons](https://lucide.dev) — interface and event-marker icons — ISC; the start-page icons were drawn for this project (SVG code)
+- [Lucide icons](https://lucide.dev) — interface and event-marker icons — ISC; the start-page icons and the project mark (planet with an orbit) were drawn for this project (SVG code)
 - [Fonts: Cormorant Garamond, Inter, JetBrains Mono (Fontsource), Noto Sans](https://fontsource.org) — SIL Open Font License 1.1
 - [NASA Space Apps Challenge logo](https://www.spaceappschallenge.org) — shown to name the hackathon; belongs to NASA Space Apps
 - [Noosphere Engineering School logo](https://noosphereglobal.com/) — logo of our partner, supplied by the team; belongs to its owner
-- [NASA logo](https://www.nasa.gov/nasa-brand-center/) — belongs to NASA; shown only as a reference to the hackathon. This is a student project, not endorsed by NASA
 
 ### Open-source code libraries
 
