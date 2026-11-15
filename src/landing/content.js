@@ -92,7 +92,7 @@ export const ABOUT = {
 // What you can explore — each card has a screenshot of the site (public/landing/shots)
 export const FEATURES = [
   {
-    id: 'globe', shot: asset('landing/shots/globe.webp'),
+    id: 'globe', shot: { en: asset('landing/shots/en/globe.webp'), uk: asset('landing/shots/globe.webp') },
     title: { uk: '3D Земля', en: '3D Earth' },
     text: {
       uk: 'Справжні знімки супутників NASA на глобусі: обери день із 2000 року й наклади один із 39 шарів — температуру, рослинність, пожежі, нічні вогні, забруднення повітря.',
@@ -100,7 +100,7 @@ export const FEATURES = [
     },
   },
   {
-    id: 'weather', shot: asset('landing/shots/weather.webp'),
+    id: 'weather', shot: asset('landing/shots/weather.webp'),   // English shot: retake when Open-Meteo allows
     title: { uk: 'Карта OSM і прогноз погоди', en: 'OSM map and weather forecast' },
     text: {
       uk: 'Детальна карта OpenStreetMap з містами й дорогами та живий прогноз на 4 дні: рух вітру, температура, опади, тиск з ізобарами, грози, пил і PM2.5. Клікни будь-де — отримаєш прогноз у точці.',
@@ -108,7 +108,7 @@ export const FEATURES = [
     },
   },
   {
-    id: 'front', shot: asset('landing/shots/front.webp'),
+    id: 'front', shot: { en: asset('landing/shots/en/front.webp'), uk: asset('landing/shots/front.webp') },
     title: { uk: 'Війна в Україні', en: 'War in Ukraine' },
     text: {
       uk: 'Як змінювалася окупована територія щомісяця з лютого 2022 року — за офіційним переліком Мінрозвитку. А ще пожежі вздовж фронту, підрив Каховської ГЕС і блекаути, помітні з космосу.',
@@ -116,7 +116,7 @@ export const FEATURES = [
     },
   },
   {
-    id: 'compare', shot: asset('landing/shots/compare.webp'),
+    id: 'compare', shot: { en: asset('landing/shots/en/compare.webp'), uk: asset('landing/shots/compare.webp') },
     title: { uk: 'Порівняння країн і тренди', en: 'Countries and trends' },
     text: {
       uk: 'Дві країни поруч: 15 показників із 1981 року, перевірка тренду на значущість, прогноз до 2050 року й формули з підставленими числами — щоб кожен крок можна було перевірити.',
@@ -124,7 +124,7 @@ export const FEATURES = [
     },
   },
   {
-    id: 'swipe', shot: asset('landing/shots/swipe.webp'),
+    id: 'swipe', shot: { en: asset('landing/shots/en/swipe.webp'), uk: asset('landing/shots/swipe.webp') },
     title: { uk: 'Було / стало', en: 'Before / after' },
     text: {
       uk: 'Потягни повзунок між двома знімками: Аральське море в 1985 і 2025 роках, Каховське водосховище до й після, озеро Урмія, вирубка лісів Амазонії.',

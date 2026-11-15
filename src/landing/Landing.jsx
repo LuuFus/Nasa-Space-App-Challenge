@@ -185,7 +185,7 @@ function Features({ pick, lang }) {
             <article key={f.id} className={i % 2 ? 'l-feature flip' : 'l-feature'} data-reveal>
               <figure className="l-shot">
                 <span className="l-shot-bar" aria-hidden="true"><i /><i /><i /></span>
-                <img src={f.shot} alt={pick(f.title)} loading="lazy" width="1280" height="768" />
+                <img src={pick(f.shot)} alt={pick(f.title)} loading="lazy" width="1280" height="768" />
               </figure>
               <div className="l-feature-text">
                 <span className="l-feature-num mono">{String(i + 1).padStart(2, '0')}</span>
