@@ -22,6 +22,8 @@ import { wxLayer } from './weather/layers.js';
 import { WindParticles } from './weather/particles.js';
 import { isolines, renderField } from './weather/render.js';
 import WeatherUI from './WeatherUI.jsx';
+import { activeHotspots } from '../content/hotspots.js';
+import { enterHotspot, hotspotHtml, leaveHotspot, pinHotspot } from '../ui/Hotspots.jsx';
 
 // The OpenStreetMap view: a flat "real" map (roads, towns, rivers) instead of the
 // 3D globe. Everything the panels switch on (NASA layers, the front line, events,
@@ -321,6 +323,27 @@ export default function MapView({ active }) {
       m.getElement().title = pick(m.ev.title);
     }
   }, [toggles.events, lang]);
+
+  // ---------------------------------------------------------------- signs of anomalies
+  // a NASA base picture counts only when it is really shown (satellite base map)
+  const hsList = activeHotspots(overlayId, basemap === 'satellite' ? baseId : null);
+  const hsKey = hsList.map((h) => h.id).join(',');
+  const hsMarkers = useRef([]);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    hsMarkers.current.forEach((m) => m.remove());
+    hsMarkers.current = toggles.hotspots ? hsList.map((h) => {
+      const el = document.createElement('div');
+      el.className = `lbl-hotspot lvl-${h.level} osm-marker`;
+      el.innerHTML = `<span>${hotspotHtml(h.level)}</span>`;
+      el.addEventListener('pointerenter', () => enterHotspot(h.id, el));
+      el.addEventListener('pointerleave', leaveHotspot);
+      el.addEventListener('click', (e) => { e.stopPropagation(); pinHotspot(h.id, el); });
+      return new maplibregl.Marker({ element: el }).setLngLat([h.lon, h.lat]).addTo(map);
+    }) : [];
+  }, [hsKey, toggles.hotspots]);
+  useEffect(() => () => hsMarkers.current.forEach((m) => m.remove()), []);
 
   // ---------------------------------------------------------------- weather (Open-Meteo)
   const L = wxLayer(wx.layer);

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, X, Moon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, X, Moon, TriangleAlert } from 'lucide-react';
 import { useStore } from '../state/store.js';
 import { showNight } from '../lib/actions.js';
+import { activeHotspots } from '../content/hotspots.js';
 import { useT } from '../i18n/index.js';
 import { fmtDate, firstDate, lastDate, periodOf, snapDate, stepDate, worldviewUrl } from '../lib/dates.js';
 import Legend from './Legend.jsx';
@@ -110,6 +111,14 @@ export default function LayersPanel() {
             </button>
           </div>
           <p className="desc">{pick(ov.desc)}</p>
+          {(() => {
+            const n = activeHotspots(ov.id, null).length;
+            return n > 0 && s.toggles.hotspots && (
+              <p className="hs-hint"><TriangleAlert size={14} strokeWidth={STROKE} /> {uk
+                ? `На карті ${n} ${n === 1 ? 'значок' : n < 5 ? 'значки' : 'значків'} — місця, де з цим шаром щось незвичне. Наведи на значок: там пояснення, фото й графік.`
+                : `${n} sign${n === 1 ? '' : 's'} on the map mark places where this layer shows something unusual. Point at a sign for an explanation, a photo and a chart.`}</p>
+            );
+          })()}
           <LayerDate layer={ov} />
           <label className="row small">{t('opacity')}
             <input type="range" min="0.1" max="1" step="0.05" value={s.overlayOpacity} onChange={(e) => s.setOverlayOpacity(+e.target.value)} />

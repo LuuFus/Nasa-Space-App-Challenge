@@ -11,6 +11,8 @@ import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { EVENTS } from '../content/events.js';
 import { markerIcon } from './markerIcon.js';
+import { activeHotspots } from '../content/hotspots.js';
+import { HotspotCard, enterHotspot, hotspotHtml, leaveHotspot, pinHotspot } from './Hotspots.jsx';
 
 // the OpenStreetMap view (MapLibre) is a separate chunk, loaded the first time it is opened
 const MapView = lazy(() => import('../map/MapView.jsx'));
@@ -122,6 +124,22 @@ export default function GlobeView() {
     })), useStore.getState().toggles.events);
   }, []);
 
+  // ---- signs of anomalies of the layers that are on (src/content/hotspots.js)
+  const hsList = activeHotspots(overlayId, baseId);
+  const hsKey = hsList.map((h) => h.id).join(',');
+  useEffect(() => {
+    const eng = engRef.current;
+    if (!eng) return;
+    eng.labels.setGroup('hotspots', hsList.map((h) => ({
+      key: 'hs' + h.id, lon: h.lon, lat: h.lat, html: hotspotHtml(h.level), cls: `lbl-hotspot lvl-${h.level}`,
+      marker: true, priority: 0, minZoom: 0,
+      onClick: (it, el) => pinHotspot(h.id, el), onEnter: (it, el) => enterHotspot(h.id, el), onLeave: () => leaveHotspot(),
+    })), toggles.hotspots && mode !== 'osm');
+    // the card of a layer that was switched off closes
+    const cur = useStore.getState().hotspot;
+    if (cur && !hsList.some((h) => h.id === cur.id)) useStore.setState({ hotspot: null });
+  }, [hsKey, toggles.hotspots, mode]);
+
   // ---- engine -> UI (hover tooltip, clicks)
   useEffect(() => {
     const eng = engRef.current;
@@ -161,6 +179,7 @@ export default function GlobeView() {
         </div>
       )}
       <MapOverlay />
+      <HotspotCard />
       {!osm && <div className="hint">{t('zoomHint')}</div>}
     </div>
   );

@@ -21,6 +21,8 @@ export const useStore = create((set, get) => ({
   setWx: (w) => set({ wx: { ...get().wx, ...w } }),
   // colour of countries by trend (Compare tab): fn(countryId) -> CSS colour, or null
   choropleth: null,
+  // the open card of a hot spot (src/ui/Hotspots.jsx): { id, x, y, pinned }
+  hotspot: null,
   spot: null,               // { lon, lat } of the point forecast card
   setSpot: (spot) => set({ spot }),
 
@@ -37,7 +39,7 @@ export const useStore = create((set, get) => ({
   trendMap: null,           // { id, year? }
   setTrendMap: (trendMap) => set({ trendMap }),
 
-  toggles: { clouds: false, borders: true, capitals: true, rivers: true, labels: true, oceans: true, graticule: false, tint: false, events: true },
+  toggles: { clouds: false, borders: true, capitals: true, rivers: true, labels: true, oceans: true, graticule: false, tint: false, events: true, hotspots: true },
   toggle: (k, v) => set({ toggles: { ...get().toggles, [k]: v ?? !get().toggles[k] } }),
   cloudDate: '2025-08-15',
   setCloudDate: (cloudDate) => set({ cloudDate }),

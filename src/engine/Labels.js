@@ -60,8 +60,10 @@ export class Labels {
     if (it.title) el.title = typeof it.title === 'string' ? it.title : it.title[this.lang];
     if (it.onClick) {
       el.classList.add('clickable');
-      el.addEventListener('click', (e) => { e.stopPropagation(); it.onClick(it); });
+      el.addEventListener('click', (e) => { e.stopPropagation(); it.onClick(it, el); });
     }
+    if (it.onEnter) el.addEventListener('pointerenter', () => it.onEnter(it, el));
+    if (it.onLeave) el.addEventListener('pointerleave', () => it.onLeave(it, el));
     this.root.appendChild(el);
     it.el = el;
     it.w = it.html ? 26 : Math.max(14, span.textContent.length * (it.charW || 6.4) + 10);

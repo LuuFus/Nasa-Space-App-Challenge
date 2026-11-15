@@ -10,10 +10,10 @@ const BASE = import.meta.env.BASE_URL || './';
 const GROUPS = [
   { title: { uk: 'Поверхня', en: 'Surface' }, keys: ['clouds', 'tint', 'graticule'] },
   { title: { uk: 'Лінії й підписи', en: 'Lines & names' }, keys: ['borders', 'capitals', 'rivers', 'labels', 'oceans'] },
-  { title: { uk: 'Події', en: 'Events' }, keys: ['events'] },
+  { title: { uk: 'Події й підказки', en: 'Events & hints' }, keys: ['events', 'hotspots'] },
 ];
-const OSM_GROUPS = [{ title: { uk: 'Події', en: 'Events' }, keys: ['events'] }];
-const TOGGLE_TEXT = { labels: 'countryNames', events: 'eventMarkers' };
+const OSM_GROUPS = [{ title: { uk: 'Події й підказки', en: 'Events & hints' }, keys: ['events', 'hotspots'] }];
+const TOGGLE_TEXT = { labels: 'countryNames', events: 'eventMarkers', hotspots: 'hotspotMarkers' };
 const MODES = [
   { id: 'globe', text: 'globe3d', menu: true },
   { id: 'contour', text: 'contourMap', menu: false },

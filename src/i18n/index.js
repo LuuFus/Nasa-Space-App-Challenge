@@ -9,6 +9,7 @@ export const STRINGS = {
   contourMap: { uk: 'Контурна карта', en: 'Contour map' },
   mapImagery: { uk: 'Карта зі знімками', en: 'Map with imagery' },
   osmMap: { uk: 'Карта OSM', en: 'OSM map' },
+  hotspotMarkers: { uk: 'Значки аномалій на шарах', en: 'Anomaly signs on layers' },
   osmHint: { uk: 'Колесо — наблизити, тягни — рухати карту. Справа — прогноз погоди', en: 'Wheel to zoom, drag to move the map. Weather forecast on the right' },
   osmHintWx: { uk: 'Клікни на карту — прогноз у точці', en: 'Click the map for a point forecast' },
   layers: { uk: 'Шари', en: 'Layers' },

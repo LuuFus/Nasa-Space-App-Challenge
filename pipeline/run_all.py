@@ -17,6 +17,7 @@ STEPS = [
     "08_event_fires.py",     # NASA FIRMS fire points for the fire-spread events
     "09_event_causes.py",    # NASA POWER daily weather vs 1991-2020 normals for 2026 events
     "10_tot_official.py",    # front line: official list of occupied territories + OCHA borders
+    "11_hotspots.py",        # hot spots on the map: yearly series and a satellite picture of each place
 ]
 # (step 07 — an older, unofficial front-line source — was removed: step 10 uses only official data)
 
