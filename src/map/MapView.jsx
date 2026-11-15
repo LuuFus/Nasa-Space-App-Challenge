@@ -111,6 +111,8 @@ export default function MapView({ active }) {
   const wxBlob = useRef(null);
   const [ready, setReady] = useState(0);         // number of the loaded base map style, 0 while loading
   const styleGen = useRef(0);
+  // the map can be changed only while its style is loaded (a new base map reloads it)
+  const live = () => !!mapRef.current?.style?._loaded;
   const [countries, setCountries] = useState(null);
   const [hover, setHover] = useState(null);
   const [view, setView] = useState(0);           // +1 after the map stopped moving
@@ -142,7 +144,12 @@ export default function MapView({ active }) {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
     // every loaded style gets a new number, so effects re-run even when React batches 0 -> n
-    map.on('style.load', () => { addOwnLayers(map); setReady(++styleGen.current); });
+    map.on('style.load', () => {
+      // a new style starts flat: put the chosen projection back
+      map.setProjection({ type: useStore.getState().osmGlobe ? 'globe' : 'mercator' });
+      addOwnLayers(map);
+      setReady(++styleGen.current);
+    });
     map.on('error', (e) => { if (import.meta.env.DEV) console.warn('map:', e.error?.message || e); });
     map.on('moveend', () => setView((v) => v + 1));
     mapRef.current = map;
@@ -185,6 +192,16 @@ export default function MapView({ active }) {
     }
   }, [active]);
 
+  // ---------------------------------------------------------------- globe or flat
+  const osmGlobe = useStore((st) => st.osmGlobe);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    map.setProjection({ type: osmGlobe ? 'globe' : 'mercator' });
+    if (osmGlobe && map.getZoom() > 3.5) map.easeTo({ zoom: 2.2, duration: 1200 });
+    partRef.current?.setGlobe(osmGlobe);
+  }, [osmGlobe, ready]);
+
   // ---------------------------------------------------------------- base map
   const satLayer = layerById(catalog, baseId) || layerById(catalog, 'bluemarble');
   const satDate = satLayer ? dates[satLayer.id] ?? satLayer.date : null;
@@ -202,7 +219,7 @@ export default function MapView({ active }) {
       .catch(() => { if (!dead && basemap !== 'osm') useStore.getState().setBasemap('osm'); });
     return () => { dead = true; };
   }, [basemap, satKey]);
-  useEffect(() => { if (ready && basemap !== 'osm') setLabelLanguage(mapRef.current, lang); }, [lang]);
+  useEffect(() => { if (ready && live() && basemap !== 'osm') setLabelLanguage(mapRef.current, lang); }, [lang]);
   // a NASA picture chosen in the Layers tab is shown as the satellite base map
   const firstBase = useRef(baseId);
   useEffect(() => {
@@ -214,7 +231,7 @@ export default function MapView({ active }) {
   const ovDate = ov ? dates[ov.id] ?? ov.date : null;
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready) return;
+    if (!ready || !live()) return;
     for (const id of NASA_IDS) {
       if (map.getLayer(id)) map.removeLayer(id);
       if (map.getSource(id)) map.removeSource(id);
@@ -231,19 +248,19 @@ export default function MapView({ active }) {
     map.addLayer({ id: 'etd-nasa', type: 'raster', source: 'etd-nasa', paint: { 'raster-opacity': op, 'raster-fade-duration': 200 } }, 'etd-trend');
   }, [ready, ov?.id, ovDate]);
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !live()) return;
     for (const id of NASA_IDS) if (mapRef.current.getLayer(id)) mapRef.current.setPaintProperty(id, 'raster-opacity', overlayOpacity);
   }, [ready, overlayOpacity]);
 
   // ---------------------------------------------------------------- trend maps (our own pictures)
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready) return;
+    if (!ready || !live()) return;
     if (!trendMap?.url) { map.setLayoutProperty('etd-trend', 'visibility', 'none'); return; }
     let dead = false;
     const img = new Image();
     img.onload = () => {
-      if (dead) return;
+      if (dead || !live()) return;
       map.getSource('etd-trend').updateImage({ url: toMercator(img).toDataURL(), coordinates: WORLD });
       map.setPaintProperty('etd-trend', 'raster-opacity', trendMap.opacity ?? 0.85);
       map.setLayoutProperty('etd-trend', 'visibility', 'visible');
@@ -255,12 +272,12 @@ export default function MapView({ active }) {
   // ---------------------------------------------------------------- front line in Ukraine
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready) return;
+    if (!ready || !live()) return;
     const set = (id, data) => map.getSource(id)?.setData(data);
     if (!front.on) { set('etd-front-areas', EMPTY); set('etd-front-lines', EMPTY); set('etd-front-cmp', EMPTY); return; }
     let dead = false;
     loadFront().then((d) => {
-      if (dead) return;
+      if (dead || !live()) return;
       const i = Math.max(0, Math.min(d.snapshots.length - 1, front.idx ?? d.snapshots.length - 1));
       const snap = d.snapshots[i];
       const cmp = front.compare != null && front.compare !== i ? d.snapshots[front.compare] : null;
@@ -276,7 +293,7 @@ export default function MapView({ active }) {
   const comparing = panel === 'compare';
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !countries) return;
+    if (!ready || !countries || !live()) return;
     const feats = comparing ? [['a', selA], ['b', selB]].map(([k, id]) => {
       const c = countries.byId.get(id);
       return c && { type: 'Feature', properties: { color: SEL[k] }, geometry: { type: 'MultiLineString', coordinates: toGeo(c.rings).flat() } };
@@ -285,7 +302,7 @@ export default function MapView({ active }) {
   }, [ready, countries, selA, selB, comparing]);
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !countries) return;
+    if (!ready || !countries || !live()) return;
     const fn = s.choropleth;
     const feats = fn ? countries.list.map((c) => {
       const color = fn(c.id);
@@ -298,11 +315,11 @@ export default function MapView({ active }) {
   const fireData = useRef(null);
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready) return;
+    if (!ready || !live()) return;
     if (!fire?.id) { map.getSource('etd-fires').setData(EMPTY); map.getSource('etd-fire-track').setData(EMPTY); fireData.current = null; return; }
     let dead = false;
     loadJSON(`fires/${fire.id}.json`).then((d) => {
-      if (dead) return;
+      if (dead || !live()) return;
       fireData.current = d;
       map.getSource('etd-fires').setData({
         type: 'FeatureCollection',
@@ -314,7 +331,7 @@ export default function MapView({ active }) {
     });
     return () => { dead = true; };
   }, [ready, fire?.id]);
-  useEffect(() => { if (ready && fireData.current && fire) setFireDay(mapRef.current, fireData.current, fire.day); }, [ready, fire?.day]);
+  useEffect(() => { if (ready && live() && fireData.current && fire) setFireDay(mapRef.current, fireData.current, fire.day); }, [ready, fire?.day]);
 
   // ---------------------------------------------------------------- event markers
   useEffect(() => {
@@ -399,7 +416,7 @@ export default function MapView({ active }) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready) return;
+    if (!ready || !live()) return;
     if (!field) {
       map.setLayoutProperty('etd-wx', 'visibility', 'none');
       map.getSource('etd-iso').setData(EMPTY);
@@ -408,7 +425,7 @@ export default function MapView({ active }) {
     const { canvas, coordinates } = renderField(field.grid, field.f, L.id);
     let dead = false;
     canvas.toBlob((blob) => {
-      if (dead || !blob) return;
+      if (dead || !blob || !live()) return;
       const url = URL.createObjectURL(blob);
       map.getSource('etd-wx').updateImage({ url, coordinates });
       map.setLayoutProperty('etd-wx', 'visibility', 'visible');

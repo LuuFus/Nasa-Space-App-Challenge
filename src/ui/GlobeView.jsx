@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Engine } from '../engine/Engine.js';
 import { Vectors } from '../engine/Vectors.js';
 import { Front } from '../engine/Front.js';
@@ -19,6 +19,23 @@ const MapView = lazy(() => import('../map/MapView.jsx'));
 
 export function layerById(catalog, id) {
   return catalog?.layers.find((l) => l.id === id) || null;
+}
+
+/** an error inside the OSM map must not take the panels and the globe down with it */
+class MapBoundary extends Component {
+  constructor(p) { super(p); this.state = { err: null }; }
+  static getDerivedStateFromError(err) { return { err }; }
+  componentDidCatch(e) { console.error('OSM map:', e); }
+  render() {
+    if (!this.state.err) return this.props.children;
+    if (!this.props.active) return null;
+    const uk = this.props.lang === 'uk';
+    return (
+      <div className="osm-wrap osm-loading">
+        <p>{uk ? 'Карта OSM дала збій.' : 'The OSM map failed.'} <button type="button" onClick={() => this.setState({ err: null })}>{uk ? 'Перезапустити карту' : 'Restart the map'}</button></p>
+      </div>
+    );
+  }
 }
 
 export default function GlobeView() {
@@ -171,7 +188,11 @@ export default function GlobeView() {
   return (
     <div className={`globe-wrap${contour && !osm ? ' contour' : ''}${osm ? ' osm-on' : ''}`}>
       <div className={osm ? 'globe is-covered' : 'globe'} ref={ref} />
-      {osmUsed && <Suspense fallback={<div className="osm-wrap osm-loading">{t('loading')}</div>}><MapView active={osm} /></Suspense>}
+      {osmUsed && (
+        <MapBoundary active={osm} lang={lang}>
+          <Suspense fallback={<div className="osm-wrap osm-loading">{t('loading')}</div>}><MapView active={osm} /></Suspense>
+        </MapBoundary>
+      )}
       {!osm && hover && (hover.country || hover.val) && (
         <div className="tooltip" style={{ left: hover.x + 14, top: hover.y + 14 }}>
           {hover.country && <b>{pick(hover.country.name)}</b>}

@@ -88,6 +88,11 @@ export default function Toolbar() {
           onMouseEnter={() => clearTimeout(timer.current)} role="menu" aria-hidden={!menu}>
           {menu === 'osm' && (
             <div className="vm-group">
+              <div className="vm-title">{uk ? 'Вигляд' : 'View'}</div>
+              <div className="vm-proj seg-ctl">
+                <button type="button" className={!s.osmGlobe ? 'on' : ''} aria-pressed={!s.osmGlobe} tabIndex={menu ? 0 : -1} onClick={() => s.setOsmGlobe(false)}>{uk ? 'Плоска карта' : 'Flat map'}</button>
+                <button type="button" className={s.osmGlobe ? 'on' : ''} aria-pressed={s.osmGlobe} tabIndex={menu ? 0 : -1} onClick={() => s.setOsmGlobe(true)}>{uk ? 'Глобус' : 'Globe'}</button>
+              </div>
               <div className="vm-title">{uk ? 'Основа карти (OpenStreetMap)' : 'Base map (OpenStreetMap)'}</div>
               <div className="vm-bases">
                 {BASEMAPS.map((b) => (

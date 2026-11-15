@@ -467,9 +467,20 @@ export class TileLayer {
 }
 
 // GIBS URL builder
+// fire detections are vector tiles in GIBS: the WMS draws them as pictures for us
+const WMS_ONLY = new Set(['VIIRS_SNPP_Thermal_Anomalies_375m_All', 'VIIRS_NOAA20_Thermal_Anomalies_375m_All', 'MODIS_Terra_Thermal_Anomalies_All']);
+
 export function gibsUrl(layer, date) {
   const ext = layer.format === 'png' ? 'png' : 'jpg';
   const time = date ? date : 'default';
+  if (WMS_ONLY.has(layer.gibs)) {
+    return (z, x, y) => {
+      const S = 288 / 2 ** z;   // degrees per tile of the GIBS EPSG:4326 grid
+      const w = -180 + x * S, n = 90 - y * S;
+      return `https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&STYLES=&LAYERS=${layer.gibs}`
+        + `&CRS=EPSG:4326&BBOX=${n - S},${w},${n},${w + S}&WIDTH=${TILE_PX}&HEIGHT=${TILE_PX}&FORMAT=image/png&TRANSPARENT=true&TIME=${time}`;
+    };
+  }
   return (z, x, y) =>
     `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/${layer.gibs}/default/${time}/${layer.tms}/${z}/${y}/${x}.${ext}`;
 }

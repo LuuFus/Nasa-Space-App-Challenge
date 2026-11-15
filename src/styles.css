@@ -639,3 +639,6 @@ details.acc.deep > :not(summary) { margin-left: 12px; margin-right: 12px; }
 .mode-btn { white-space: nowrap; }
 @media (max-width: 1250px) { .search { flex-basis: 220px; } .brand-text span { display: none; } }
 @media (max-width: 1050px) { .search { flex-basis: 160px; min-width: 120px; } .brand-text { display: none; } }
+
+.vm-proj { display: flex; margin: 2px 0 8px; }
+.vm-proj button { flex: 1; font-size: 12px; padding: 5px 8px !important; }

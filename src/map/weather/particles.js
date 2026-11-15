@@ -37,6 +37,11 @@ export class WindParticles {
     this._build();
   }
 
+  setGlobe(on) {
+    this.globe = on;
+    this._build();
+  }
+
   setVisible(on) {
     this.on = on;
     this.canvas.style.display = on ? '' : 'none';
@@ -63,16 +68,37 @@ export class WindParticles {
     this.dpr = dpr;
     const cols = Math.ceil(w / CELL) + 1, rows = Math.ceil(h / CELL) + 1;
     // no rotation or tilt on this map: lon depends only on x, lat only on y
-    const lons = new Float64Array(cols), lats = new Float64Array(rows);
-    for (let i = 0; i < cols; i++) lons[i] = map.unproject([i * CELL, 0]).lng;
-    for (let j = 0; j < rows; j++) lats[j] = map.unproject([0, j * CELL]).lat;
     const fu = new Float32Array(cols * rows), fv = new Float32Array(cols * rows);
     const { grid, u, v } = this.data;
-    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-      const k = j * cols + i;
-      const lon = ((((lons[i] + 180) % 360) + 360) % 360) - 180;
-      fu[k] = sampleField(grid, u, lon, lats[j]);
-      fv[k] = sampleField(grid, v, lon, lats[j]);
+    const wrap = (x) => ((((x + 180) % 360) + 360) % 360) - 180;
+    if (this.globe) {
+      // on the globe every screen point has its own lon/lat, and the wind turns with the meridians
+      const north = (lon, lat, x, y) => {
+        const p = map.project([lon, Math.min(89.9, lat + 0.25)]);
+        const dx = p.x - x, dy = p.y - y, n = Math.hypot(dx, dy) || 1;
+        return [dx / n, dy / n];
+      };
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const k = j * cols + i, x = i * CELL, y = j * CELL;
+        const ll = map.unproject([x, y]);
+        const back = map.project(ll);
+        if (Math.hypot(back.x - x, back.y - y) > CELL) { fu[k] = fv[k] = NaN; continue; }   // space, not the Earth
+        const uu = sampleField(grid, u, wrap(ll.lng), ll.lat), vv = sampleField(grid, v, wrap(ll.lng), ll.lat);
+        const [nx, ny] = north(ll.lng, ll.lat, x, y);
+        // screen motion = v along "north" + u along "east" (north turned 90° clockwise)
+        fu[k] = vv * nx - uu * ny;
+        fv[k] = -(vv * ny + uu * nx);
+      }
+    } else {
+      // flat map without rotation: lon depends only on x, lat only on y
+      const lons = new Float64Array(cols), lats = new Float64Array(rows);
+      for (let i = 0; i < cols; i++) lons[i] = map.unproject([i * CELL, 0]).lng;
+      for (let j = 0; j < rows; j++) lats[j] = map.unproject([0, j * CELL]).lat;
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const k = j * cols + i;
+        fu[k] = sampleField(grid, u, wrap(lons[i]), lats[j]);
+        fv[k] = sampleField(grid, v, wrap(lons[i]), lats[j]);
+      }
     }
     this.field = { cols, rows, fu, fv, w, h };
     const n = this.reduced ? 0 : Math.min(7000, Math.round((w * h) / 260));

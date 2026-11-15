@@ -17,6 +17,9 @@ export const useStore = create((set, get) => ({
   // OpenStreetMap view: base map and the windy.com-style weather forecast
   basemap: localStorage.getItem('basemap') || 'osm',   // osm | light | dark | satellite
   setBasemap: (basemap) => { localStorage.setItem('basemap', basemap); set({ basemap }); },
+  // the OSM map as a 3D globe (MapLibre globe projection) or flat (web Mercator)
+  osmGlobe: localStorage.getItem('osmGlobe') === '1',
+  setOsmGlobe: (osmGlobe) => { localStorage.setItem('osmGlobe', osmGlobe ? '1' : '0'); set({ osmGlobe }); },
   wx: { layer: null, t: null, particles: true, playing: false },   // t = index of the 3-hour step
   setWx: (w) => set({ wx: { ...get().wx, ...w } }),
   // colour of countries by trend (Compare tab): fn(countryId) -> CSS colour, or null
