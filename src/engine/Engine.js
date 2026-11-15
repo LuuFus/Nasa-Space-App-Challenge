@@ -470,8 +470,25 @@ export class Engine {
     this.uniforms.uPxPerKm.value = (this.focalPx / Math.max(alt, 1e-6) / 6371) * (m >= 0.5 ? 0.86 : 1);
   }
 
+  /** stop drawing while another view (the OpenStreetMap one) covers the engine */
+  setPaused(p) {
+    this.paused = p;
+    if (!p) { this.resize(); this.requestRender(); }
+  }
+
+  /** put the camera above lon/lat at height alt (Earth radii), without an animation */
+  setCameraTo(lon, lat, alt) {
+    const c = this.controls;
+    c.anim = null;
+    c.globe = { lon, lat, alt: clamp(alt, 0.0005, MAX_ALT) };
+    const [x, y] = flatPos(lon, lat);
+    c.flat = { x, y, dist: clamp(alt * 1.15, 0.0008, this._fitDist()) };
+    this.requestRender();
+  }
+
   _loop(now) {
     this.raf = requestAnimationFrame(this._loop);
+    if (this.paused) return;
     const moving = this.controls.tick();
     if (this.morphAnim) this.morphAnim.step();
     const busy = scheduler.queue.size > 0 || this.uploads.length > 0;

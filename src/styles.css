@@ -447,3 +447,15 @@ details.acc.deep > :not(summary) { margin-left: 12px; margin-right: 12px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* OpenStreetMap view switch */
+.globe.is-covered { visibility: hidden; }
+.osm-loading { display: grid; place-items: center; color: var(--cyan); }
+.vm-bases { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 2px 0 4px; }
+.vm-base { display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 4px !important; font-size: 11.5px; border-radius: 10px !important; text-align: center; }
+.vm-base i { display: block; height: 40px; border-radius: 7px; background-size: cover; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.vm-base.base-osm i { background: linear-gradient(135deg, #f2efe9 0 40%, #aad3df 40% 55%, #f2efe9 55%), #f2efe9; }
+.vm-base.base-light i { background: linear-gradient(135deg, #fafaf8 0 45%, #d4dadc 45% 58%, #fafaf8 58%); }
+.vm-base.base-dark i { background: linear-gradient(135deg, #2b2f36 0 45%, #11161d 45% 58%, #2b2f36 58%); }
+.vm-base.base-satellite i { background: radial-gradient(circle at 30% 40%, #3f6b3a 0 22%, transparent 23%), radial-gradient(circle at 70% 65%, #8a7a52 0 18%, transparent 19%), #0f2c55; }
+.vm-base.on { outline: 2px solid var(--cyan); outline-offset: 1px; }

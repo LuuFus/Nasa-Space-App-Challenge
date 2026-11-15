@@ -30,6 +30,13 @@ SESSION.headers.update({"User-Agent": USER_AGENT})
 
 EARTH_RADIUS_KM = 6371.0088
 
+# Windows consoles default to a legacy code page: keep "km²", "°C" and Cyrillic printable
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 
 def log(*args):
     print(*args, flush=True)

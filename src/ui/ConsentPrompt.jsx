@@ -5,7 +5,7 @@ import { useT } from '../i18n/index.js';
 /** Global topics ask (once) whether to switch from the 3D globe to the contour map. */
 export function suggestContourMap(reason, onDone) {
   const st = useStore.getState();
-  if (st.mode === 'flat') return onDone?.();
+  if (st.mode !== 'globe') return onDone?.();
   const go = () => { st.setFlatStyle('contour'); st.setMode('flat'); onDone?.(); };
   if (st.consentRemember === 'yes') return go();
   if (st.consentRemember === 'no') return onDone?.();

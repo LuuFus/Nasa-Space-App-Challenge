@@ -2,9 +2,15 @@
 import { useStore } from '../state/store.js';
 import { whenEngine } from '../engine/instance.js';
 import { loadJSON } from './data.js';
-import { snapshotIndex } from '../engine/Front.js';
+import { snapshotIndex } from './frontGeo.js';
 
 export async function flyTo(lon, lat, alt = 0.3) {
+  if (useStore.getState().mode === 'osm') {
+    const { whenMap, altToZoom } = await import('../map/instance.js');
+    const map = await whenMap();
+    map.flyTo({ center: [lon, lat], zoom: altToZoom(alt, lat, map.getContainer().clientHeight), duration: 2200, essential: true });
+    return;
+  }
   const eng = await whenEngine();
   return eng.flyTo(lon, lat, alt, 2200);
 }

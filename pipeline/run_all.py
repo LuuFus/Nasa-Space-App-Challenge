@@ -18,7 +18,7 @@ STEPS = [
     "09_event_causes.py",    # NASA POWER daily weather vs 1991-2020 normals for 2026 events
     "10_tot_official.py",    # front line: official list of occupied territories + OCHA borders
 ]
-# 07_frontline.py (DeepStateMap) is the old front-line source, kept only until step 10 has its input files
+# (step 07 — an older, unofficial front-line source — was removed: step 10 uses only official data)
 
 if __name__ == "__main__":
     sys.path.insert(0, str(HERE))

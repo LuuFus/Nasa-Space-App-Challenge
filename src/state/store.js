@@ -9,10 +9,20 @@ export const useStore = create((set, get) => ({
   catalog: null,
   setCatalog: (catalog) => set({ catalog }),
 
-  mode: 'globe',            // 'globe' | 'flat'
+  mode: 'globe',            // 'globe' | 'flat' (contour map of the 3D engine) | 'osm' (OpenStreetMap, src/map/)
   flatStyle: 'contour',     // 'contour' (white land, blue sea) | 'imagery'
   setMode: (mode) => set({ mode }),
   setFlatStyle: (flatStyle) => set({ flatStyle }),
+
+  // OpenStreetMap view: base map and the windy.com-style weather forecast
+  basemap: localStorage.getItem('basemap') || 'osm',   // osm | light | dark | satellite
+  setBasemap: (basemap) => { localStorage.setItem('basemap', basemap); set({ basemap }); },
+  wx: { layer: null, t: null, particles: true, playing: false },   // t = index of the 3-hour step
+  setWx: (w) => set({ wx: { ...get().wx, ...w } }),
+  // colour of countries by trend (Compare tab): fn(countryId) -> CSS colour, or null
+  choropleth: null,
+  spot: null,               // { lon, lat } of the point forecast card
+  setSpot: (spot) => set({ spot }),
 
   baseId: 'bluemarble',
   overlayId: null,          // the active data layer

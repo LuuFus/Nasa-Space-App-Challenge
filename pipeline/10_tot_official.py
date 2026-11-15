@@ -11,12 +11,15 @@ Inputs
   * Borders of Ukrainian territorial communities (hromadas): OCHA COD-AB
     Ukraine, admin level 3, Humanitarian Data Exchange — licence CC BY-IGO.
 
-Every row of the list has a KATOTTG code and dates (start / end). From them we
-rebuild, for 23 February 2022 and the 1st of every month after it, which
-communities were occupied, which had active hostilities and which had been
-liberated. Precision is one community (on average ~300 km²): a community where
-only some villages are listed is marked "partly occupied" and not counted in
-the occupied area.
+Every row of the list has a KATOTTG code, its kind (possible hostilities /
+active hostilities / temporarily occupied) and dates (start / end). Since the
+edition of 26.05.2026 (order No. 987) the list goes settlement by settlement and
+the kind is written in every row. From it we rebuild, for 23 February 2022 and
+the 1st of every month after it, which communities were occupied, which had
+active hostilities and which had been liberated. Precision is one community
+(on average ~300 km²): a community is "occupied" when at least half of its
+listed settlements are, "partly occupied" when fewer are (not counted in the
+occupied area).
 
 Output: public/data/front.json (format "communities", read by src/engine/Front.js)
 """
@@ -84,6 +87,20 @@ def section_of(text, current):
     return current
 
 
+def row_kind(cell):
+    """kind of territory written in one table cell (short cells only, not the header)"""
+    t = cell.lower()
+    if not t or len(t) > 90:
+        return None
+    if "тимчасово окупован" in t:
+        return "occupied"
+    if "активних бойових" in t:
+        return "active"
+    if "можливих бойових" in t:
+        return "possible"
+    return None
+
+
 def parse_list():
     files = sorted(TOT_DIR.glob("*.docx"))
     if not files:
@@ -99,7 +116,9 @@ def parse_list():
                 continue
             dates = [dt.date(int(y), int(m), int(d)) for d, m, y in DATE.findall(joined)]
             name = next((c for c in cells if c and not CODE.search(c) and not DATE.search(c) and not c.isdigit()), "")
-            entries.append({"code": codes[0], "section": section, "name": name[:120],
+            # newer editions name the kind of territory in the row itself
+            kind = next((k for k in map(row_kind, cells) if k), None)
+            entries.append({"code": codes[0], "section": kind or section, "name": name[:120],
                             "start": dates[0] if dates else None, "end": dates[1] if len(dates) > 1 else None})
         log(f"  {f.name}: {len(entries) - n0} rows with a KATOTTG code")
     by = {}
@@ -168,29 +187,40 @@ def build_geometry(hrom, used):
 
 
 # ---------------------------------------------------------------- snapshots
-RANK = {"liberated": 1, "contested": 2, "partial": 3, "crimea": 4, "ordlo": 4, "occupied": 4}
-
-
 def classify(spans, hrom, day):
-    cls = {}
-    for pc, section, start, end, partial in spans:
+    """class of every listed community on `day`, from the state of its settlements"""
+    st = {}
+    for pc, section, start, end, partial, code in spans:
+        s = st.setdefault(pc, {"all": set(), "occ": set(), "old": set(), "act": set(), "lib": set(), "whole": False})
+        s["all"].add(code)
         active = start is not None and start <= day and (end is None or end > day)
         if section == "occupied":
             if active:
+                s["occ"].add(code)
                 if start < dt.date(2022, 2, 24):
-                    k = "crimea" if hrom[pc]["oblast"] in CRIMEA else "ordlo"
-                else:
-                    k = "partial" if partial else "occupied"
+                    s["old"].add(code)
+                if not partial:            # the row names the whole community
+                    s["whole"] = True
             elif end is not None and end <= day:
-                k = "liberated"
-            else:
-                continue
+                s["lib"].add(code)
         elif section == "active" and active:
-            k = "contested"
-        else:
-            continue
-        if RANK[k] >= RANK.get(cls.get(pc), 0):
-            cls[pc] = k
+            s["act"].add(code)
+    cls = {}
+    for pc, s in st.items():
+        occ = len(s["occ"])
+        if s["whole"] or occ >= 0.5 * len(s["all"]):
+            if occ or s["whole"]:
+                if len(s["old"]) >= 0.5 * max(1, occ):
+                    cls[pc] = "crimea" if hrom[pc]["oblast"] in CRIMEA else "ordlo"
+                else:
+                    cls[pc] = "occupied"
+                continue
+        if occ:
+            cls[pc] = "partial"
+        elif s["act"]:
+            cls[pc] = "contested"
+        elif s["lib"] - s["occ"]:
+            cls[pc] = "liberated"
     return cls
 
 
@@ -213,13 +243,13 @@ def main():
         if not ts:
             missing.append(e["code"])
         for pc, partial in ts:
-            spans.append((pc, e["section"], e["start"], e["end"], partial))
+            spans.append((pc, e["section"], e["start"], e["end"], partial, e["code"]))
     if missing:
         log(f"  {len(missing)} codes without a community polygon, e.g. {missing[:5]}")
     # Crimea may live in another annex: it has been occupied since 2014 in any case
     if not any(hrom[s[0]]["oblast"] in CRIMEA and s[1] == "occupied" for s in spans):
         log("  Crimea is not in the files — adding it as occupied since 20.02.2014")
-        spans += [(pc, "occupied", CRIMEA_SINCE, None, False) for pc, h in hrom.items() if h["oblast"] in CRIMEA]
+        spans += [(pc, "occupied", CRIMEA_SINCE, None, False, pc) for pc, h in hrom.items() if h["oblast"] in CRIMEA]
 
     used = sorted({s[0] for s in spans})
     hromadas = build_geometry(hrom, used)

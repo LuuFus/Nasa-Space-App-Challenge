@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Engine } from '../engine/Engine.js';
 import { Vectors } from '../engine/Vectors.js';
 import { Front } from '../engine/Front.js';
@@ -10,14 +10,10 @@ import { valueAt } from '../lib/legend.js';
 import { useStore } from '../state/store.js';
 import { useT } from '../i18n/index.js';
 import { EVENTS } from '../content/events.js';
-import { createElement as lucideSvg, Cloud, Droplets, Flame, Shield, Snowflake, Thermometer, Tornado, Trees, Waves } from 'lucide';
+import { markerIcon } from './markerIcon.js';
 
-// map markers of events: the same vector icons as in the panels (lucide, vanilla build)
-const MARKER_ICONS = { war: Shield, water: Droplets, fire: Flame, ice: Snowflake, air: Cloud, land: Trees, heat: Thermometer, storm: Tornado, quake: Waves };
-function markerIcon(cat) {
-  const svg = lucideSvg(MARKER_ICONS[cat] || Shield, { width: 14, height: 14, 'stroke-width': 1.9 });
-  return svg.outerHTML;
-}
+// the OpenStreetMap view (MapLibre) is a separate chunk, loaded the first time it is opened
+const MapView = lazy(() => import('../map/MapView.jsx'));
 
 export function layerById(catalog, id) {
   return catalog?.layers.find((l) => l.id === id) || null;
@@ -84,7 +80,12 @@ export default function GlobeView() {
     for (const k of ['borders', 'rivers', 'graticule', 'capitals', 'labels', 'oceans', 'tint']) if (v.state[k] !== toggles[k]) v.set(k, toggles[k]);
     engRef.current.labels.setVisible('events', toggles.events);
   }, [toggles]);
-  useEffect(() => { engRef.current?.setMode(mode); }, [mode]);
+  useEffect(() => { if (mode !== 'osm') engRef.current?.setMode(mode); }, [mode]);
+  const osm = mode === 'osm';
+  const [osmUsed, setOsmUsed] = useState(osm);
+  useEffect(() => { if (osm) setOsmUsed(true); }, [osm]);
+  // the before/after slider lives in the 3D engine: opening it leaves the OSM map
+  useEffect(() => { if (osm && swipe.enabled) s.setMode('globe'); }, [osm, swipe.enabled]);
   useEffect(() => { engRef.current?.setFlatStyle(flatStyle); }, [flatStyle]);
   // the two compared countries are highlighted only while comparing (they would hide other layers)
   const comparing = s.panel === 'compare';
@@ -149,9 +150,10 @@ export default function GlobeView() {
   }, [countries]);
 
   return (
-    <div className={contour ? 'globe-wrap contour' : 'globe-wrap'}>
-      <div className="globe" ref={ref} />
-      {hover && (hover.country || hover.val) && (
+    <div className={`globe-wrap${contour && !osm ? ' contour' : ''}${osm ? ' osm-on' : ''}`}>
+      <div className={osm ? 'globe is-covered' : 'globe'} ref={ref} />
+      {osmUsed && <Suspense fallback={<div className="osm-wrap osm-loading">{t('loading')}</div>}><MapView active={osm} /></Suspense>}
+      {!osm && hover && (hover.country || hover.val) && (
         <div className="tooltip" style={{ left: hover.x + 14, top: hover.y + 14 }}>
           {hover.country && <b>{pick(hover.country.name)}</b>}
           <div className="muted">{hover.lat.toFixed(2)}°, {hover.lon.toFixed(2)}°</div>
@@ -159,7 +161,7 @@ export default function GlobeView() {
         </div>
       )}
       <MapOverlay />
-      <div className="hint">{t('zoomHint')}</div>
+      {!osm && <div className="hint">{t('zoomHint')}</div>}
     </div>
   );
 }

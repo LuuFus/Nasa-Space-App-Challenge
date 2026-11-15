@@ -12,11 +12,19 @@ const GROUPS = [
   { title: { uk: 'Лінії й підписи', en: 'Lines & names' }, keys: ['borders', 'capitals', 'rivers', 'labels', 'oceans'] },
   { title: { uk: 'Події', en: 'Events' }, keys: ['events'] },
 ];
+const OSM_GROUPS = [{ title: { uk: 'Події', en: 'Events' }, keys: ['events'] }];
 const TOGGLE_TEXT = { labels: 'countryNames', events: 'eventMarkers' };
 const MODES = [
   { id: 'globe', text: 'globe3d', menu: true },
   { id: 'contour', text: 'contourMap', menu: false },
-  { id: 'imagery', text: 'mapImagery', menu: true },
+  { id: 'osm', text: 'osmMap', menu: true },
+];
+// base maps of the OpenStreetMap view (src/map/basemaps.js)
+const BASEMAPS = [
+  { id: 'osm', title: { uk: 'OSM класична', en: 'OSM classic' } },
+  { id: 'light', title: { uk: 'Світла', en: 'Light' } },
+  { id: 'dark', title: { uk: 'Темна', en: 'Dark' } },
+  { id: 'satellite', title: { uk: 'Супутник NASA', en: 'NASA satellite' } },
 ];
 
 export default function Toolbar() {
@@ -27,10 +35,10 @@ export default function Toolbar() {
   const timer = useRef(null);
   const refs = useRef({});
   const setView = (v) => {
-    if (v === 'globe') s.setMode('globe');
-    else { s.setFlatStyle(v === 'contour' ? 'contour' : 'imagery'); s.setMode('flat'); }
+    if (v === 'globe' || v === 'osm') s.setMode(v);
+    else { s.setFlatStyle('contour'); s.setMode('flat'); }
   };
-  const view = s.mode === 'globe' ? 'globe' : s.flatStyle;
+  const view = s.mode === 'globe' || s.mode === 'osm' ? s.mode : s.flatStyle;
   const open = (id) => {
     clearTimeout(timer.current);
     const el = refs.current[id];
@@ -77,7 +85,20 @@ export default function Toolbar() {
         </div>
         <div className={menu ? 'view-menu glass open' : 'view-menu glass'} style={{ left: anchor }}
           onMouseEnter={() => clearTimeout(timer.current)} role="menu" aria-hidden={!menu}>
-          {GROUPS.map((g) => (
+          {menu === 'osm' && (
+            <div className="vm-group">
+              <div className="vm-title">{uk ? 'Основа карти (OpenStreetMap)' : 'Base map (OpenStreetMap)'}</div>
+              <div className="vm-bases">
+                {BASEMAPS.map((b) => (
+                  <button key={b.id} type="button" className={s.basemap === b.id ? `vm-base on base-${b.id}` : `vm-base base-${b.id}`} aria-pressed={s.basemap === b.id}
+                    tabIndex={menu ? 0 : -1} onClick={() => s.setBasemap(b.id)}>
+                    <i aria-hidden="true" /><span>{pick(b.title)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {(menu === 'osm' ? OSM_GROUPS : GROUPS).map((g) => (
             <div key={g.title.en} className="vm-group">
               <div className="vm-title">{pick(g.title)}</div>
               {g.keys.map((k) => (

@@ -39,7 +39,7 @@ export default function CompareDetail({ varId }) {
   const [gibsData, setGibsData] = useState(null);
   useEffect(() => { loadJSON('gibs_country_annual.json').then(setGibsData).catch(() => {}); }, []);
   // leaving the panel clears the trend colouring
-  useEffect(() => () => getEngine()?.vectors?.setChoropleth(null), []);
+  useEffect(() => () => { getEngine()?.vectors?.setChoropleth(null); useStore.setState({ choropleth: null }); }, []);
 
   const v0 = VARIABLES[varId];
   const season = v0.src === 'gibs' ? SEASONS[0] : SEASONS.find((x) => x.id === seasonId);
@@ -93,7 +93,7 @@ export default function CompareDetail({ varId }) {
       const a = x.p < 0.05 ? 0.85 : 0.35;
       return divergingColor(k, warmCold, a);
     };
-    const apply = () => { getEngine()?.vectors?.setChoropleth(fn); setChoro({ max, warmCold }); };
+    const apply = () => { getEngine()?.vectors?.setChoropleth(fn); useStore.setState({ choropleth: fn }); setChoro({ max, warmCold }); };
     suggestContourMap({
       uk: 'Тренд по всіх країнах світу — це глобальна картина. На контурній карті видно всю планету одразу.',
       en: 'A trend for every country is a global picture. The contour map shows the whole planet at once.',
@@ -136,7 +136,7 @@ export default function CompareDetail({ varId }) {
               <button className="btn-ghost" onClick={() => s.setOverlay(v.gibs)}><MapIcon size={14} strokeWidth={STROKE} /> {pick(v.title)} — {t('showOnMap')}</button>
             )}
             <button className="btn-ghost" onClick={colourMap}><Palette size={14} strokeWidth={STROKE} /> {t('mapColor')}</button>
-            {choro && <button className="btn-ghost" onClick={() => { getEngine()?.vectors?.setChoropleth(null); setChoro(null); }}><X size={14} strokeWidth={STROKE} /> {t('trendMapOff')}</button>}
+            {choro && <button className="btn-ghost" onClick={() => { getEngine()?.vectors?.setChoropleth(null); useStore.setState({ choropleth: null }); setChoro(null); }}><X size={14} strokeWidth={STROKE} /> {t('trendMapOff')}</button>}
           </div>
           {choro && (
             <div className="legend">

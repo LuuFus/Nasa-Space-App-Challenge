@@ -10,7 +10,7 @@ export const UKRAINE_KM2 = 603628;
 /** where the data comes from: { uk, en, short: {uk, en}, url } */
 export function frontSource(d) {
   if (d?.attribution) return d.attribution;
-  return { uk: '© DeepStateMap (щомісячні знімки)', en: '© DeepStateMap (monthly snapshots)', short: { uk: '© DeepStateMap', en: '© DeepStateMap' }, url: 'https://deepstatemap.live' };
+  return { uk: 'Офіційний перелік ТОТ (наказ № 376)', en: 'Official list of occupied territories (order No. 376)', short: { uk: 'Наказ № 376', en: 'Order No. 376' }, url: 'https://zakon.rada.gov.ua/laws/show/z0380-25' };
 }
 
 /** true when the data is the official community-level list (order No. 376) */
